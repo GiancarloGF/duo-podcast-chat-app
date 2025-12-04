@@ -1,0 +1,107 @@
+{
+  "episode": {
+    "id": "ep_001",
+    "title": "Breaking Boundaries - Rompiendo Barreras",
+    "description": "Historias de Ed Dwight, el primer candidato afroamericano a astronauta, y Bequi Livingston, pionera como mujer bombera forestal",
+    "publicationDate": "20240115",
+    "estimatedDuration": "45 minutos",
+    "difficulty": "intermediate",
+    "hosts": ["Diana Gameros"],
+    "protagonists": [
+      {
+        "name": "Ed Dwight",
+        "role": "Primer candidato afroamericano a astronauta",
+        "language": "en"
+      },
+      {
+        "name": "Bequi Livingston",
+        "role": "Primera mujer en equipo Smokey Bear Hotshots",
+        "language": "en"
+      }
+    ],
+    "tags": ["derechos civiles", "historia", "NASA", "bomberos"],
+    "messages": [
+      {
+        "id": 1,
+        "sender": "Diana Gameros",
+        "senderType": "host",
+        "language": "es",
+        "requiresTranslation": true,
+        "content": "En 1961, Ed Dwight fue invitado a inscribirse en un programa de entrenamiento para la NASA, la agencia espacial estadounidense. Él supo de inmediato lo que aquello significaba: nunca antes hubo un astronauta negro en los Estados Unidos.",
+        "officialTranslation": "In 1961, Ed Dwight was invited to enroll in a training program for NASA, the American space agency. He immediately knew what that meant: there had never been a Black astronaut in the United States before.",
+        "messageType": "context",
+        "keyTerms": [
+          {
+            "spanish": "astronauta negro",
+            "english": "Black astronaut"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "sender": "Ed Dwight",
+        "senderType": "protagonist",
+        "language": "en",
+        "requiresTranslation": false,
+        "content": "If I got into that program, I could become the world's first Black astronaut!",
+        "officialTranslation": null,
+        "messageType": "narrative"
+      },
+      {
+        "id": 3,
+        "sender": "Diana Gameros",
+        "senderType": "host",
+        "language": "es",
+        "requiresTranslation": true,
+        "content": "Pero los jefes de Ed le dijeron que no se postulara. Ya era un piloto de las Fuerzas Armadas... podría llegar a ser oficial, y de los de alto rango. Sus superiores le advirtieron que unirse a la NASA sería malo para su carrera. Pero Ed decidió inscribirse de todos modos.",
+        "officialTranslation": "But Ed's bosses told him not to apply. He was already an Air Force pilot... he could become an officer, and a high-ranking one. His superiors warned him that joining NASA would be bad for his career. But Ed decided to enroll anyway.",
+        "messageType": "context",
+        "keyTerms": [
+          {
+            "spanish": "Fuerzas Armadas",
+            "english": "Air Force"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "sender": "Ed Dwight",
+        "senderType": "protagonist",
+        "language": "en",
+        "requiresTranslation": false,
+        "content": "I sent my application, although I didn't think I would get into the program. But a few days later, I got a letter that said I was accepted. Soon, there was a story about me in the newspaper. And in Kansas City, the place where I'm from, they had a huge celebration for me. I was going to be the first Black man in space!",
+        "officialTranslation": null,
+        "messageType": "narrative"
+      },
+      {
+        "id": 5,
+        "sender": "Diana Gameros",
+        "senderType": "host",
+        "language": "es",
+        "requiresTranslation": true,
+        "content": "Welcome, bienvenidos y bienvenidas a 'Relatos en inglés', un podcast de Duolingo. Soy Diana Gameros. En cada episodio podrás practicar inglés a tu propio ritmo, escuchando historias reales y fascinantes.",
+        "officialTranslation": "Welcome to 'Stories in English', a Duolingo podcast. I'm Diana Gameros. In each episode you can practice English at your own pace, listening to real and fascinating stories.",
+        "messageType": "introduction",
+        "keyTerms": []
+      },
+      {
+        "id": 6,
+        "sender": "Diana Gameros",
+        "senderType": "host",
+        "language": "es",
+        "requiresTranslation": true,
+        "content": "En los Estados Unidos hay una larga tradición de lucha por los derechos civiles, o civil rights. Y hay algo muy importante en esa lucha por la igualdad: el derecho al empleo.",
+        "officialTranslation": "In the United States there is a long tradition of fighting for civil rights. And there is something very important in that fight for equality: the right to employment.",
+        "messageType": "educational",
+        "keyTerms": [
+          {
+            "spanish": "derechos civiles",
+            "english": "civil rights",
+            "explanation": "Término clave en la historia estadounidense"
+          }
+        ],
+        "culturalContext": "Contexto sobre el movimiento de derechos civiles en Estados Unidos"
+      }
+    ]
+  }
+}
