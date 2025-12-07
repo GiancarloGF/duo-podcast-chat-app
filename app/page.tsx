@@ -22,7 +22,8 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const handleStartChat = async (episodeId: string) => {
     const chat = await initializeChat(episodeId);
@@ -70,7 +71,6 @@ export default function Home() {
         {episodes && episodes.length > 0 ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {episodes.map((episode) => {
-              console.log(episode);
               const basicInfo = getEpisodeBasicInfo(episode);
               const chat = chats.find((c) => c.episodeId === episode.id);
               const isInitialized = !!chat;

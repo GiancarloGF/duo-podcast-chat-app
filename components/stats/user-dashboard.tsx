@@ -22,6 +22,16 @@ export function UserDashboard() {
       setStats(userStats);
       setLevel(userLevel);
       setStreak(userStreak);
+    } else {
+      // Set default values when no progress data exists
+      setStats({
+        totalTranslations: 0,
+        totalSkipped: 0,
+        completedEpisodes: 0,
+        averageScore: 0,
+      });
+      setLevel('Principiante');
+      setStreak(0);
     }
   }, []);
 

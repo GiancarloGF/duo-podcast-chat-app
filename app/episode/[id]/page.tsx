@@ -330,7 +330,7 @@ export default function EpisodePage() {
             </Link>
             <div className='min-w-0 flex-1'>
               <h1 className='font-bold text-gray-900 dark:text-white truncate'>
-                {episode.title}
+                {episode.title || 'Episodio'}
               </h1>
               <p className='text-xs text-gray-500 dark:text-gray-400'>
                 Mensaje {currentMessageIndex + 1} de {episode.messages.length}

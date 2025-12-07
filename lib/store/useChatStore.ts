@@ -34,11 +34,9 @@ export const useChatStore = create<ChatState>()(
           // Fetch Episodes
           const epsRes = await fetch('/api/episodes');
           const episodes = await epsRes.json();
-
           // Fetch Chats
           const chatsRes = await fetch('/api/chats');
           const chats = await chatsRes.json();
-
           set({ episodes, chats, isLoading: false });
         } catch (error) {
           console.error('Failed to load data:', error);
