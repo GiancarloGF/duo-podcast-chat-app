@@ -12,6 +12,8 @@ interface ChatContainerProps {
   isLoading?: boolean;
 }
 
+import { TypingIndicator } from './typing-indicator';
+
 export function ChatContainer({
   messages,
   userTranslations,
@@ -28,7 +30,7 @@ export function ChatContainer({
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 0);
     }
-  }, [messages, userTranslations]);
+  }, [messages, userTranslations, isLoading]);
 
   return (
     <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-slate-900'>
@@ -67,8 +69,8 @@ export function ChatContainer({
 
         {/* Loading indicator */}
         {isLoading && (
-          <div className='flex justify-center py-4'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400'></div>
+          <div className='flex justify-end py-2 animate-in fade-in slide-in-from-bottom-2 duration-300'>
+            <TypingIndicator />
           </div>
         )}
       </div>
