@@ -6,9 +6,9 @@ import { MessageBubble } from './message-bubble';
 
 interface ChatContainerProps {
   messages: Message[];
-  userTranslations: Record<number, string>;
-  feedbackAvailable: Record<number, boolean>;
-  onFeedbackClick: (messageId: number) => void;
+  userTranslations: Record<string, string>;
+  feedbackAvailable: Record<string, boolean>;
+  onFeedbackClick: (messageId: string) => void;
   isLoading?: boolean;
 }
 
@@ -51,7 +51,10 @@ export function ChatContainer({
                       requiresTranslation: false,
                       content: userTranslations[message.id],
                       officialTranslation: null,
-                      messageType: 'translation',
+                      contentHtml: '',
+                      contentMarkdown: '',
+                      keyPoints: [],
+                      // messageType: 'translation', // Removed as it's not in Message type
                     }}
                     showFeedbackButton={feedbackAvailable[message.id]}
                     onFeedbackClick={onFeedbackClick}

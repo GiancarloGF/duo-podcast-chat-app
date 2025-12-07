@@ -1,0 +1,979 @@
+{
+    "episodeNumber": 1,
+    "episodeTitle": "Breaking Boundaries (Rompiendo barreras)",
+    "url": "https://podcast.duolingo.com/episodio-1-breaking-boundaries-rompiendo-barreras-es.html",
+    "imageUrl": "https://podcast.duolingo.com/images/ingles-espanol/Episode%201.png",
+    "summaryText": "En este episodio conocemos a dos pioneros, o trailblazers, de Estados Unidos que rompieron barreras de raza y género en su puesto de trabajo.",
+    "summaryHtml": "<p>En este episodio conocemos a dos pioneros, o <em>trailblazers</em>, de Estados Unidos que rompieron barreras de raza y género en su puesto de trabajo.</p>",
+    "languageLevel": "B1 (Intermedio)",
+    "themes": [
+        "Derechos Civiles",
+        "NASA y Carrera Espacial",
+        "Discriminación Racial y de Género",
+        "Superación Personal"
+    ],
+    "characters": [
+        {
+            "name": "Diana",
+            "role": "host"
+        },
+        {
+            "name": "Ed",
+            "role": "protagonist"
+        },
+        {
+            "name": "Bequi",
+            "role": "protagonist"
+        }
+    ],
+    "messages": [
+        {
+            "relatorName": "Diana",
+            "content": "En este episodio conocemos a dos pioneros, o trailblazers, de Estados Unidos que rompieron barreras de raza y género en su puesto de trabajo.",
+            "contentHtml": "<p>En este episodio conocemos a dos pioneros, o <em>trailblazers</em>, de Estados Unidos que rompieron barreras de raza y género en su puesto de trabajo.</p>",
+            "contentMkd": "En este episodio conocemos a dos pioneros, o **trailblazers**, de Estados Unidos que rompieron barreras de raza y género en su puesto de trabajo.",
+            "language": "es",
+            "translation": "In this episode we meet two pioneers, or Trailblazers, from the United States who broke barriers of race and gender in their job.",
+            "id": "66a153e9-fd84-434c-97cf-e44924a86161",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "trailblazers",
+                    "example": "",
+                    "definition_es": "Pioneros; personas que abren nuevos caminos.",
+                    "definition_en": "Pioneers; people who open new paths."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "En 1961, Ed Dwight fue invitado a inscribirse en un programa de entrenamiento para la NASA, la agencia espacial estadounidense. Él supo de inmediato lo que aquello significaba: nunca antes hubo un astronauta negro en los Estados Unidos.",
+            "contentHtml": "<p> En 1961, Ed Dwight fue invitado a inscribirse en un programa de entrenamiento para la NASA, la agencia espacial estadounidense. Él supo de inmediato lo que aquello significaba: nunca antes hubo un astronauta negro en los Estados Unidos.</p>",
+            "contentMkd": "En 1961, Ed Dwight fue invitado a inscribirse en un programa de entrenamiento para la NASA, la agencia espacial estadounidense. Él supo de inmediato lo que aquello significaba: nunca antes hubo un astronauta negro en los Estados Unidos.",
+            "language": "es",
+            "translation": "In 1961, Ed Dwight was invited to enroll in a training program for NASA, the American space agency. He knew immediately what that meant: never before was there a black astronaut in the United States.",
+            "id": "f793f273-3114-4ca9-9211-ad20a49d6239",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "If I got into that program, I could become the world’s first Black astronaut!",
+            "contentHtml": "<p> If I got into that program, I could become the world’s first Black astronaut!</p>",
+            "contentMkd": "If I got into that program, I could become the world’s first Black astronaut!",
+            "language": "en",
+            "translation": "¡Si entrara en ese programa, podría convertirme en el primer astronauta negro del mundo!",
+            "id": "1415feeb-a4cb-47c4-a40a-6577af417010",
+            "keyPoints": [
+                {
+                    "type": "grammar",
+                    "concept": "Second Conditional",
+                    "word": "If I got into... I could become...",
+                    "example": "*If he were taller, he could be a basketball player.*",
+                    "definition_es": "Se usa para hablar de situaciones hipotéticas o irreales en el presente o futuro y sus posibles resultados.",
+                    "definition_en": "Used to talk about hypothetical or unreal situations in the present or future and their potential outcomes."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "get into",
+                    "example": "*It's hard to get into that university.*",
+                    "definition_es": "Entrar en un lugar o ser aceptado en un programa.",
+                    "definition_en": "To enter a place or be accepted into a program."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Pero los jefes de Ed le dijeron que no se postulara. Ya era un piloto de las Fuerzas Armadas... podría llegar a ser oficial, y de los de alto rango. Sus superiores le advirtieron que unirse a la NASA sería malo para su carrera. Pero Ed decidió inscribirse de todos modos.",
+            "contentHtml": "<p> Pero los jefes de Ed le dijeron que no se postulara. Ya era un piloto de las Fuerzas Armadas... podría llegar a ser oficial, y de los de alto rango. Sus superiores le advirtieron que unirse a la NASA sería malo para su carrera. Pero Ed decidió inscribirse de todos modos.</p>",
+            "contentMkd": "Pero los jefes de Ed le dijeron que no se postulara. Ya era un piloto de las Fuerzas Armadas... podría llegar a ser oficial, y de los de alto rango. Sus superiores le advirtieron que unirse a la NASA sería malo para su carrera. Pero Ed decidió inscribirse de todos modos.",
+            "language": "es",
+            "translation": "But Ed's bosses told him not to run. He was already a pilot of the Armed Forces... he could become an officer, and of the high-ranking. His superiors warned him that joining NASA would be bad for his career. But Ed decided to sign up anyway.",
+            "id": "ae6f9c0d-54b6-43bc-a9d5-fe72fb5c0364",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "I sent my application, although I didn’t think I would get into the program. But a few days later, I got a letter that said I was accepted. Soon, there was a story about me in the newspaper. And in Kansas City, the place where I’m from, they had a huge celebration for me. I was going to be the first Black man in space!",
+            "contentHtml": "<p> I sent my application, although I didn’t think I would get into the program. But a few days later, I got a letter that said I was accepted. Soon, there was a story about me in the newspaper. And in Kansas City, the place where I’m from, they had a huge celebration for me. I was going to be the first Black man in space!</p>",
+            "contentMkd": "I sent my application, although I didn’t think I would get into the program. But a few days later, I got a letter that said I was accepted. Soon, there was a story about me in the newspaper. And in Kansas City, the place where I’m from, they had a huge celebration for me. I was going to be the first Black man in space!",
+            "language": "en",
+            "translation": "Envié mi solicitud, aunque no pensé que entraría en el programa. Pero unos días después, recibí una carta que decía que me aceptaron. Pronto, hubo una historia sobre mí en el periódico. Y en Kansas City, el lugar de donde soy, tuvieron una gran celebración para mí. ¡Iba a ser el primer hombre negro en el espacio!",
+            "id": "c4762282-2f4d-42a4-ae03-01a40d8fa243",
+            "keyPoints": [
+                {
+                    "type": "grammar",
+                    "concept": "Future in the Past (Past of 'going to')",
+                    "word": "I was going to be",
+                    "example": "*She said she was going to call me later.*",
+                    "definition_es": "Se usa para hablar de una acción futura que se planeó o predijo desde un momento en el pasado.",
+                    "definition_en": "Used to talk about a future action that was planned or predicted from a point in the past."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "get into",
+                    "example": "*It's hard to get into that university.*",
+                    "definition_es": "Entrar en un lugar o ser aceptado en un programa.",
+                    "definition_en": "To enter a place or be accepted into a program."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Todos nuestros protagonistas hablan en un inglés sencillo y fácil de entender para quienes están aprendiendo el idioma. En cada capítulo, yo te acompañaré para asegurarme de que entiendas todo.",
+            "contentHtml": "<p>Todos nuestros protagonistas hablan en un inglés sencillo y fácil de entender para quienes están aprendiendo el idioma. En cada capítulo, yo te acompañaré para asegurarme de que entiendas todo.</p>",
+            "contentMkd": "Todos nuestros protagonistas hablan en un inglés sencillo y fácil de entender para quienes están aprendiendo el idioma. En cada capítulo, yo te acompañaré para asegurarme de que entiendas todo.",
+            "language": "es",
+            "translation": "All our protagonists speak in simple English and easy to understand for those who are learning the language. In each chapter, I will accompany you to make sure you understand everything.",
+            "id": "c71dc960-29e4-4573-a2ab-e0a7f58ac9a6",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Hoy vamos a escuchar a dos personas que dieron pasos muy importantes en sus vidas, rompiendo barreras, o breaking boundaries.",
+            "contentHtml": "<p>Hoy vamos a escuchar a dos personas que dieron pasos muy importantes en sus vidas, rompiendo barreras, o <em>breaking boundaries</em>.</p>",
+            "contentMkd": "Hoy vamos a escuchar a dos personas que dieron pasos muy importantes en sus vidas, rompiendo barreras, o **breaking boundaries**.",
+            "language": "es",
+            "translation": "Today we are going to listen to two people who took very important steps in their lives, breaking barriers, or breaking boundaries.",
+            "id": "e09c4586-1d79-42cc-b754-3811b3461698",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Expression",
+                    "word": "breaking boundaries",
+                    "example": "",
+                    "definition_es": "Romper barreras, superar límites.",
+                    "definition_en": "To break barriers, to overcome limits."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "En los Estados Unidos hay una larga tradición de lucha por los derechos civiles, o civil rights. Y hay algo muy importante en esa lucha por la igualdad: el derecho al empleo. En 1961 la idea de un astronauta afroamericano era impensable. Pasarían cuatro años más para que el Congreso de los Estados Unidos aprobara una ley de derechos civiles que prohibió la discriminación en el trabajo por raza o género.",
+            "contentHtml": "<p> En los Estados Unidos hay una larga tradición de lucha por los derechos civiles, o <em>civil rights</em>. Y hay algo muy importante en esa lucha por la igualdad: el derecho al empleo. En 1961 la idea de un astronauta afroamericano era impensable. Pasarían cuatro años más para que el Congreso de los Estados Unidos aprobara una ley de derechos civiles que prohibió la discriminación en el trabajo por raza o género.</p>",
+            "contentMkd": "En los Estados Unidos hay una larga tradición de lucha por los derechos civiles, o **civil rights**. Y hay algo muy importante en esa lucha por la igualdad: el derecho al empleo. En 1961 la idea de un astronauta afroamericano era impensable. Pasarían cuatro años más para que el Congreso de los Estados Unidos aprobara una ley de derechos civiles que prohibió la discriminación en el trabajo por raza o género.",
+            "language": "es",
+            "translation": "In the United States there is a long tradition of fighting for civil rights, or civil rights. And there is something very important in that fight for equality: the right to employment. In 1961 the idea of an African American astronaut was unthinkable. It would take four more years for the United States Congress to pass a civil rights law that prohibited discrimination at work by race or gender.",
+            "id": "d2f84b16-40c9-4284-b62d-82b2895fe410",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Compound Noun",
+                    "word": "civil rights",
+                    "example": "",
+                    "definition_es": "Derechos civiles; derechos garantizados a todos los ciudadanos, como la igualdad y la libertad.",
+                    "definition_en": "Civil rights; rights guaranteed to all citizens, such as equality and freedom."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Cuando Ed Dwight recibió la carta con la invitación para ser astronauta, no sabía que un afroamericano podía serlo... porque ninguno antes lo había sido.",
+            "contentHtml": "<p>Cuando Ed Dwight recibió la carta con la invitación para ser astronauta, no sabía que un afroamericano podía serlo... porque ninguno antes lo había sido.</p>",
+            "contentMkd": "Cuando Ed Dwight recibió la carta con la invitación para ser astronauta, no sabía que un afroamericano podía serlo... porque ninguno antes lo había sido.",
+            "language": "es",
+            "translation": "When Ed Dwight received the letter with the invitation to be an astronaut, he did not know that an African American could be... because none of them had been before.",
+            "id": "5addfdaf-44ad-41ce-b5b9-70fcbe846070",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "I was born in Kansas City, in the state of Kansas, in 1933. I didn’t think about becoming an astronaut while I was growing up. When I was a kid, I wanted to be an artist. I told my dad about the idea, and he said, “No, you should become an engineer. That’s how you will make money.” He didn’t think I would make a lot of money as an artist. This was during the Great Depression, after all.",
+            "contentHtml": "<p> I was born in Kansas City, in the state of Kansas, in 1933. I didn’t think about becoming an astronaut while I was growing up. When I was a kid, I wanted to be an artist. I told my dad about the idea, and he said, “No, you should become an engineer. That’s how you will make money.” He didn’t think I would make a lot of money as an artist. This was during the Great Depression, after all.</p>",
+            "contentMkd": "I was born in Kansas City, in the state of Kansas, in 1933. I didn’t think about becoming an astronaut while I was **growing up**. When I was a kid, I wanted to be an artist. I told my dad about the idea, and he said, “No, you should become an engineer. That’s how you will make money.” He didn’t think I would make a lot of money as an artist. This was during the **Great Depression**, after all.",
+            "language": "en",
+            "translation": "Nací en Kansas City, en el estado de Kansas, en 1933. No pensé en convertirme en astronauta mientras crecía. Cuando era niño, quería ser artista. Le conté a mi papá sobre la idea y él dijo: \"No, deberías convertirte en ingeniero. Así es como ganarás dinero\". No pensó que ganaría mucho dinero como artista. Esto fue durante la Gran Depresión, después de todo.",
+            "id": "9bf6caeb-b67c-47fe-a721-65d4eb71830b",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "growing up",
+                    "example": "*I grew up near the beach.*",
+                    "definition_es": "Crecer, madurar (físicamente o en edad).",
+                    "definition_en": "To grow up, to mature (physically or in age)."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Compound Noun",
+                    "word": "Great Depression",
+                    "example": "*The government created programs to help people during the Great Depression.*",
+                    "definition_es": "Gran Depresión; crisis económica mundial de los años 30.",
+                    "definition_en": "The Great Depression; the worldwide economic crisis of the 1930s."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "La Gran Depresión fue la mayor crisis económica de la historia del mundo y afectó de forma muy grave a los Estados Unidos. Hubo mucho desempleo y hambre. La familia de Ed no tenía mucho dinero.",
+            "contentHtml": "<p> La Gran Depresión fue la mayor crisis económica de la historia del mundo y afectó de forma muy grave a los Estados Unidos. Hubo mucho desempleo y hambre. La familia de Ed no tenía mucho dinero.</p>",
+            "contentMkd": "La Gran Depresión fue la mayor crisis económica de la historia del mundo y afectó de forma muy grave a los Estados Unidos. Hubo mucho desempleo y hambre. La familia de Ed no tenía mucho dinero.",
+            "language": "es",
+            "translation": "The Great Depression was the largest economic crisis in the history of the world and it seriously affected the United States. There was a lot of unemployment and hunger. Ed's family didn't have much money.",
+            "id": "6505056a-d798-4b48-b017-058776dc1fe1",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "My family lived on a farm next to an airport. My mom took me on walks to see the planes when I was little. I was fascinated! Eventually, I knew all of the workers at the airport, and they paid me to clean the planes. When I was 10, I told the pilots that I wanted to fly. And they agreed to take me in the air with them. The first time I flew in a plane, I felt like a bird. You can see everything up in the air!",
+            "contentHtml": "<p> My family lived on a farm next to an airport. My mom took me on walks to see the planes when I was little. I was fascinated! Eventually, I knew all of the workers at the airport, and they paid me to clean the planes. When I was 10, I told the pilots that I wanted to fly. And they agreed to take me in the air with them. The first time I flew in a plane, I felt like a bird. You can see everything up in the air!</p>",
+            "contentMkd": "My family lived on a farm next to an airport. My mom **took me on walks to see** the planes when I was little. I was fascinated! Eventually, I knew all of the workers at the airport, and they paid me to clean the planes. When I was 10, I told the pilots that I wanted to fly. And they agreed to take me in the air with them. The first time I flew in a plane, I felt like a bird. You can see everything **up in the air**!",
+            "language": "en",
+            "translation": "Mi familia vivía en una granja junto a un aeropuerto. Mi mamá me llevó a caminar a ver los aviones cuando yo era pequeña. ¡Estaba fascinado! Eventualmente, conocí a todos los trabajadores del aeropuerto y me pagaron para limpiar los aviones. Cuando tenía 10 años, les dije a los pilotos que quería volar. Y acordaron llevarme al aire con ellos. La primera vez que volé en un avión, me sentí como un pájaro. ¡Puedes ver todo en el aire!",
+            "id": "2e4f032a-e8d8-4555-9f8e-d7c76ca68c6f",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Collocation",
+                    "word": "took me on walks",
+                    "example": "*My dad always takes me on walks in the park.*",
+                    "definition_es": "Llevar a alguien a pasear.",
+                    "definition_en": "To take someone out for a walk."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Prepositional Phrase",
+                    "word": "up in the air",
+                    "example": "*The pilot saw a cloud up in the air.*",
+                    "definition_es": "En el aire. También significa 'indefinido' o 'sin resolver'.",
+                    "definition_en": "In the air. Also means 'undecided' or 'unresolved'."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Ed pasaba mucho tiempo en el aeropuerto, y esto no le gustó a su mamá. Como su papá, ella quería que él ganara dinero.",
+            "contentHtml": "<p> Ed pasaba mucho tiempo en el aeropuerto, y esto no le gustó a su mamá. Como su papá, ella quería que él ganara dinero.</p>",
+            "contentMkd": "Ed pasaba mucho tiempo en el aeropuerto, y esto no le gustó a su mamá. Como su papá, ella quería que él ganara dinero.",
+            "language": "es",
+            "translation": "Ed spent a lot of time at the airport, and his mom didn't like this. Like his dad, she wanted him to make money.",
+            "id": "0649204f-cb42-4a3d-b0b7-85430603bca3",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "My mom found a job for me. I started delivering newspapers. I had two different routes because there were two types of newspapers: one for the White people and one for the Black people. Kansas City was a segregated city.",
+            "contentHtml": "<p> My mom found a job for me. I started delivering newspapers. I had two different routes because there were two types of newspapers: one for the White people and one for the Black people. Kansas City was a segregated city.</p>",
+            "contentMkd": "My mom found a job for me. I started delivering newspapers. I had two different routes because there were two types of newspapers: one for the White people and one for the Black people. Kansas City was a **segregated city**.",
+            "language": "en",
+            "translation": "Mi mamá encontró un trabajo para mí. Empecé a entregar periódicos. Tenía dos rutas diferentes porque había dos tipos de periódicos: uno para los blancos y otro para los negros. Kansas City era una ciudad segregada.",
+            "id": "b6afa0eb-55ce-4064-a179-e92a0e2492db",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adjective + Noun",
+                    "word": "segregated city",
+                    "example": "*They went to a segregated school in the past.*",
+                    "definition_es": "Una ciudad con segregación (separación de grupos raciales o sociales).",
+                    "definition_en": "A city with segregation (separation of racial or social groups)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "En aquella época muchas ciudades de los Estados Unidos estaban segregadas, o segregated. Por ley, los restaurantes, cines, baños y colegios estaban separados para los afroamericanos. Ellos no podían compartir espacios con las personas de raza blanca.",
+            "contentHtml": "<p> En aquella época muchas ciudades de los Estados Unidos estaban segregadas, o <em>segregated</em>. Por ley, los restaurantes, cines, baños y colegios estaban separados para los afroamericanos. Ellos no podían compartir espacios con las personas de raza blanca.</p>",
+            "contentMkd": "En aquella época muchas ciudades de los Estados Unidos estaban segregadas, o **segregated**. Por ley, los restaurantes, cines, baños y colegios estaban separados para los afroamericanos. Ellos no podían compartir espacios con las personas de raza blanca.",
+            "language": "es",
+            "translation": "At that time many cities in the United States were segregated, or segregated. By law, restaurants, cinemas, bathrooms and schools were separated for African Americans. They could not share spaces with white people.",
+            "id": "144e7737-17d4-4fa6-b0f4-da92254cbbb6",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adjective",
+                    "word": "segregated",
+                    "example": "",
+                    "definition_es": "Segregado; separado por raza o grupo social.",
+                    "definition_en": "Segregated; separated by race or social group."
+                }
+            ]
+        },
+        {
+            "relatorName": "Ed",
+            "content": "One day, while I was delivering newspapers, I saw something interesting on the front page of the Black newspaper. It was a Black pilot standing on the wing of an airplane. He was from Kansas City, like me! I thought, “Wow, I can’t believe that a Black person is allowed to fly a plane!” The next week, I applied to join the Air Force. And I was accepted! My first destination in the Air Force was a base in the state of Texas. But soon, I realized that the other students didn’t have a good opinion of me. They didn’t think that I looked like a person who could do great things –– because I was short and Black. So I decided to become an overachiever.",
+            "contentHtml": "<p> One day, while I was delivering newspapers, I saw something interesting on the front page of the Black newspaper. It was a Black pilot standing on the wing of an airplane. He was from Kansas City, like me! I thought, “Wow, I can’t believe that a Black person is allowed to fly a plane!” The next week, I applied to join the Air Force. And I was accepted! My first destination in the Air Force was a base in the state of Texas. But soon, I realized that the other students didn’t have a good opinion of me. They didn’t think that I looked like a person who could do great things –– because I was short and Black. So I decided to become an overachiever.</p>",
+            "contentMkd": "One day, while I was **delivering newspapers**, I saw something interesting on the front page of the Black newspaper. It was a Black pilot standing on the wing of an airplane. He was from Kansas City, like me! I thought, “Wow, I can’t believe that a Black person is allowed to fly a plane!” The next week, I applied to join the Air Force. And I was accepted! My first destination in the Air Force was a base in the state of Texas. But soon, I realized that the other students didn’t have a good opinion of me. They didn’t think that I looked like a person who could do great things –– because I was short and Black. So I decided to become an **overachiever**.",
+            "language": "en",
+            "translation": "Un día, mientras entregaba periódicos, vi algo interesante en la portada del periódico negro. Era un piloto negro de pie en el ala de un avión. ¡Él era de Kansas City, como yo! Pensé: “¡Guau, no puedo creer que a una persona negra se le permita volar un avión!” La semana siguiente, solicité unirme a la Fuerza Aérea. ¡Y me aceptaron! Mi primer destino en la Fuerza Aérea fue una base en el estado de Texas. Pero pronto, me di cuenta de que los otros estudiantes no tenían una buena opinión de mí. No pensaron que parecía una persona que podía hacer grandes cosas, porque era bajita y negra. Así que decidí convertirme en un triunfador.",
+            "id": "6811ac01-18ba-46b3-be26-7ed58581f883",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Collocation",
+                    "word": "delivering newspapers",
+                    "example": "*He had a job delivering newspapers every morning.*",
+                    "definition_es": "Repartir periódicos.",
+                    "definition_en": "To deliver newspapers."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "overachiever",
+                    "example": "*She's an overachiever who always volunteers for extra work.*",
+                    "definition_es": "Alguien que se esfuerza en exceso o logra más de lo esperado.",
+                    "definition_en": "Someone who tries too hard or achieves more than expected."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Un overachiever es alguien que hace un gran esfuerzo para destacar, tratando de superar algún obstáculo.",
+            "contentHtml": "<p> Un <em>overachiever</em> es alguien que hace un gran esfuerzo para destacar, tratando de superar algún obstáculo.</p>",
+            "contentMkd": "Un **overachiever** es alguien que hace un gran esfuerzo para destacar, tratando de superar algún obstáculo.",
+            "language": "es",
+            "translation": "An Overachiever is someone who makes a great effort to stand out, trying to overcome some obstacle.",
+            "id": "90846323-7ae3-4411-bf54-2b1ca6d57ae6",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "overachiever",
+                    "example": "",
+                    "definition_es": "Alguien que se esfuerza en exceso o logra más de lo esperado para superar un obstáculo.",
+                    "definition_en": "Someone who strives too hard or achieves more than expected to overcome an obstacle."
+                }
+            ]
+        },
+        {
+            "relatorName": "Ed",
+            "content": "I made sure that I learned more about flying planes than any other student. And I worked harder than everybody else. Soon, people started noticing my hard work. By 1961, I was a captain at my base. That’s when I got the letter from the Pentagon. I was asked to join an experimental test pilot program for NASA. At that point, the space agency was only three years old.",
+            "contentHtml": "<p> I made sure that I learned more about flying planes than any other student. And I worked harder than everybody else. Soon, people started noticing my hard work. By 1961, I was a captain at my base. That’s when I got the letter from the Pentagon. I was asked to join an experimental test pilot program for NASA. At that point, the space agency was only three years old.</p>",
+            "contentMkd": "I made sure that I learned more about flying planes than any other student. And I worked harder than everybody else. Soon, people started **noticing my hard work**. By 1961, I was a captain at my base. That’s when I got the letter from the Pentagon. **I was asked to join** an experimental test pilot program for NASA. At that point, the space agency was only three years old.",
+            "language": "en",
+            "translation": "Me aseguré de aprender más sobre volar aviones que cualquier otro estudiante. Y trabajé más duro que los demás. Pronto, la gente comenzó a notar mi arduo trabajo. En 1961, yo era capitán en mi base. Fue entonces cuando recibí la carta del Pentágono. Me pidieron que me uniera a un programa piloto de pruebas experimentales para la NASA. En ese momento, la Agencia Espacial tenía solo tres años.",
+            "id": "e49b7816-1fd1-4641-a939-65843adede9b",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Collocation",
+                    "word": "noticing my hard work",
+                    "example": "*The boss noticed my hard work.*",
+                    "definition_es": "Notar/darse cuenta de mi arduo trabajo.",
+                    "definition_en": "To notice my hard work."
+                },
+                {
+                    "type": "grammar",
+                    "concept": "Passive Voice (Past Simple)",
+                    "word": "I was asked to join...",
+                    "example": "*The meeting was canceled due to bad weather.*",
+                    "definition_es": "Se usa para enfatizar la acción y el objeto, no quién la realizó (es una voz pasiva en pasado simple).",
+                    "definition_en": "Used to emphasize the action and the object, not who performed it (it is a passive voice in past simple)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "La NASA había enviado al primer astronauta de los Estados Unidos al espacio en 1961… un mes después de la Unión Soviética. Eran los tiempos de la carrera espacial, o the Space Race.",
+            "contentHtml": "<p> La NASA había enviado al primer astronauta de los Estados Unidos al espacio en 1961… un mes después de la Unión Soviética. Eran los tiempos de la carrera espacial, o <em>the Space Race</em>.</p>",
+            "contentMkd": "La NASA había enviado al primer astronauta de los Estados Unidos al espacio en 1961… un mes después de la Unión Soviética. Eran los tiempos de la carrera espacial, o **the Space Race**.",
+            "language": "es",
+            "translation": "NASA had sent the first United States astronaut into space in 1961… a month after the Soviet Union. Those were the times of the space race, or The Space Race.",
+            "id": "9e015cf1-e123-414e-9aa9-2d7caca65907",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Proper Noun",
+                    "word": "the Space Race",
+                    "example": "",
+                    "definition_es": "La Carrera Espacial; competencia entre EEUU y la URSS por la superioridad en el espacio.",
+                    "definition_en": "The Space Race; competition between the US and the USSR for superiority in space."
+                }
+            ]
+        },
+        {
+            "relatorName": "Ed",
+            "content": "This was an important time in American history. It was the beginning of the civil rights movement, when many Americans were trying to get equality for the Black community.",
+            "contentHtml": "<p> This was an important time in American history. It was the beginning of the civil rights movement, when many Americans were trying to get equality for the Black community.</p>",
+            "contentMkd": "This was an important time in American history. It was the beginning of the civil rights movement, when many Americans were **trying to get** equality for the Black community.",
+            "language": "en",
+            "translation": "Este fue un momento importante en la historia americana. Fue el comienzo del movimiento de derechos civiles, cuando muchos estadounidenses estaban tratando de obtener la igualdad de la comunidad negra.",
+            "id": "fd08952f-b6c7-4d50-9085-b3e2c7b3b2e0",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb/Expression",
+                    "word": "trying to get",
+                    "example": "*She is trying to get a promotion at work.*",
+                    "definition_es": "Intentar conseguir/obtener.",
+                    "definition_en": "To try to achieve/obtain."
+                }
+            ]
+        },
+        {
+            "relatorName": "Ed",
+            "content": "President John F. Kennedy wanted to help the Black community, so he talked to the civil rights leaders. They thought that a Black astronaut could inspire many Black people who wanted to study math, science, and engineering. So President Kennedy told the Air Force to find a Black pilot for NASA’s new program. At the time, there were only 125 Black pilots in the whole world. And they wanted this pilot to be under 30 years old, have 1,500 hours flying in jets, and have an engineering degree. That was basically me!",
+            "contentHtml": "<p>President John F. Kennedy wanted to help the Black community, so he talked to the civil rights leaders. They thought that a Black astronaut could inspire many Black people who wanted to study math, science, and engineering. So President Kennedy told the Air Force to find a Black pilot for NASA’s new program. At the time, there were only 125 Black pilots in the whole world.\nAnd they wanted this pilot to be under 30 years old, have 1,500 hours flying in jets, and have an engineering degree. That was basically me!</p>",
+            "contentMkd": "President John F. Kennedy wanted to help the Black community, so he talked to the civil rights leaders. They thought that a Black astronaut could inspire many Black people who wanted to study math, science, and engineering. So President Kennedy told the Air Force to find a Black pilot for NASA’s new program. At the time, there were only 125 Black pilots in the whole world. And they wanted this pilot to be under 30 years old, have 1,500 hours **flying in jets**, and have an engineering degree. That was **basically** me!",
+            "language": "en",
+            "translation": "El presidente John F. Kennedy quería ayudar a la comunidad negra, por lo que habló con los líderes de los derechos civiles. Pensaron que un astronauta negro podría inspirar a muchos negros que querían estudiar matemáticas, ciencias e ingeniería. Entonces, el presidente Kennedy le dijo a la Fuerza Aérea que encontrara un piloto negro para el nuevo programa de la NASA. En ese momento, solo había 125 pilotos negros en todo el mundo. Y querían que este piloto tuviera menos de 30 años, tuviera 1500 horas de vuelo en aviones y tuviera un título en ingeniería. ¡Ese era básicamente yo!",
+            "id": "0b7843f1-c692-4932-9798-e584c5458f12",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adverb",
+                    "word": "basically",
+                    "example": "*Basically, the project is finished.*",
+                    "definition_es": "Básicamente, en esencia, fundamentalmente.",
+                    "definition_en": "Basically, in essence, fundamentally."
+                },
+                {
+                    "type": "grammar",
+                    "concept": "Gerund after verb/preposition",
+                    "word": "flying in jets",
+                    "example": "*I love traveling by flying in jets.*",
+                    "definition_es": "Uso del gerundio (-ing) después de un verbo o preposición, funcionando como sustantivo.",
+                    "definition_en": "Use of the gerund (-ing) after a verb or preposition, functioning as a noun."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Ed finalmente respondió a la carta diciendo que estaba interesado. Pronto, desde Washington le comunicaron su nuevo destino.",
+            "contentHtml": "<p> Ed finalmente respondió a la carta diciendo que estaba interesado. Pronto, desde Washington le comunicaron su nuevo destino.</p>",
+            "contentMkd": "Ed finalmente respondió a la carta diciendo que estaba interesado. Pronto, desde Washington le comunicaron su nuevo destino.",
+            "language": "es",
+            "translation": "Ed finally responded to the letter saying he was interested. Soon, from Washington they told him his new destination.",
+            "id": "8ca3ce5f-6cd3-4132-86d0-2c2b8fdc7f02",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "The Air Force sent me to the experimental test pilot school for aerospace pilots in California. I was the only Black pilot in the program. President Kennedy wanted me to be famous, so I talked to big groups of people all over the country. My face was also on the front page of newspapers and magazines all over the world. They thought I could be a symbol for both the civil rights movement and the space race. I felt really proud.",
+            "contentHtml": "<p> The Air Force sent me to the experimental test pilot school for aerospace pilots in California. I was the only Black pilot in the program. President Kennedy wanted me to be famous, so I talked to big groups of people all over the country. My face was also on the front page of newspapers and magazines all over the world. They thought I could be a symbol for both the civil rights movement and the space race. I felt really proud.</p>",
+            "contentMkd": "The Air Force sent me to the experimental test pilot school for aerospace pilots in California. I was the only Black pilot in the program. President Kennedy wanted me to be famous, so I talked to **big groups of people** all over the country. My face was also on the front page of newspapers and magazines all over the world. They thought I could be a symbol for both the civil rights movement and the space race. I felt really proud.",
+            "language": "en",
+            "translation": "La Fuerza Aérea me envió a la escuela piloto de pruebas experimentales para pilotos aeroespaciales en California. Yo era el único piloto negro en el programa. El presidente Kennedy quería que yo fuera famoso, así que hablé con grandes grupos de personas en todo el país. Mi cara también estaba en la portada de periódicos y revistas de todo el mundo. Pensaron que podía ser un símbolo tanto para el movimiento de derechos civiles como para la carrera espacial. Me sentí muy orgullosa.",
+            "id": "070247e2-48b1-4bf7-be38-f99a2c2a3152",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Collocation",
+                    "word": "big groups of people",
+                    "example": "*There were big groups of people at the concert.*",
+                    "definition_es": "Grandes grupos de personas.",
+                    "definition_en": "Large groups of people."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Ed trabajó duro, y durante dos años se preparó para ser astronauta, hasta que llegó el viernes 22 de noviembre de 1963.",
+            "contentHtml": "<p> Ed trabajó duro, y durante dos años se preparó para ser astronauta, hasta que llegó el viernes 22 de noviembre de 1963.</p>",
+            "contentMkd": "Ed trabajó duro, y durante dos años se preparó para ser astronauta, hasta que llegó el viernes 22 de noviembre de 1963.",
+            "language": "es",
+            "translation": "Ed worked hard, and for two years he prepared to be an astronaut, until he arrived on Friday, November 22, 1963.",
+            "id": "9f1cb231-c6f1-47d2-8711-63128e7e4dd1",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "President Kennedy was assassinated on that Friday. After that, everything changed. When Vice President Johnson became the new president, I was pushed to leave the space training program. I didn’t want to leave, and it was really hard for me. But I did leave. I realized that NASA never really wanted a Black astronaut.",
+            "contentHtml": "<p> President Kennedy was assassinated on that Friday. After that, everything changed. When Vice President Johnson became the new president, I was pushed to leave the space training program. I didn’t want to leave, and it was really hard for me. But I did leave. I realized that NASA never really wanted a Black astronaut.</p>",
+            "contentMkd": "President Kennedy was assassinated on that Friday. After that, everything changed. When Vice President Johnson became the new president, I was **pushed to leave** the space training program. I didn’t want to leave, and it was really hard for me. But I did leave. I realized that NASA never really wanted a Black astronaut.",
+            "language": "en",
+            "translation": "El presidente Kennedy fue asesinado ese viernes. Después de eso, todo cambió. Cuando el vicepresidente Johnson se convirtió en el nuevo presidente, me empujó a abandonar el programa de capacitación espacial. No quería irme, y fue muy difícil para mí. Pero me fui. Me di cuenta de que la NASA nunca quería realmente un astronauta negro.",
+            "id": "bd7d9274-6c20-409c-b505-a9bc23c3aca1",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Passive Voice/Collocation",
+                    "word": "was pushed to leave",
+                    "example": "*He was pushed to resign after the scandal.*",
+                    "definition_es": "Fue presionado/obligado a irse/renunciar.",
+                    "definition_en": "Was pressured/forced to leave/resign."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Hasta entonces, los astronautas en los Estados Unidos eran todos hombres y todos de raza blanca.",
+            "contentHtml": "<p> Hasta entonces, los astronautas en los Estados Unidos eran todos hombres y todos de raza blanca.</p>",
+            "contentMkd": "Hasta entonces, los astronautas en los Estados Unidos eran todos hombres y todos de raza blanca.",
+            "language": "es",
+            "translation": "Until then, astronauts in the United States were all men and all white.",
+            "id": "0480b0d5-994c-403c-bedf-4cc37813961d",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Ed",
+            "content": "It seemed clear to me that NASA wanted the world to believe that the first seven astronauts in space were heroes, like Superman. And of course, Superman is a White guy.",
+            "contentHtml": "<p> It seemed clear to me that NASA wanted the world to believe that the first seven astronauts in space were heroes, like Superman. And of course, Superman is a White guy.</p>",
+            "contentMkd": "It seemed clear to me that NASA wanted the world to believe that the first seven astronauts in space were heroes, like Superman. And of course, Superman is a **White guy**.",
+            "language": "en",
+            "translation": "Me pareció claro que la NASA quería que el mundo creyera que los primeros siete astronautas en el espacio eran héroes, como Superman. Y, por supuesto, Superman es un tipo blanco.",
+            "id": "bb78367d-1e48-4af4-8048-fe333a98c1e4",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Informal Noun",
+                    "word": "White guy",
+                    "example": "*He said he spoke to an old White guy.*",
+                    "definition_es": "Hombre blanco (término informal).",
+                    "definition_en": "White man (informal term)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "La NASA tardaría veinte años más en mandar al espacio a la primera persona afroamericana (por cierto, junto con la primera mujer). Pero Ed no dejó de luchar por la igualdad de derechos.",
+            "contentHtml": "<p> La NASA tardaría veinte años más en mandar al espacio a la primera persona afroamericana (por cierto, junto con la primera mujer). Pero Ed no dejó de luchar por la igualdad de derechos.</p>",
+            "contentMkd": "La NASA tardaría veinte años más en mandar al espacio a la primera persona afroamericana (por cierto, junto con la primera mujer). Pero Ed no dejó de luchar por la igualdad de derechos.",
+            "language": "es",
+            "translation": "NASA would take twenty more years to send the first African American person into space (by the way, along with the first woman). But Ed did not stop fighting for equal rights.",
+            "id": "d2279165-22e6-4279-b7b2-a4f61f9d6594",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Mientras que Ed Dwight de niño estaba obsesionado con aquellos aviones que volaban muy rápido, unos estados más al oeste, unas décadas después, una niña llamada Bequi Livingston estaba fascinada por... los incendios. Ella pasaba los veranos con su familia en Nuevo México y amaba la naturaleza. Después de la universidad, se apuntó a clases de bombero forestal o wildland firefighter.",
+            "contentHtml": "<p> Mientras que Ed Dwight de niño estaba obsesionado con aquellos aviones que volaban muy rápido, unos estados más al oeste, unas décadas después, una niña llamada Bequi Livingston estaba fascinada por... los incendios. Ella pasaba los veranos con su familia en Nuevo México y amaba la naturaleza. Después de la universidad, se apuntó a clases de bombero forestal o <em>wildland firefighter</em>.</p>",
+            "contentMkd": "Mientras que Ed Dwight de niño estaba obsesionado con aquellos aviones que volaban muy rápido, unos estados más al oeste, unas décadas después, una niña llamada Bequi Livingston estaba fascinada por... los incendios. Ella pasaba los veranos con su familia en Nuevo México y amaba la naturaleza. Después de la universidad, se apuntó a clases de bombero forestal o **wildland firefighter**.",
+            "language": "es",
+            "translation": "While Ed Dwight as a child was obsessed with those planes that were flying very fast, a few states further west, a few decades later, a girl named Bequi Livingston was fascinated by... fires. She spent her summers with her family in New Mexico and loved nature. After college, he signed up for Forest Firefighter or Wildland Firefighter classes.",
+            "id": "0d026045-4f14-447d-8a43-dd3141130e83",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Compound Noun",
+                    "word": "wildland firefighter",
+                    "example": "",
+                    "definition_es": "Bombero forestal; persona que combate incendios en bosques y áreas naturales.",
+                    "definition_en": "Forest firefighter; person who fights fires in forests and natural areas."
+                }
+            ]
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "On my first day of training to become a wildland firefighter, the office manager was very surprised. I don’t think she expected me to be a woman, because she offered me a job in the office! And I said, “No, no, I want to be a firefighter.”",
+            "contentHtml": "<p> On my first day of training to become a wildland firefighter, the office manager was very surprised. I don’t think she expected me to be a woman, because she offered me a job in the office! And I said, “No, no, I want to be a firefighter.”</p>",
+            "contentMkd": "On my first day of training to become a **wildland firefighter**, the office manager was very surprised. I don’t think she **expected me to be** a woman, because she offered me a job in the office! And I said, “No, no, I want to be a firefighter.”",
+            "language": "en",
+            "translation": "En mi primer día de entrenamiento para convertirme en bombero forestal, el gerente de la oficina estaba muy sorprendido. No creo que ella esperara que yo fuera una mujer, ¡porque me ofreció un trabajo en la oficina! Y dije: “No, no, quiero ser bombero”.",
+            "id": "84d5f2f5-231d-405f-b51f-506e7884d33a",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Compound Noun",
+                    "word": "wildland firefighter",
+                    "example": "*She trained for years to become a wildland firefighter.*",
+                    "definition_es": "Bombero forestal.",
+                    "definition_en": "Forest firefighter."
+                },
+                {
+                    "type": "grammar",
+                    "concept": "Verb Pattern (Expect + Object + Infinitive)",
+                    "word": "expected me to be",
+                    "example": "*My parents expect me to study hard.*",
+                    "definition_es": "Patrón verbal usado para expresar expectativas o peticiones.",
+                    "definition_en": "Verb pattern used to express expectations or requests."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi se entrenó en el estado de Idaho. Su primer día fue un poco inusual.",
+            "contentHtml": "<p> Bequi se entrenó en el estado de Idaho. Su primer día fue un poco inusual.</p>",
+            "contentMkd": "Bequi se entrenó en el estado de Idaho. Su primer día fue un poco inusual.",
+            "language": "es",
+            "translation": "Bequi trained in the state of Idaho. Her first day was a bit unusual.",
+            "id": "e832b851-f763-4e89-8b01-d70377488344",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "I’m pretty small. Most people think firefighters are big and tall. So, when the office manager saw me, she said, “Oh, honey, you’re too small for this job.” But she didn’t know me. Yes, I am shorter than most people. But my nickname is “Bulldog” — because I’m small but strong.",
+            "contentHtml": "<p> I’m pretty small. Most people think firefighters are big and tall. So, when the office manager saw me, she said, “Oh, honey, you’re too small for this job.” But she didn’t know me. Yes, I am shorter than most people. But my nickname is “Bulldog” — because I’m small but strong.</p>",
+            "contentMkd": "I’m pretty small. Most people think firefighters are big and tall. So, when the office manager saw me, she said, “Oh, honey, you’re too **small for this job**.” But she didn’t know me. Yes, I am shorter than most people. But my nickname is “Bulldog” — because I’m small but strong.",
+            "language": "en",
+            "translation": "Soy bastante pequeña. La mayoría de la gente piensa que los bomberos son grandes y altos. Entonces, cuando el gerente de la oficina me vio, ella dijo: \"Oh, cariño, eres demasiado pequeña para este trabajo\". Pero ella no me conocía. Sí, soy más baja que la mayoría de la gente. Pero mi apodo es \"Bulldog\", porque soy pequeña pero fuerte.",
+            "id": "d0aeaa54-e26b-40e7-8699-212e5874b69a",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adjective + Prepositional Phrase",
+                    "word": "small for this job",
+                    "example": "*The car is too small for a big family.*",
+                    "definition_es": "Pequeña para este trabajo.",
+                    "definition_en": "Small for this job."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Los bomberos forestales deben caminar con bultos muy pesados por las montañas y utilizan herramientas, como sierras y picos, para mantener los cortafuegos.",
+            "contentHtml": "<p> Los bomberos forestales deben caminar con bultos muy pesados por las montañas y utilizan herramientas, como sierras y picos, para mantener los cortafuegos.</p>",
+            "contentMkd": "Los bomberos forestales deben caminar con bultos muy pesados por las montañas y utilizan herramientas, como sierras y picos, para mantener los cortafuegos.",
+            "language": "es",
+            "translation": "Forest firefighters must walk with very heavy bundles through the mountains and use tools, such as saws and picks, to maintain firewalls.",
+            "id": "5f64d1f2-1d5d-4581-9b16-921d15b01850",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "There is a lot of physical activity when you are training to be a wildland firefighter. You spend a lot of time doing difficult physical activities. You also have to walk up and down mountains with a lot of weight on your back. So, you have to be very strong, physically and mentally. It’s a difficult job.",
+            "contentHtml": "<p> There is a lot of physical activity when you are training to be a wildland firefighter. You spend a lot of time doing difficult physical activities. You also have to walk up and down mountains with a lot of weight on your back. So, you have to be very strong, physically and mentally. It’s a difficult job.</p>",
+            "contentMkd": "There is a lot of physical activity when you are training to be a wildland firefighter. You spend a lot of time **doing** **difficult physical activities**. You also have to walk up and down mountains with a lot of weight on your back. So, you have to be very strong, physically and mentally. It’s a difficult job.",
+            "language": "en",
+            "translation": "Hay mucha actividad física cuando te estás entrenando para ser bombero de tierras salvajes. Pasas mucho tiempo haciendo actividades físicas difíciles. También tienes que caminar arriba y abajo de las montañas con mucho peso en la espalda. Entonces, tienes que ser muy fuerte, física y mentalmente. Es un trabajo difícil.",
+            "id": "fd367c6b-79a1-4ffb-b116-f1c8ec6501ef",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Collocation",
+                    "word": "doing difficult physical activities",
+                    "example": "*The athletes spend hours doing difficult physical activities.*",
+                    "definition_es": "Realizar actividades físicas difíciles.",
+                    "definition_en": "To perform difficult physical activities."
+                },
+                {
+                    "type": "grammar",
+                    "concept": "Gerund as Object",
+                    "word": "doing",
+                    "example": "*She enjoys doing yoga.*",
+                    "definition_es": "Uso del gerundio (-ing) como objeto de la frase.",
+                    "definition_en": "Use of the gerund (-ing) as the object of the phrase."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi ingresó al programa y pasó el invierno de 1979 preparándose para ser bombero forestal. La mayoría de sus compañeros la trataron bien… pero algunos no... simplemente por ser mujer.",
+            "contentHtml": "<p> Bequi ingresó al programa y pasó el invierno de 1979 preparándose para ser bombero forestal. La mayoría de sus compañeros la trataron bien… pero algunos no... simplemente por ser mujer.</p>",
+            "contentMkd": "Bequi ingresó al programa y pasó el invierno de 1979 preparándose para ser bombero forestal. La mayoría de sus compañeros la trataron bien… pero algunos no... simplemente por ser mujer.",
+            "language": "es",
+            "translation": "Bequi entered the program and spent the winter of 1979 preparing to be a forestry firefighter. Most of her classmates treated her well... but some didn't... just because she was a woman.",
+            "id": "01c48716-7e9a-49e9-b601-d48780ffbc38",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "I worked with some men who didn’t think a woman should be a firefighter. But after they saw that I was good at the job, and that I didn’t need help, they accepted me.",
+            "contentHtml": "<p> I worked with some men who didn’t think a woman should be a firefighter. But after they saw that I was good at the job, and that I didn’t need help, they accepted me.</p>",
+            "contentMkd": "I worked with some men who didn’t think a woman should be a firefighter. But after they saw that I was **good at the job**, and that I didn’t need help, they accepted me.",
+            "language": "en",
+            "translation": "Trabajé con algunos hombres que no pensaban que una mujer debería ser bombero. Pero después de que vieron que era buena en el trabajo y que no necesitaba ayuda, me aceptaron.",
+            "id": "92f7535b-d09f-4315-9964-b816091a1a72",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adjective + Preposition",
+                    "word": "good at the job",
+                    "example": "*She is good at speaking English.*",
+                    "definition_es": "Ser bueno en/para el trabajo (una habilidad).",
+                    "definition_en": "To be good at/for the job (a skill)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "En los años 80, las mujeres sólo eran un 37% de los empleados de tiempo completo en los Estados Unidos. Aún quedaba mucho para lograr la igualdad de derechos. A algunos bomberos no les gustaba tener a Bequi al lado.",
+            "contentHtml": "<p> En los años 80, las mujeres sólo eran un 37% de los empleados de tiempo completo en los Estados Unidos. Aún quedaba mucho para lograr la igualdad de derechos. A algunos bomberos no les gustaba tener a Bequi al lado.</p>",
+            "contentMkd": "En los años 80, las mujeres sólo eran un 37% de los empleados de tiempo completo en los Estados Unidos. Aún quedaba mucho para lograr la igualdad de derechos. A algunos bomberos no les gustaba tener a Bequi al lado.",
+            "language": "es",
+            "translation": "In the 1980s, women were only 37% of full-time employees in the United States. There was still a long way to go to achieve equal rights. Some firefighters didn't like to have Bequi next door.",
+            "id": "114c0bdf-92a5-4e22-9edd-df1bb004546d",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "One time, when I was getting ready to fight a fire, another firefighter pulled me off the truck! He said, “I’m not going to let a woman do my job.”",
+            "contentHtml": "<p> One time, when I was getting ready to fight a fire, another firefighter pulled me off the truck! He said, “I’m not going to let a woman do my job.”</p>",
+            "contentMkd": "One time, when I was **getting ready** to fight a fire, another firefighter **pulled me off** the truck! He said, “I’m not going to let a woman do my job.”",
+            "language": "en",
+            "translation": "Una vez, cuando me estaba preparando para combatir un incendio, ¡otro bombero me sacó del camión! Él dijo: “No voy a dejar que una mujer haga mi trabajo”.",
+            "id": "f56aa0f0-b1cd-413a-b850-c838c645e851",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "getting ready",
+                    "example": "*I was getting ready for my interview.*",
+                    "definition_es": "Prepararse (para una acción).",
+                    "definition_en": "To get ready (for an action)."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "pulled me off",
+                    "example": "*He was pulled off the stage by security.*",
+                    "definition_es": "Sacar a alguien de un lugar (con fuerza).",
+                    "definition_en": "To pull someone off a place (with force)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi siguió luchando, y con el tiempo, su trabajo y su fuerza le ganaron el respeto de sus compañeros.",
+            "contentHtml": "<p> Bequi siguió luchando, y con el tiempo, su trabajo y su fuerza le ganaron el respeto de sus compañeros.</p>",
+            "contentMkd": "Bequi siguió luchando, y con el tiempo, su trabajo y su fuerza le ganaron el respeto de sus compañeros.",
+            "language": "es",
+            "translation": "Bequi continued fighting, and with time, her work and her strength earned her the respect of her classmates.",
+            "id": "01c37b01-5232-4740-9b5f-15a09289569b",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "I was really strong and fit, stronger and in better shape than some of the men. During a job in 1986, I was leading a team of firefighters on a hike up a mountain. I was walking very quickly. When we took a break, the men on my team put some rocks in my bag. They wanted me to go slower, because they couldn’t walk as fast as me! I didn’t even notice! Because, like I said, I was a bulldog.",
+            "contentHtml": "<p> I was really strong and fit, stronger and in better shape than some of the men. During a job in 1986, I was leading a team of firefighters on a hike up a mountain. I was walking very quickly. When we took a break, the men on my team put some rocks in my bag. They wanted me to go slower, because they couldn’t walk as fast as me! I didn’t even notice! Because, like I said, I was a bulldog.</p>",
+            "contentMkd": "I was really strong and fit, stronger and in **better shape** than some of the men. During a job in 1986, I was leading a team of firefighters on a hike up a mountain. I was walking very quickly. When we took a break, the men on my team put some rocks in my bag. They wanted me to go slower, because they couldn’t walk as fast as me! I didn’t even notice! Because, like I said, I was a **bulldog**.",
+            "language": "en",
+            "translation": "Estaba realmente fuerte y en forma, más fuerte y en mejor forma que algunos de los hombres. Durante un trabajo en 1986, dirigía un equipo de bomberos en una caminata por una montaña. Estaba caminando muy rápido. Cuando nos tomamos un descanso, los hombres de mi equipo pusieron algunas piedras en mi bolso. ¡Querían que fuera más lento, porque no podían caminar tan rápido como yo! ¡Ni siquiera me di cuenta! Porque, como dije, yo era un bulldog.",
+            "id": "fde55306-2cd7-48d9-9869-dc81f49a4db9",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Idiom/Expression",
+                    "word": "in better shape",
+                    "example": "*He started running every day to get in better shape.*",
+                    "definition_es": "En mejor forma (física).",
+                    "definition_en": "In better (physical) shape."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun (Metaphor)",
+                    "word": "bulldog",
+                    "example": "*She is a real bulldog when it comes to negotiating.*",
+                    "definition_es": "Bulldog (usado aquí como metáfora para una persona tenaz o testaruda).",
+                    "definition_en": "Bulldog (used here as a metaphor for a tenacious or stubborn person)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi soñó con convertirse en bombero de élite, de un tipo específico que en inglés se llama “hotshot”. Son los que van al foco del incendio cuando este está activo. Se ponen en peligro, o in harm’s way...",
+            "contentHtml": "<p> Bequi soñó con convertirse en bombero de élite, de un tipo específico que en inglés se llama “hotshot”. Son los que van al foco del incendio cuando este está activo. Se ponen en peligro, o <em>in harm’s way</em>...</p>",
+            "contentMkd": "Bequi soñó con convertirse en bombero de élite, de un tipo específico que en inglés se llama “hotshot”. Son los que van al foco del incendio cuando este está activo. Se ponen en peligro, o **in harm’s way**...",
+            "language": "es",
+            "translation": "Bequi dreamed of becoming an elite firefighter, of a specific type called “hotshot” in English. They are the ones who go to the focus of the fire when it is active. They put themselves in danger, or in harm's way...",
+            "id": "5f135b1c-c76b-4e14-9494-0808a3297a73",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Idiom/Expression",
+                    "word": "in harm’s way",
+                    "example": "",
+                    "definition_es": "En peligro, en riesgo de sufrir daño.",
+                    "definition_en": "In danger, at risk of being harmed."
+                }
+            ]
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "There are only 11 teams of “Hotshots” in the United States. They’re the firefighters who work in the hottest part of the fire. And they fight the biggest fires. Hotshots aren’t afraid of the job. They aren’t afraid to be in harm’s way. They aren’t afraid of getting hurt, and they have to be very healthy and strong.",
+            "contentHtml": "<p> There are only 11 teams of “Hotshots” in the United States. They’re the firefighters who work in the hottest part of the fire. And they fight the biggest fires. Hotshots aren’t afraid of the job. They aren’t afraid to be in harm’s way. They aren’t afraid of getting hurt, and they have to be very healthy and strong.</p>",
+            "contentMkd": "There are only 11 teams of “**Hotshots**” in the United States. They’re the firefighters who work in the hottest part of the fire. And they fight the biggest fires. Hotshots aren’t afraid of the job. They aren’t afraid to be in harm’s way. They aren’t afraid of getting hurt, and they have to be very healthy and strong.",
+            "language": "en",
+            "translation": "Solo hay 11 equipos de \"hotshots\" en los Estados Unidos. Son los bomberos que trabajan en la parte más caliente del incendio. Y luchan contra los mayores incendios. Los hotshots no tienen miedo del trabajo. No tienen miedo de estar en peligro. No tienen miedo de lastimarse, y tienen que ser muy saludables y fuertes.",
+            "id": "8e16f62a-0d75-4df4-b096-66d7d74f8a42",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Proper Noun/Compound Noun",
+                    "word": "Hotshots",
+                    "example": "*Hotshots are elite firefighters who battle the most intense fires.*",
+                    "definition_es": "Hotshots (bomberos de élite que combaten los incendios más activos).",
+                    "definition_en": "Hotshots (elite firefighters who fight the most active fires)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Si en esa época, ser mujer y trabajar como bombera forestal ya era difícil… ingresar en un equipo de élite era casi imposible.",
+            "contentHtml": "<p> Si en esa época, ser mujer y trabajar como bombera forestal ya era difícil… ingresar en un equipo de élite era casi imposible.</p>",
+            "contentMkd": "Si en esa época, ser mujer y trabajar como bombera forestal ya era difícil… ingresar en un equipo de élite era casi imposible.",
+            "language": "es",
+            "translation": "If at that time, being a woman and working as a forestry firefighter was already difficult... Entering an elite team was almost impossible.",
+            "id": "e5f1ea2a-1b71-4887-b119-94ee596bb077",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Smokey Bear es un oso animado que protagoniza campañas para prevenir incendios forestales desde los años cuarenta. El equipo al que se unió Bequi toma su nombre del oso verdadero en que se inspiró ese dibujo, que había sido rescatado de un incendio en Nuevo México.",
+            "contentHtml": "<p> <em>Smokey Bear</em> es un oso animado que protagoniza campañas para prevenir incendios forestales desde los años cuarenta. El equipo al que se unió Bequi toma su nombre del oso verdadero en que se inspiró ese dibujo, que había sido rescatado de un incendio en Nuevo México.</p>",
+            "contentMkd": "**Smokey Bear** es un oso animado que protagoniza campañas para prevenir incendios forestales desde los años cuarenta. El equipo al que se unió Bequi toma su nombre del oso verdadero en que se inspiró ese dibujo, que había sido rescatado de un incendio en Nuevo México.",
+            "language": "es",
+            "translation": "Smokey Bear is an animated bear that is leading campaigns to prevent wildfires since the 1940s. The team that Bequi joined takes its name from the real bear in which that drawing was inspired, which had been rescued from a fire in New Mexico.",
+            "id": "9a175bd3-ff4d-4c29-9b2c-1ce574baeea0",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Proper Noun",
+                    "word": "Smokey Bear",
+                    "example": "",
+                    "definition_es": "Smokey Bear (personaje de campañas de prevención de incendios forestales en EEUU).",
+                    "definition_en": "Smokey Bear (character from forest fire prevention campaigns in the US)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "The superintendent of the Smokey Bear Hotshot team didn’t think women should be Hotshots. He would not let a woman be part of his team. But in 1988, the team got a new superintendent. And this new guy personally contacted me. He asked me to apply to be on the team. During my career, that superintendent was one of the few people who really wanted to help women firefighters succeed.",
+            "contentHtml": "<p> The superintendent of the Smokey Bear Hotshot team didn’t think women should be Hotshots. He would not let a woman be part of his team. But in 1988, the team got a new superintendent. And this new guy personally contacted me. He asked me to apply to be on the team. During my career, that superintendent was one of the few people who really wanted to help women firefighters succeed.</p>",
+            "contentMkd": "The **superintendent** of the Smokey Bear Hotshot team didn’t think women should be Hotshots. He would not let a woman be part of his team. But in 1988, the team got a new superintendent. And this new guy personally contacted me. He asked me to apply to be on the team. During my career, that superintendent was one of the few people who really wanted to help women firefighters succeed.",
+            "language": "en",
+            "translation": "El superintendente del equipo Smokey Bear Hotshot no pensó que las mujeres deberían ser Hotshots. No dejaba que una mujer fuera parte de su equipo. Pero en 1988, el equipo consiguió un nuevo superintendente. Y este nuevo chico me contactó personalmente. Me pidió que aplicara para estar en el equipo. Durante mi carrera, ese superintendente fue una de las pocas personas que realmente quiso ayudar a las mujeres bomberos a tener éxito.",
+            "id": "d7fa7b91-ff18-472e-8c38-89269e355745",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "superintendent",
+                    "example": "*The school superintendent made a new rule.*",
+                    "definition_es": "Director, superintendente, encargado.",
+                    "definition_en": "Director, superintendent, manager."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Ese director, o superintendent, terminó siendo uno de los mayores defensores de Bequi a lo largo de su carrera.",
+            "contentHtml": "<p> Ese director, o <em>superintendent</em>, terminó siendo uno de los mayores defensores de Bequi a lo largo de su carrera.</p>",
+            "contentMkd": "Ese director, o **superintendent**, terminó siendo uno de los mayores defensores de Bequi a lo largo de su carrera.",
+            "language": "es",
+            "translation": "That director, or Superintendent, ended up being one of Bequi's biggest defenders throughout his career.",
+            "id": "700ccfbb-1005-4e1a-b56b-99a22949a699",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "superintendent",
+                    "example": "",
+                    "definition_es": "Director, superintendente.",
+                    "definition_en": "Director, superintendent."
+                }
+            ]
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "In 1988, a friend and I became the first women to join the Smokey Bear Hotshots. I achieved my dream! And it was an amazing job! We started out fighting fires in the state of Minnesota. During the rest of the summer, we worked on a lot of fires.",
+            "contentHtml": "<p> In 1988, a friend and I became the first women to join the Smokey Bear Hotshots. I achieved my dream! And it was an amazing job! We started out fighting fires in the state of Minnesota. During the rest of the summer, we worked on a lot of fires.</p>",
+            "contentMkd": "In 1988, a friend and I became the first women to join the Smokey Bear Hotshots. I achieved my dream! And it was an **amazing job**! We **started out** fighting fires in the state of Minnesota. During the rest of the summer, we worked on a lot of fires.",
+            "language": "en",
+            "translation": "En 1988, una amiga y yo nos convertimos en las primeras mujeres en unirse a los Hotshots de Smokey Bear. ¡Logré mi sueño! ¡Y fue un trabajo increíble! Empezamos a combatir incendios en el estado de Minnesota. Durante el resto del verano, trabajamos en muchos incendios.",
+            "id": "7209930f-b47e-40af-ae39-0d19992f15ff",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Adjective + Noun",
+                    "word": "amazing job",
+                    "example": "*It was an amazing job, full of challenges.*",
+                    "definition_es": "Trabajo increíble.",
+                    "definition_en": "Amazing job."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "started out",
+                    "example": "*She started out as an intern and is now the CEO.*",
+                    "definition_es": "Empezar (una carrera, una actividad).",
+                    "definition_en": "To start (a career, an activity)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi se jubiló como bombera de élite después de 27 años de servicio.",
+            "contentHtml": "<p> Bequi se jubiló como bombera de élite después de 27 años de servicio.</p>",
+            "contentMkd": "Bequi se jubiló como bombera de élite después de 27 años de servicio.",
+            "language": "es",
+            "translation": "Bequi retired as an elite firefighter after 27 years of service.",
+            "id": "84882e3c-f485-4523-9118-a6d10c059885",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "Today, I think things are a lot different. There are definitely a lot more women fighting fires now, but not as many as there should be! It’s still not very common for them to be on Hotshot teams. There are usually only two or three women on a team of twenty people. So, in 2012, I started a program called Women in Wildland Fire. I wanted to help more women become wildland firefighters.",
+            "contentHtml": "<p> Today, I think things are a lot different. There are definitely a lot more women fighting fires now, but not as many as there should be! It’s still not very common for them to be on Hotshot teams. There are usually only two or three women on a team of twenty people. So, in 2012, I started a program called Women in Wildland Fire. I wanted to help more women become wildland firefighters.</p>",
+            "contentMkd": "Today, I think things are a lot different. There are definitely a lot more women fighting fires now, but **not as many as there should be**! It’s still not very common for them to be on Hotshot teams. There are usually only two or three women on a team of twenty people. So, in 2012, I started a program called **Women in Wildland Fire**. I wanted to help more women become wildland firefighters.",
+            "language": "en",
+            "translation": "Hoy creo que las cosas son muy diferentes. Definitivamente hay muchas más mujeres que combaten incendios ahora, ¡pero no tantas como debería haber! Todavía no es muy común que estén en equipos Hotshot. Por lo general, solo hay dos o tres mujeres en un equipo de veinte personas. Entonces, en 2012, comencé un programa llamado Mujeres en Bomberos Forestales. Quería ayudar a más mujeres a convertirse en bomberos forestales.",
+            "id": "2d8f9464-a3f1-43ef-97f2-663c0133c0ff",
+            "keyPoints": [
+                {
+                    "type": "grammar",
+                    "concept": "Comparative/Structure",
+                    "word": "not as many as there should be",
+                    "example": "*There are not as many books as there should be on this topic.*",
+                    "definition_es": "No tantos como debería haber.",
+                    "definition_en": "Not as many as there should be."
+                },
+                {
+                    "type": "vocabulary",
+                    "concept": "Program Name",
+                    "word": "Women in Wildland Fire",
+                    "example": "*The Women in Wildland Fire program helps female recruits.*",
+                    "definition_es": "Mujeres en Bomberos Forestales (nombre de un programa).",
+                    "definition_en": "Women in Wildland Fire (name of a program)."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi da consejos a mujeres que quieren ser firefighters.",
+            "contentHtml": "<p> Bequi da consejos a mujeres que quieren ser <em>firefighters</em>.</p>",
+            "contentMkd": "Bequi da consejos a mujeres que quieren ser **firefighters**.",
+            "language": "es",
+            "translation": "Bequi gives advice to women who want to be firefighters.",
+            "id": "060d2d3a-14d4-4a25-a400-d8305c21e649",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Noun",
+                    "word": "firefighters",
+                    "example": "",
+                    "definition_es": "Bomberos; personas que se dedican a apagar incendios.",
+                    "definition_en": "Firefighters; people dedicated to extinguishing fires."
+                }
+            ]
+        },
+        {
+            "relatorName": "Bequi",
+            "content": "I tell them that they need to be strong for the difficult parts of the job, physically and emotionally. I tell them: You may experience discrimination... or worse. But now we are lucky because there are ways to get help if something unfair happens. When I started fighting fires, women didn’t have much help in bad situations. But things are better now. And I think that’s amazing!",
+            "contentHtml": "<p> I tell them that they need to be strong for the difficult parts of the job, physically and emotionally. I tell them: You may experience discrimination... or worse. But now we are lucky because there are ways to get help if something unfair happens. When I started fighting fires, women didn’t have much help in bad situations. But things are better now. And I think that’s amazing!</p>",
+            "contentMkd": "I tell them that they need to be strong for the difficult parts of the job, physically and emotionally. I tell them: You may experience discrimination... or worse. But now we are lucky because there are ways to **get help** if something unfair happens. When I started fighting fires, women didn’t have much help in bad situations. But things are **better now**. And I think that’s amazing!",
+            "language": "en",
+            "translation": "Les digo que necesitan ser fuertes para las partes difíciles del trabajo, física y emocionalmente. Les dije: Es posible que experimenten discriminación... o peor. Pero ahora tenemos suerte porque hay formas de obtener ayuda si sucede algo injusto. Cuando comencé a combatir incendios, las mujeres no tenían mucha ayuda en malas situaciones. Pero las cosas están mejor ahora. ¡Y creo que eso es increíble!",
+            "id": "2c40f0f6-353a-43a8-87af-d73b9b9f856d",
+            "keyPoints": [
+                {
+                    "type": "vocabulary",
+                    "concept": "Phrasal Verb",
+                    "word": "get help",
+                    "example": "*If you feel sick, you should get help.*",
+                    "definition_es": "Conseguir ayuda.",
+                    "definition_en": "To get help."
+                },
+                {
+                    "type": "grammar",
+                    "concept": "Comparative Adjective",
+                    "word": "better now",
+                    "example": "*My English is better now than last year.*",
+                    "definition_es": "Las cosas están mejor ahora (comparativo de 'good').",
+                    "definition_en": "Things are better now (comparative of 'good')."
+                }
+            ]
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Bequi Livingston está jubilada y vive en Albuquerque, Nuevo México, y la productora de su historia es Stephanie Joyce.",
+            "contentHtml": "<p> Bequi Livingston está jubilada y vive en Albuquerque, Nuevo México, y la productora de su historia es Stephanie Joyce.</p>",
+            "contentMkd": "Bequi Livingston está jubilada y vive en Albuquerque, Nuevo México, y la productora de su historia es Stephanie Joyce.",
+            "language": "es",
+            "translation": "Bequi Livingston is retired and lives in Albuquerque, New Mexico, and the producer of her story is Stephanie Joyce.",
+            "id": "140f852a-cb28-4b7f-b389-a6dadc6337b0",
+            "keyPoints": []
+        },
+        {
+            "relatorName": "Diana",
+            "content": "Ed Dwight Jr. es hoy un artista que vive en Denver, Colorado y su historia la produjo Rebecca Rosman.",
+            "contentHtml": "<p>Ed Dwight Jr. es hoy un artista que vive en Denver, Colorado y su historia la produjo Rebecca Rosman.</p>",
+            "contentMkd": "Ed Dwight Jr. es hoy un artista que vive en Denver, Colorado y su historia la produjo Rebecca Rosman.",
+            "language": "es",
+            "translation": "Ed Dwight Jr. is today an artist who lives in Denver, Colorado and his story was produced by Rebecca Rosman.",
+            "id": "b188c039-4467-4632-9c4c-353d9e80e1b3",
+            "keyPoints": []
+        }
+    ]
+}

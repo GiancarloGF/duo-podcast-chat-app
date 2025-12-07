@@ -1,2 +1,16 @@
-☐ Utilizar correctamente el archivo json con la estructura correcta
+✔ Utilizar correctamente el archivo json con la estructura correcta @done(25-12-03 23:32)
+Persistencia de datos en el navegador:
+    ☐ Instalar Zustand para el manejo de estado local.
+    ☐ Definir store para los datos de la aplicación.
+    ☐ Definir store para la información de episodios completados, no completados.
+    ☐ Definir store para información del chat.
+
+Persistencia de datos en base de datos:
+    ☐ Instalar Supabase o Firebase para la persistencia de datos.
+    ☐ Implementar autenticación.
+    ☐ Crear base de datos para la lista de episodios.
+    ☐ Crear base de datos para los chats iniciados por el usuario. Cada chat debe de contener información del episodio, los mensajes ya mostrados y datos adicionales (Ejm: isCompleted).
+
+☐ Agregar avatar a los mensajes del chat. Usuario a la derecha, los demás a la izquierda.
+☐ Refactorizar el uso de componentes. Utilizar shadcn para los componentes.
 ☐ Cargar más episodios en formato json

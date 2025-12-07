@@ -1,63 +1,73 @@
 export type SenderType = 'host' | 'protagonist' | 'user';
 export type MessageLanguage = 'es' | 'en';
-export type MessageType =
-  | 'context'
-  | 'narrative'
-  | 'educational'
-  | 'introduction'
-  | 'translation';
 
-export interface KeyTerm {
-  spanish: string;
-  english: string;
-  explanation?: string;
+export interface KeyPoint {
+  type: string;
+  concept: string;
+  word: string;
+  example: string;
+  definition_es: string;
+  definition_en: string;
 }
 
 export interface Message {
-  id: number;
+  id: string;
   sender: string;
-  senderType: SenderType;
+  senderType: SenderType | string; // Added field
   language: MessageLanguage;
   requiresTranslation: boolean;
-  content: string;
-  officialTranslation: string | null;
-  messageType: MessageType;
-  keyTerms?: KeyTerm[];
-  culturalContext?: string;
-  audioTimestamp?: string;
+  content: string; // Was contentText
+  contentHtml: string;
+  contentMarkdown: string;
+  officialTranslation: string | null; // Was contentTranslation
+  keyPoints: KeyPoint[];
 }
 
-export interface Protagonist {
+export interface Character {
   name: string;
   role: string;
-  language: MessageLanguage;
 }
 
 export interface Episode {
   id: string;
   title: string;
-  description: string;
-  publicationDate: string;
-  estimatedDuration: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  hosts: string[];
-  protagonists: Protagonist[];
-  tags: string[];
+  imageUrl: string;
+  summaryText: string;
+  summaryHtml: string;
+  languageLevel: string;
+  themes: string[];
+  characters: Character[];
   messages: Message[];
 }
 
+export interface ChatMessage {
+  id: string;
+  order: number;
+  episodeMessageId: string;
+  sender: string;
+  message: string;
+  translationFeedback?: TranslationFeedback;
+}
+
+export interface Chat {
+  episodeId: string;
+  messages: ChatMessage[];
+}
+
+export interface TranslationFeedback {
+  analysis: string;
+  score: number;
+  suggestions: string[];
+  differences?: string;
+}
+
 export interface UserTranslation {
-  messageId: number;
+  messageId: string; // Changed to string
   userTranslation: string;
-  feedback?: {
-    officialTranslation: string;
-    analysis: string;
-    score: number;
-    suggestions: string[];
-    differences?: string;
-  };
+  officialTranslation: string;
   timestamp: number;
   skipped: boolean;
+  feedback?: TranslationFeedback;
 }
 
 export interface EpisodeProgress {

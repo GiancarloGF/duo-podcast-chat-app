@@ -1,39 +1,26 @@
-import { generateText } from "ai"
-import { TranslationService } from "@/lib/translation-service"
+import { GeminiService } from '@/lib/gemini-service';
 
-export const maxDuration = 30 // Vercel serverless max timeout
+export const maxDuration = 30; // Vercel serverless max timeout
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const { originalEs, officialTranslation, userTranslation, context } = body
+    const body = await req.json();
+    const { originalText, officialTranslation, userTranslation, context } = body;
 
-    if (!originalEs || !officialTranslation || !userTranslation) {
-      return Response.json({ error: "Missing required fields" }, { status: 400 })
+    if (!originalText || !officialTranslation || !userTranslation) {
+      return Response.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
-    // Prepare the prompt for Gemini
-    const prompt = TranslationService.formatRequestForAI({
-      originalEs,
+    // Call Gemini API with structured outputs
+    const feedback = await GeminiService.getTranslationFeedback(
+      originalText,
       officialTranslation,
       userTranslation,
-      context,
-    })
-
-    // Call Gemini via AI SDK
-    const { text } = await generateText({
-      model: "openai/gpt-4o-mini", // Using Vercel AI Gateway which supports multiple models
-      prompt,
-      temperature: 0.7,
-      maxTokens: 500,
-    })
-
-    // Parse the AI response
-    const feedback = TranslationService.parseAIResponse(text)
-
-    if (!feedback) {
-      return Response.json({ error: "Failed to parse AI response" }, { status: 500 })
-    }
+      context
+    );
 
     return Response.json(
       {
@@ -45,16 +32,16 @@ export async function POST(req: Request) {
           suggestions: feedback.suggestions,
         },
       },
-      { status: 200 },
-    )
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error getting feedback:", error)
+    console.error('Error getting feedback:', error);
     return Response.json(
       {
-        error: "Failed to generate feedback",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to generate feedback',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }
