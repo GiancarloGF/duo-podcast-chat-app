@@ -4,7 +4,7 @@ import type React from 'react';
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send, Mic, AlertCircle } from 'lucide-react';
+import { Send, SkipForward, AlertCircle } from 'lucide-react';
 import { TranslationValidator } from '@/lib/translation-service';
 import { cn } from '@/lib/utils';
 
@@ -114,14 +114,16 @@ export function TranslationInput({
 
         {/* Action Buttons */}
         <div className='flex items-center gap-1 pb-1'>
-          {/* Mic Button (Visual only for now unless functionality exists) */}
+          {/* Skip Button (Replaces Mic) */}
           <Button
             variant='ghost'
             size='icon'
             className='h-9 w-9 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full'
-            onClick={() => {}} // Placeholder for voice input
+            onClick={onSkip}
+            disabled={isLoading || disabled}
+            aria-label='Skip'
           >
-            <Mic className='h-5 w-5' />
+            <SkipForward className='h-5 w-5' />
           </Button>
 
           {/* Send Button */}
@@ -139,21 +141,6 @@ export function TranslationInput({
             <Send className='h-4 w-4 ml-0.5' />
           </Button>
         </div>
-      </div>
-
-      {/* Skip Button - Positioned outside or subtly integrated? 
-          The reference image doesn't show a skip button. 
-          I'll keep it as a subtle text link below or standard button if critical flow.
-          For now, I'll add a minimal skip option below the bar to not clutter the clean design.
-      */}
-      <div className='mt-2 flex justify-center'>
-        <button
-          onClick={onSkip}
-          disabled={isLoading || disabled}
-          className='text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors'
-        >
-          Saltar esta frase
-        </button>
       </div>
     </div>
   );

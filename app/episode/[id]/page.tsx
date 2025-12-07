@@ -148,7 +148,7 @@ export default function EpisodePage() {
         id: userMsgId,
         episodeMessageId: currentMessage.id,
         sender: 'user',
-        message: translation,
+        message: translation || '(Saltado)', // Use fallback if empty to pass validation
         isUserMessage: true,
         translationFeedback: feedback || undefined,
         timestamp: Date.now(),
