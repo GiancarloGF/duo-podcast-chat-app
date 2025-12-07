@@ -5,11 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import type {
   Episode,
   Message,
-  EpisodeProgress,
+  ChatMessage,
   UserTranslation,
 } from '@/lib/types';
-import { loadEpisode } from '@/lib/episode-loader';
-import { storage } from '@/lib/storage';
 import { AIService } from '@/lib/ai-service';
 import { ChatContainer } from '@/components/chat/chat-container';
 import { TranslationInput } from '@/components/chat/translation-input';
@@ -17,97 +15,52 @@ import { ErrorAlert } from '@/components/chat/error-alert';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, RotateCcw, Home } from 'lucide-react';
 import Link from 'next/link';
+import { useChatStore } from '@/lib/store/useChatStore';
 
 export default function EpisodePage() {
   const params = useParams();
   const router = useRouter();
   const episodeId = params.id as string;
 
-  const [episode, setEpisode] = useState<Episode | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [userTranslations, setUserTranslations] = useState<
-    Record<string, string>
-  >({});
-  const [allTranslations, setAllTranslations] = useState<UserTranslation[]>([]);
-  const [feedbackAvailable, setFeedbackAvailable] = useState<
-    Record<string, boolean>
-  >({});
-  const [selectedFeedback, setSelectedFeedback] =
-    useState<UserTranslation | null>(null);
+  const {
+    episodes,
+    chats,
+    initializeChat,
+    updateLocalChatProgress,
+    syncChatToDB,
+    loadData,
+  } = useChatStore();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [episodeComplete, setEpisodeComplete] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] =
+    useState<UserTranslation | null>(null);
+
+  // Derived state
+  const episode = episodes.find((e) => e.id === episodeId);
+  const chat = chats.find((c) => c.episodeId === episodeId);
+  const loading = !episode; // If we have episodes, we are good. Chat might be loading/creating.
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const loadedEpisode = await loadEpisode(episodeId);
-        if (!loadedEpisode) {
-          console.error('Episode not found');
-          router.push('/');
-          return;
-        }
-
-        setEpisode(loadedEpisode);
-
-        const progress = storage.getEpisodeProgress(episodeId);
-        const startIndex = progress?.currentMessageIndex || 0;
-        setCurrentMessageIndex(startIndex);
-
-        if (progress?.translations) {
-          setAllTranslations(progress.translations);
-
-          const trans: Record<string, string> = {};
-          const feedback: Record<string, boolean> = {};
-
-          progress.translations.forEach((t) => {
-            trans[t.messageId] = t.userTranslation;
-            feedback[t.messageId] = !!t.feedback;
-          });
-
-          setUserTranslations(trans);
-          setFeedbackAvailable(feedback);
-        }
-      } catch (error) {
-        console.error('Error loading episode:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [episodeId, router]);
-
-  useEffect(() => {
-    if (episode) {
-      const toDisplay = episode.messages.slice(0, currentMessageIndex + 1);
-      setDisplayedMessages(toDisplay);
+    // If deep linked and no data, load data
+    if (episodes.length === 0) {
+      loadData();
     }
-  }, [episode, currentMessageIndex]);
+  }, [episodes.length, loadData]);
 
   useEffect(() => {
-    if (episode && currentMessageIndex >= episode.messages.length - 1) {
-      setEpisodeComplete(true);
-    }
-  }, [episode, currentMessageIndex]);
-
-  useEffect(() => {
-    if (episode) {
-      const progress: EpisodeProgress = {
-        episodeId,
-        currentMessageIndex,
-        translations: allTranslations,
-        startedAt: Date.now(),
-        lastUpdated: Date.now(),
+    // Initialize chat if it doesn't exist and we have the episode
+    if (episode && !chat && !isProcessing) {
+      // Avoid infinite loop if init fails, maybe check a flag?
+      // For now assume it works.
+      const init = async () => {
+        await initializeChat(episodeId);
       };
-
-      storage.saveEpisodeProgress(progress);
+      init();
     }
-  }, [episodeId, currentMessageIndex, allTranslations, episode]);
+  }, [episode, chat, episodeId, initializeChat, isProcessing]);
 
-  if (loading) {
+  if (loading || !episode) {
     return (
       <div className='min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4'>
         <div className='text-center'>
@@ -123,71 +76,113 @@ export default function EpisodePage() {
     );
   }
 
-  if (!episode) {
-    return (
-      <div className='min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4'>
-        <div className='text-center'>
-          <p className='text-gray-600 dark:text-gray-400 mb-4'>
-            Episodio no encontrado
-          </p>
-          <Link href='/'>
-            <Button>Volver al Inicio</Button>
-          </Link>
-        </div>
-      </div>
-    );
+  // Calculate rendering state
+  const progress = chat?.progress || 0;
+  const currentMessageIndex = progress;
+  const currentMessage = episode.messages[currentMessageIndex];
+  const episodeComplete = currentMessageIndex >= episode.messages.length;
+
+  const displayedMessages = episode.messages.slice(
+    0,
+    currentMessageIndex + (episodeComplete ? 0 : 1)
+  );
+
+  // Construct userTranslations map from Chat History
+  const userTranslations: Record<string, string> = {};
+  const feedbackAvailable: Record<string, boolean> = {};
+  const allTranslations: UserTranslation[] = [];
+
+  if (chat) {
+    chat.messages.forEach((msg) => {
+      if (msg.isUserMessage && msg.episodeMessageId) {
+        userTranslations[msg.episodeMessageId] = msg.message;
+        if (msg.translationFeedback) {
+          feedbackAvailable[msg.episodeMessageId] = true;
+        }
+
+        // Reconstruct UserTranslation object for Feedback Modal
+        // We need to find the original official translation
+        const originalMsg = episode.messages.find(
+          (m) => m.id === msg.episodeMessageId
+        );
+        allTranslations.push({
+          messageId: msg.episodeMessageId,
+          userTranslation: msg.message,
+          officialTranslation: originalMsg?.officialTranslation || '',
+          timestamp:
+            typeof msg.timestamp === 'number' ? msg.timestamp : Date.now(),
+          skipped: msg.message === '', // Assuming empty message is skip
+          feedback: msg.translationFeedback,
+        });
+      }
+    });
   }
 
-  const currentMessage = episode.messages[currentMessageIndex];
   const needsTranslation =
-    currentMessage?.language === 'es' && currentMessage?.requiresTranslation;
+    !episodeComplete &&
+    currentMessage?.language === 'es' &&
+    currentMessage?.requiresTranslation;
 
   const handleTranslation = async (translation: string) => {
-    if (!currentMessage) return;
+    if (!currentMessage || !chat) return;
 
     setIsProcessing(true);
     setAiError(null);
 
     try {
-      const newTranslation: UserTranslation = {
-        messageId: currentMessage.id,
-        userTranslation: translation,
-        officialTranslation: currentMessage.officialTranslation || '',
-        timestamp: Date.now(),
-        skipped: false,
-      };
-
-      setUserTranslations((prev) => ({
-        ...prev,
-        [currentMessage.id]: translation,
-      }));
-
-      const feedback = await AIService.getFeedbackWithRetry(
-        currentMessage.content,
-        currentMessage.officialTranslation || '',
-        translation
-      );
-
-      if (feedback) {
-        newTranslation.feedback = feedback;
-
-        setFeedbackAvailable((prev) => ({
-          ...prev,
-          [currentMessage.id]: true,
-        }));
-      } else {
-        setAiError(
-          'No se pudo obtener retroalimentación. Continúa con el siguiente mensaje.'
+      let feedback = null;
+      // Only get feedback if actual translation provided
+      if (translation) {
+        feedback = await AIService.getFeedbackWithRetry(
+          currentMessage.content,
+          currentMessage.officialTranslation || '',
+          translation
         );
       }
 
-      setAllTranslations((prev) => [...prev, newTranslation]);
+      const newMessages = [...chat.messages];
 
-      if (currentMessageIndex < episode.messages.length - 1) {
-        setTimeout(() => {
-          setCurrentMessageIndex((prev) => prev + 1);
-        }, 500);
-      }
+      // 1. Add User Message (if translation provided or skipped as empty)
+      const userMsgId = `user-msg-${Date.now()}`;
+      const userMsg: ChatMessage = {
+        id: userMsgId,
+        episodeMessageId: currentMessage.id,
+        sender: 'user',
+        message: translation,
+        isUserMessage: true,
+        translationFeedback: feedback || undefined,
+        timestamp: Date.now(),
+      };
+      newMessages.push(userMsg);
+
+      // 2. Add THE Episode Message to the chat history as well?
+      // The requirement "Los mensajes que se han agregado al chat" implies it.
+      // But displayedMessages is derived from Episode static data.
+      // Storing it in Chat.messages is redundant for display but good for "Transcript" in DB.
+      // I will add it for DB completeness but UI uses 'episode' static data for display to keep rich content.
+      // We will add it as a "host" or "protagonist" message.
+      const epMsgCopy: ChatMessage = {
+        id: `ep-msg-copy-${Date.now()}`,
+        episodeMessageId: currentMessage.id,
+        sender: currentMessage.sender,
+        message: currentMessage.content,
+        isUserMessage: false,
+        timestamp: Date.now(),
+      };
+      newMessages.push(epMsgCopy);
+
+      const newProgress = currentMessageIndex + 1;
+      const isComplete = newProgress >= episode.messages.length;
+
+      // Optimistic update
+      updateLocalChatProgress(chat._id || '', newProgress, newMessages);
+
+      // Sync to DB
+      await syncChatToDB(chat._id || '', {
+        progress: newProgress,
+        messages: newMessages,
+        status: isComplete ? 'completed' : 'initialized',
+      });
     } catch (error) {
       console.error('Error processing translation:', error);
       setAiError('Error procesando tu traducción. Por favor intenta de nuevo.');
@@ -197,31 +192,46 @@ export default function EpisodePage() {
   };
 
   const handleSkip = () => {
-    if (!currentMessage) return;
-
-    const skippedTranslation: UserTranslation = {
-      messageId: currentMessage.id,
-      userTranslation: '',
-      officialTranslation: currentMessage.officialTranslation || '',
-      timestamp: Date.now(),
-      skipped: true,
-    };
-
-    setAllTranslations((prev) => [...prev, skippedTranslation]);
-
-    if (currentMessageIndex < episode.messages.length - 1) {
-      setCurrentMessageIndex((prev) => prev + 1);
-    }
+    handleTranslation(''); // Treat as empty translation
   };
 
-  const handleRestartEpisode = () => {
-    setCurrentMessageIndex(0);
-    setUserTranslations({});
-    setAllTranslations([]);
-    setFeedbackAvailable({});
-    setEpisodeComplete(false);
+  const handleNext = () => {
+    // For non-translation messages, just advance progress
+    // And maybe add the message to history?
+    if (!currentMessage || !chat) return;
+
+    const newMessages = [...chat.messages];
+    const epMsgCopy: ChatMessage = {
+      id: `ep-msg-copy-${Date.now()}`,
+      episodeMessageId: currentMessage.id,
+      sender: currentMessage.sender,
+      message: currentMessage.content,
+      isUserMessage: false,
+      timestamp: Date.now(),
+    };
+    newMessages.push(epMsgCopy);
+
+    const newProgress = currentMessageIndex + 1;
+    const isComplete = newProgress >= episode.messages.length;
+
+    updateLocalChatProgress(chat._id || '', newProgress, newMessages);
+
+    syncChatToDB(chat._id || '', {
+      progress: newProgress,
+      messages: newMessages,
+      status: isComplete ? 'completed' : 'initialized',
+    });
+  };
+
+  const handleRestartEpisode = async () => {
+    if (!chat) return;
+    updateLocalChatProgress(chat._id || '', 0, []);
+    await syncChatToDB(chat._id || '', {
+      progress: 0,
+      messages: [],
+      status: 'initialized',
+    });
     setAiError(null);
-    storage.deleteEpisodeProgress(episodeId);
   };
 
   if (episodeComplete) {
@@ -389,11 +399,7 @@ export default function EpisodePage() {
           ) : (
             <div className='flex justify-center'>
               <Button
-                onClick={() => {
-                  if (currentMessageIndex < episode.messages.length - 1) {
-                    setCurrentMessageIndex((prev) => prev + 1);
-                  }
-                }}
+                onClick={handleNext}
                 disabled={isProcessing}
                 className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
               >

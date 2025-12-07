@@ -13,7 +13,7 @@ export interface KeyPoint {
 export interface Message {
   id: string;
   sender: string;
-  senderType: SenderType | string; // Added field
+  senderType: SenderType | string;
   language: MessageLanguage;
   requiresTranslation: boolean;
   content: string; // Was contentText
@@ -41,17 +41,24 @@ export interface Episode {
 }
 
 export interface ChatMessage {
-  id: string;
-  order: number;
-  episodeMessageId: string;
+  id: string; // Unique ID for this specific chat message (e.g. generated or episode msg id)
+  episodeMessageId?: string; // If it relates to an episode message
   sender: string;
   message: string;
+  isUserMessage: boolean;
   translationFeedback?: TranslationFeedback;
+  timestamp?: number | string; // Date from DB
 }
 
 export interface Chat {
+  _id?: string; // Optional because Mongoose adds it, receiving from API
   episodeId: string;
+  userId: string;
+  status: 'idle' | 'initialized' | 'completed';
+  progress: number;
   messages: ChatMessage[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TranslationFeedback {
