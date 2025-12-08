@@ -84,17 +84,42 @@ export default function Home() {
               return (
                 <Card
                   key={episode.id}
-                  className='hover:shadow-lg transition-shadow cursor-pointer border-0 bg-white dark:bg-slate-800'
+                  className='hover:shadow-lg transition-shadow border-0 bg-white dark:bg-slate-800 !pt-0 pb-6 overflow-hidden flex flex-col'
                 >
-                  <CardHeader>
-                    <CardTitle className='text-xl text-gray-900 dark:text-white'>
+                  {episode.imageUrl && (
+                    <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700'>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={episode.imageUrl}
+                        alt={basicInfo.title}
+                        className='w-full h-full object-cover transition-transform hover:scale-105 duration-500'
+                      />
+                      {isInitialized && (
+                        <div className='absolute top-2 right-2'>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              chat.status === 'completed'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                            }`}
+                          >
+                            {chat.status === 'completed'
+                              ? 'Completado'
+                              : 'En progreso'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <CardHeader className='pt-6'>
+                    <CardTitle className='text-xl text-gray-900 dark:text-white line-clamp-1'>
                       {basicInfo.title}
                     </CardTitle>
                     <CardDescription className='text-sm text-gray-600 dark:text-gray-400'>
                       {basicInfo.protagonists}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className='space-y-4'>
+                  <CardContent className='space-y-4 flex-grow'>
                     <p className='text-sm text-gray-700 dark:text-gray-300 line-clamp-3'>
                       {basicInfo.description}
                     </p>
@@ -152,11 +177,11 @@ export default function Home() {
                     </div>
 
                     {/* CTA Button */}
-                    <div className='mt-4'>
+                    <div className='mt-4 pt-2'>
                       {isInitialized ? (
                         <Link href={`/episode/${episode.id}`}>
                           <Button className='w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'>
-                            Continuar ({chat.status})
+                            Continuar
                           </Button>
                         </Link>
                       ) : (

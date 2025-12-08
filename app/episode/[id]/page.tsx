@@ -34,6 +34,7 @@ export default function EpisodePage() {
   } = useChatStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false); // Track skip action specifically
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<UserTranslation | null>(null);
@@ -128,6 +129,8 @@ export default function EpisodePage() {
   const handleTranslation = async (translation: string) => {
     if (!currentMessage || !chat) return;
 
+    const isSkipAction = !translation;
+    if (isSkipAction) setIsSkipping(true);
     setIsProcessing(true);
     setAiError(null);
 
@@ -192,6 +195,7 @@ export default function EpisodePage() {
       setAiError('Error procesando tu traducción. Por favor intenta de nuevo.');
     } finally {
       setIsProcessing(false);
+      setIsSkipping(false);
     }
   };
 
@@ -387,7 +391,7 @@ export default function EpisodePage() {
           const trans = allTranslations.find((t) => t.messageId === messageId);
           if (trans) setSelectedFeedback(trans);
         }}
-        isLoading={isProcessing}
+        isLoading={isProcessing && !isSkipping}
       />
 
       {/* Input Area */}
