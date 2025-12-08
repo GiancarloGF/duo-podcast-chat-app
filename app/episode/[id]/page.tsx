@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, RotateCcw, Home } from 'lucide-react';
 import Link from 'next/link';
 import { useChatStore } from '@/lib/store/useChatStore';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function EpisodePage() {
   const params = useParams();
@@ -142,18 +144,20 @@ export default function EpisodePage() {
 
       const newMessages = [...chat.messages];
 
-      // 1. Add User Message (if translation provided or skipped as empty)
-      const userMsgId = `user-msg-${Date.now()}`;
-      const userMsg: ChatMessage = {
-        id: userMsgId,
-        episodeMessageId: currentMessage.id,
-        sender: 'user',
-        message: translation || '(Saltado)', // Use fallback if empty to pass validation
-        isUserMessage: true,
-        translationFeedback: feedback || undefined,
-        timestamp: Date.now(),
-      };
-      newMessages.push(userMsg);
+      // 1. Add User Message (ONLY if translation provided)
+      if (translation) {
+        const userMsgId = `user-msg-${Date.now()}`;
+        const userMsg: ChatMessage = {
+          id: userMsgId,
+          episodeMessageId: currentMessage.id,
+          sender: 'user',
+          message: translation,
+          isUserMessage: true,
+          translationFeedback: feedback || undefined,
+          timestamp: Date.now(),
+        };
+        newMessages.push(userMsg);
+      }
 
       // 2. Add THE Episode Message to the chat history as well?
       // The requirement "Los mensajes que se han agregado al chat" implies it.
@@ -449,9 +453,11 @@ export default function EpisodePage() {
                   <h4 className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
                     Análisis:
                   </h4>
-                  <p className='text-gray-600 dark:text-gray-400 text-sm mt-1 whitespace-pre-wrap break-words'>
-                    {selectedFeedback.feedback.analysis}
-                  </p>
+                  <div className='text-gray-600 dark:text-gray-400 text-sm mt-1 break-words prose-sm prose-p:my-1 prose-ul:my-1 prose-strong:text-indigo-600 dark:prose-strong:text-indigo-400'>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {selectedFeedback.feedback.analysis}
+                    </ReactMarkdown>
+                  </div>
                 </div>
 
                 {selectedFeedback.feedback.suggestions.length > 0 && (
@@ -463,7 +469,16 @@ export default function EpisodePage() {
                       {selectedFeedback.feedback.suggestions.map(
                         (suggestion, idx) => (
                           <li key={idx} className='break-words'>
-                            {suggestion}
+                            <span className='inline-block'>
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p: ({ children }) => <>{children}</>,
+                                }}
+                              >
+                                {suggestion}
+                              </ReactMarkdown>
+                            </span>
                           </li>
                         )
                       )}

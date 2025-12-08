@@ -46,44 +46,23 @@ export class GeminiService {
     userTranslation: string,
     context?: string
   ): string {
-    return `Eres un experto evaluador de traducciones español-inglés. Tu tarea es analizar la calidad de una traducción proporcionada por un estudiante.
+    return `Actúa como un profesor de inglés oach amigable y experto. Tu objetivo es dar feedback a un estudiante sobre su traducción de español a inglés.
 
-TEXTO ORIGINAL (ESPAÑOL):
-"${originalText}"
+CONTEXTO:
+Original (ES): "${originalText}"
+Referencia (EN): "${officialTranslation}"
+Estudiante (EN): "${userTranslation}"
+${context ? `Contexto extra: ${context}` : ''}
 
-TRADUCCIÓN OFICIAL (REFERENCIA):
-"${officialTranslation}"
+INSTRUCCIONES CLAVE:
+1. **Puntuación (0-100)**: Sé justo pero motivador.
+2. **Análisis (Breve y Natural)**:
+   - Usa un tono conversacional, informal y directo (como "¡Buen trabajo!", "Ojo con esto").
+   - **IMPORTANTE**: Usa formato Markdown para resaltar palabras clave o frases (ej. **palabra importante**).
+   - Sé conciso. No des explicaciones teóricas largas, ve al grano sobre qué suena natural y qué no.
+3. **Diferencias**: Menciona solo las diferencias que realmente cambian el sentido o la naturalidad.
+4. **Sugerencias (Máx 2)**: Consejos cortos y accionables para sonar más nativo.
 
-TRADUCCIÓN DEL ESTUDIANTE:
-"${userTranslation}"
-${context ? `\nCONTEXTO ADICIONAL:\n${context}` : ''}
-
-INSTRUCCIONES DE EVALUACIÓN:
-
-1. **Puntuación (score)**: Asigna un valor de 0-100 considerando:
-   - Precisión semántica (¿transmite el mismo significado?)
-   - Naturalidad en inglés (¿suena natural para un nativo?)
-   - Gramática y sintaxis
-   - Vocabulario apropiado
-   - Fidelidad al texto original
-
-2. **Análisis (analysis)**: Proporciona un análisis breve que incluya:
-   - Fortalezas de la traducción del estudiante
-   - Áreas de mejora identificadas
-   - Comparación con la traducción oficial
-   - Evaluación de naturalidad y fluidez
-
-3. **Diferencias (differences)**: Identifica las diferencias clave entre ambas traducciones:
-   - Diferencias de vocabulario
-   - Diferencias estructurales o gramaticales
-   - Diferencias de registro o tono
-   - Impacto de estas diferencias en el significado
-
-4. **Sugerencias (suggestions)**: Proporciona 2-3 sugerencias concretas y accionables:
-   - Cada sugerencia debe ser específica y práctica
-   - Enfócate en los errores más importantes
-   - Incluye alternativas o correcciones cuando sea posible
-
-IMPORTANTE: Sé constructivo y educativo. El objetivo es ayudar al estudiante a mejorar.`;
+Tu respuesta debe ser estructurada en JSON según el esquema, pero el contenido de texto debe sentirse humano y fácil de leer.`;
   }
 }
