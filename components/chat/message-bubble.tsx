@@ -2,9 +2,10 @@
 
 import type { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Languages } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: Message;
@@ -36,6 +37,7 @@ export function MessageBubble({
   showFeedbackButton = false,
   onFeedbackClick,
 }: MessageBubbleProps) {
+  const [isTranslated, setIsTranslated] = useState(false);
   const isUserMessage = message.senderType === 'user';
   const isHostMessage = message.senderType === 'host';
   const isProtagonistMessage = message.senderType === 'protagonist';
@@ -64,7 +66,7 @@ export function MessageBubble({
   );
 
   const bubbleClasses = cn(
-    'max-w-md break-words',
+    'max-w-md break-words relative group/bubble', // Added group/bubble for hover effects if needed
     isUserMessage
       ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl px-5 py-3' // User: Pill
       : isProtagonistMessage
@@ -76,6 +78,8 @@ export function MessageBubble({
     'flex gap-3 items-start mb-4',
     isUserMessage && 'flex-row-reverse justify-start ml-auto'
   );
+
+  const hasTranslation = !!message.officialTranslation;
 
   return (
     <div
@@ -124,12 +128,61 @@ export function MessageBubble({
               : undefined
           }
         >
+          {/* Header with Translate Button (Only if translation exists and NOT user message) */}
+          {hasTranslation && !isUserMessage && (
+            <div className='absolute top-2 right-2 opacity-0 group-hover/bubble:opacity-100 transition-opacity'>
+              <button
+                onClick={() => setIsTranslated(!isTranslated)}
+                className='p-1.5 rounded-full bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-gray-700 dark:text-gray-200 transition-colors'
+                title={isTranslated ? 'Ver original' : 'Ver traducción'}
+              >
+                <Languages size={14} />
+              </button>
+            </div>
+          )}
+
           {/* Render Markdown Content */}
-          <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic'>
+          <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {message.contentMarkdown || message.content}
+              {isTranslated
+                ? message.officialTranslation || ''
+                : message.contentMarkdown || message.content}
             </ReactMarkdown>
           </div>
+
+          {/* Key Points Display - NOW INSIDE BUBBLE */}
+          {message.keyPoints &&
+            message.keyPoints.length > 0 &&
+            !isTranslated && (
+              <div className='text-xs text-gray-600 dark:text-gray-300 mt-3 pt-3 border-t border-gray-400/20 dark:border-gray-500/30'>
+                <details className='cursor-pointer group/details'>
+                  <summary className='font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded px-1 -ml-1 inline-flex items-center gap-1 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                    Puntos clave
+                  </summary>
+                  <div className='mt-2 space-y-2'>
+                    {message.keyPoints.map((point, idx) => (
+                      <div
+                        key={idx}
+                        className='text-xs border-l-2 border-blue-400/50 pl-2'
+                      >
+                        <div className='font-semibold'>
+                          {point.word}{' '}
+                          <span className='font-normal opacity-80'>
+                            ({point.concept})
+                          </span>
+                        </div>
+                        <div className='opacity-90'>{point.definition_es}</div>
+                        {point.example && (
+                          <div className='italic mt-0.5 opacity-75'>
+                            {point.example}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            )}
 
           {/* Feedback Button */}
           {showFeedbackButton && (
@@ -142,40 +195,6 @@ export function MessageBubble({
             </button>
           )}
         </div>
-
-        {/* Key Points Display */}
-        {message.keyPoints && message.keyPoints.length > 0 && (
-          <div className='text-xs text-gray-500 dark:text-gray-400 mt-1 pl-1'>
-            <details className='cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 group'>
-              <summary className='font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded px-2 py-1'>
-                Puntos clave
-              </summary>
-              <div className='ml-2 mt-1 space-y-2'>
-                {message.keyPoints.map((point, idx) => (
-                  <div
-                    key={idx}
-                    className='text-xs border-l-2 border-blue-200 dark:border-blue-800 pl-2'
-                  >
-                    <div className='font-semibold text-blue-600 dark:text-blue-400'>
-                      {point.word}{' '}
-                      <span className='text-gray-400 font-normal'>
-                        ({point.concept})
-                      </span>
-                    </div>
-                    <div className='text-gray-600 dark:text-gray-300'>
-                      {point.definition_es}
-                    </div>
-                    {point.example && (
-                      <div className='text-gray-500 italic mt-0.5'>
-                        {point.example}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </details>
-          </div>
-        )}
       </div>
     </div>
   );
