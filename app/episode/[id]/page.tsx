@@ -422,7 +422,7 @@ export default function EpisodePage() {
       {selectedFeedback && (
         <div className='fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center p-4 z-50'>
           <div
-            className='bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto'
+            className='bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-lg md:max-w-3xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto'
             role='dialog'
             aria-labelledby='feedback-title'
           >
@@ -434,45 +434,122 @@ export default function EpisodePage() {
             </h3>
 
             {selectedFeedback.feedback ? (
-              <div className='space-y-4'>
-                <div>
-                  <h4 className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
-                    Tu traducción:
-                  </h4>
-                  <p className='text-gray-600 dark:text-gray-400 text-sm mt-1 break-words'>
-                    {selectedFeedback.userTranslation}
-                  </p>
+              <div className='space-y-6'>
+                {/* Comparison Section */}
+                <div className='grid gap-4 sm:grid-cols-2'>
+                  <div className='border-l-4 border-gray-300 dark:border-gray-600 pl-3 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-r'>
+                    <h4 className='font-bold text-gray-700 dark:text-gray-300 text-xs uppercase tracking-wide mb-1'>
+                      Tu traducción
+                    </h4>
+                    <p className='text-gray-800 dark:text-gray-200 text-sm italic'>
+                      &quot;{selectedFeedback.userTranslation}&quot;
+                    </p>
+                  </div>
+                  <div className='border-l-4 border-blue-500 pl-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-r'>
+                    <h4 className='font-bold text-blue-700 dark:text-blue-300 text-xs uppercase tracking-wide mb-1'>
+                      Oficial
+                    </h4>
+                    <p className='text-blue-900 dark:text-blue-100 text-sm'>
+                      &quot;{selectedFeedback.officialTranslation}&quot;
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h4 className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
-                    Traducción oficial:
-                  </h4>
-                  <p className='text-gray-600 dark:text-gray-400 text-sm mt-1 break-words'>
-                    {selectedFeedback.officialTranslation}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
-                    Análisis:
-                  </h4>
-                  <div className='text-gray-600 dark:text-gray-400 text-sm mt-1 break-words prose-sm prose-p:my-1 prose-ul:my-1 prose-strong:text-indigo-600 dark:prose-strong:text-indigo-400'>
+                {/* Score */}
+                <div className='flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-700'>
+                  <div className='text-3xl font-bold text-blue-600 dark:text-blue-400'>
+                    {selectedFeedback.feedback.score}
+                    <span className='text-base font-normal text-gray-400'>
+                      /100
+                    </span>
+                  </div>
+                  <div className='text-sm text-gray-600 dark:text-gray-400 leading-tight'>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {selectedFeedback.feedback.analysis}
                     </ReactMarkdown>
                   </div>
                 </div>
 
+                {/* Detailed Analysis Categories */}
+                {selectedFeedback.feedback.detailedAnalysis && (
+                  <div className='grid gap-4 sm:grid-cols-3 text-sm'>
+                    <div className='space-y-1'>
+                      <h5 className='font-semibold text-gray-900 dark:text-white flex items-center gap-2'>
+                        📖 Gramática
+                      </h5>
+                      <div className='text-gray-600 dark:text-gray-400 text-xs'>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {selectedFeedback.feedback.detailedAnalysis.grammar ||
+                            'Sin comentarios.'}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                    <div className='space-y-1'>
+                      <h5 className='font-semibold text-gray-900 dark:text-white flex items-center gap-2'>
+                        🗣️ Vocabulario
+                      </h5>
+                      <div className='text-gray-600 dark:text-gray-400 text-xs'>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {selectedFeedback.feedback.detailedAnalysis
+                            .vocabulary || 'Sin comentarios.'}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                    <div className='space-y-1'>
+                      <h5 className='font-semibold text-gray-900 dark:text-white flex items-center gap-2'>
+                        🏗️ Construcción
+                      </h5>
+                      <div className='text-gray-600 dark:text-gray-400 text-xs'>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {selectedFeedback.feedback.detailedAnalysis
+                            .construction || 'Sin comentarios.'}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Phrasal Verbs Section - Only if relevant */}
+                {selectedFeedback.feedback.phrasalVerbs?.relevant && (
+                  <div className='bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg p-3'>
+                    <h5 className='font-bold text-indigo-700 dark:text-indigo-300 text-sm mb-2 flex items-center gap-2'>
+                      ✨ Boost your fluency: Phrasal Verbs
+                    </h5>
+                    <ul className='space-y-1'>
+                      {selectedFeedback.feedback.phrasalVerbs.suggestions.map(
+                        (sug, i) => (
+                          <li
+                            key={i}
+                            className='text-sm text-indigo-900 dark:text-indigo-100 pl-4 relative before:content-["•"] before:absolute before:left-1 before:text-indigo-400'
+                          >
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p: ({ children }) => <>{children}</>,
+                              }}
+                            >
+                              {sug}
+                            </ReactMarkdown>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* General Suggestions */}
                 {selectedFeedback.feedback.suggestions.length > 0 && (
                   <div>
-                    <h4 className='font-semibold text-gray-700 dark:text-gray-300 text-sm'>
-                      Sugerencias:
-                    </h4>
-                    <ul className='text-gray-600 dark:text-gray-400 text-sm mt-1 space-y-1 list-disc list-inside'>
+                    <h5 className='font-semibold text-gray-900 dark:text-white text-sm mb-2'>
+                      💡 Tips extra
+                    </h5>
+                    <ul className='space-y-2'>
                       {selectedFeedback.feedback.suggestions.map(
                         (suggestion, idx) => (
-                          <li key={idx} className='break-words'>
+                          <li
+                            key={idx}
+                            className='text-sm text-gray-600 dark:text-gray-300 pl-5 relative before:content-["✓"] before:absolute before:left-0 before:text-green-500'
+                          >
                             <span className='inline-block'>
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
@@ -490,20 +567,12 @@ export default function EpisodePage() {
                   </div>
                 )}
 
-                <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 gap-4'>
-                  <div>
-                    <span className='text-xs text-gray-600 dark:text-gray-400'>
-                      Puntuación:
-                    </span>
-                    <div className='text-lg font-bold text-blue-600 dark:text-blue-400'>
-                      {selectedFeedback.feedback.score}/100
-                    </div>
-                  </div>
+                <div className='pt-2 flex justify-end'>
                   <Button
                     onClick={() => setSelectedFeedback(null)}
-                    className='w-full sm:w-auto bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
+                    className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 text-white'
                   >
-                    Cerrar
+                    Entendido
                   </Button>
                 </div>
               </div>

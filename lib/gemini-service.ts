@@ -46,7 +46,7 @@ export class GeminiService {
     userTranslation: string,
     context?: string
   ): string {
-    return `Actúa como un profesor de inglés oach amigable y experto. Tu objetivo es dar feedback a un estudiante sobre su traducción de español a inglés.
+    return `Actúa como un profesor de inglés coach amigable y experto. Tu objetivo es dar feedback a un estudiante sobre su traducción de español a inglés.
 
 CONTEXTO:
 Original (ES): "${originalText}"
@@ -56,13 +56,17 @@ ${context ? `Contexto extra: ${context}` : ''}
 
 INSTRUCCIONES CLAVE:
 1. **Puntuación (0-100)**: Sé justo pero motivador.
-2. **Análisis (Breve y Natural)**:
-   - Usa un tono conversacional, informal y directo (como "¡Buen trabajo!", "Ojo con esto").
-   - **IMPORTANTE**: Usa formato Markdown para resaltar palabras clave o frases (ej. **palabra importante**).
-   - Sé conciso. No des explicaciones teóricas largas, ve al grano sobre qué suena natural y qué no.
-3. **Diferencias**: Menciona solo las diferencias que realmente cambian el sentido o la naturalidad.
-4. **Sugerencias (Máx 2)**: Consejos cortos y accionables para sonar más nativo.
+2. **Análisis General**: Breve resumen del desempeño.
+3. **Análisis Detallado**:
+   - **Gramática**: Errores gramaticales específicos.
+   - **Vocabulario**: Elección de palabras.
+   - **Construcción**: Estructura de la oración.
+4. **Phrasal Verbs**:
+   - ¡IMPORTANTE! Si se puede usar un phrasal verb para sonar más natural, sugíérelo.
+   - Da ejemplos concretos.
+5. **Sugerencias**: Tips cortos para mejorar.
 
-Tu respuesta debe ser estructurada en JSON según el esquema, pero el contenido de texto debe sentirse humano y fácil de leer.`;
+Usa Markdown para resaltar palabras clave (**palabra**).
+Tu respuesta debe seguir estrictamente el esquema JSON proporcionado.`;
   }
 }

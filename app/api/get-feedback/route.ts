@@ -5,7 +5,8 @@ export const maxDuration = 30; // Vercel serverless max timeout
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { originalText, officialTranslation, userTranslation, context } = body;
+    const { originalText, officialTranslation, userTranslation, context } =
+      body;
 
     if (!originalText || !officialTranslation || !userTranslation) {
       return Response.json(
@@ -25,12 +26,7 @@ export async function POST(req: Request) {
     return Response.json(
       {
         success: true,
-        feedback: {
-          score: feedback.score,
-          analysis: feedback.analysis,
-          differences: feedback.differences,
-          suggestions: feedback.suggestions,
-        },
+        feedback: feedback,
       },
       { status: 200 }
     );

@@ -1,9 +1,4 @@
-export interface AIFeedback {
-  score: number;
-  analysis: string;
-  differences: string;
-  suggestions: string[];
-}
+import type { TranslationFeedback } from '@/lib/types';
 
 export class AIService {
   static async getFeedback(
@@ -11,7 +6,7 @@ export class AIService {
     officialTranslation: string,
     userTranslation: string,
     context?: string
-  ): Promise<AIFeedback | null> {
+  ): Promise<TranslationFeedback | null> {
     try {
       const response = await fetch('/api/get-feedback', {
         method: 'POST',
@@ -51,7 +46,7 @@ export class AIService {
     context?: string,
     maxRetries = 3,
     initialDelay = 1000
-  ): Promise<AIFeedback | null> {
+  ): Promise<TranslationFeedback | null> {
     let delay = initialDelay;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
