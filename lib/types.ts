@@ -38,6 +38,7 @@ export interface Episode {
   themes: string[];
   characters: Character[];
   messages: Message[];
+  messageCount?: number;
 }
 
 export interface ChatMessage {

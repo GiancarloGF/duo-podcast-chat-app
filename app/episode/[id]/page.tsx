@@ -31,6 +31,7 @@ export default function EpisodePage() {
     updateLocalChatProgress,
     syncChatToDB,
     loadData,
+    loadEpisodeDetails,
   } = useChatStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -47,9 +48,16 @@ export default function EpisodePage() {
   useEffect(() => {
     // If deep linked and no data, load data
     if (episodes.length === 0) {
-      loadData();
+      loadData({ full: true });
     }
   }, [episodes.length, loadData]);
+
+  useEffect(() => {
+    // Ensure full episode data (with messages) is available
+    if (episode && (!episode.messages || episode.messages.length === 0)) {
+      loadEpisodeDetails(episodeId);
+    }
+  }, [episode, episodeId, loadEpisodeDetails]);
 
   useEffect(() => {
     // Initialize chat if it doesn't exist and we have the episode

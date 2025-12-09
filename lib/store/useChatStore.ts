@@ -9,7 +9,8 @@ interface ChatState {
   error: string | null;
 
   // Actions
-  loadData: () => Promise<void>;
+  loadData: (options?: { full?: boolean }) => Promise<void>;
+  loadEpisodeDetails: (episodeId: string) => Promise<Episode | null>;
   initializeChat: (episodeId: string) => Promise<Chat | null>;
   getChatByEpisodeId: (episodeId: string) => Chat | undefined;
   updateLocalChatProgress: (
@@ -28,19 +29,104 @@ export const useChatStore = create<ChatState>()(
       isLoading: false,
       error: null,
 
-      loadData: async () => {
+      loadData: async (options?: { full?: boolean }) => {
+        const fetchFull = options?.full;
         set({ isLoading: true, error: null });
         try {
-          // Fetch Episodes
-          const epsRes = await fetch('/api/episodes');
-          const episodes = await epsRes.json();
-          // Fetch Chats
-          const chatsRes = await fetch('/api/chats');
-          const chats = await chatsRes.json();
+          if (fetchFull) {
+            const epsRes = await fetch('/api/episodes');
+            const episodes = await epsRes.json();
+            const chatsRes = await fetch('/api/chats');
+            const chats = await chatsRes.json();
+            set({ episodes, chats, isLoading: false });
+            return;
+          }
+
+          const query = `
+            query HomeSummary {
+              homeSummary {
+                episodes {
+                  id
+                  title
+                  imageUrl
+                  summaryText
+                  summaryHtml
+                  languageLevel
+                  themes
+                  messageCount
+                  characters {
+                    name
+                    role
+                  }
+                }
+                chats {
+                  id
+                  episodeId
+                  userId
+                  status
+                  progress
+                }
+              }
+            }
+          `;
+
+          const res = await fetch('/api/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query }),
+          });
+
+          const { data, errors } = await res.json();
+
+          if (errors?.length) {
+            throw new Error(errors[0]?.message || 'GraphQL error');
+          }
+
+          const homeSummary = data?.homeSummary;
+          const episodes: Episode[] = (homeSummary?.episodes || []).map(
+            (episode: any) => ({
+              ...episode,
+              messages: [],
+            })
+          );
+
+          const chats: Chat[] = (homeSummary?.chats || []).map(
+            (chat: any) => ({
+              ...chat,
+              _id: chat.id || chat._id,
+              messages: chat.messages || [],
+            })
+          );
+
           set({ episodes, chats, isLoading: false });
         } catch (error) {
           console.error('Failed to load data:', error);
           set({ error: 'Failed to load data', isLoading: false });
+        }
+      },
+
+      loadEpisodeDetails: async (episodeId: string) => {
+        try {
+          const res = await fetch(`/api/episodes/${episodeId}`);
+          if (!res.ok) throw new Error('Failed to load episode');
+          const episode: Episode = await res.json();
+
+          set((state) => {
+            const existingIndex = state.episodes.findIndex(
+              (e) => e.id === episodeId
+            );
+            if (existingIndex >= 0) {
+              const updated = [...state.episodes];
+              updated[existingIndex] = episode;
+              return { episodes: updated };
+            }
+            return { episodes: [...state.episodes, episode] };
+          });
+
+          return episode;
+        } catch (error) {
+          console.error('Failed to load episode details:', error);
+          return null;
         }
       },
 
