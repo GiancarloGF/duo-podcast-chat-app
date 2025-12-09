@@ -34,7 +34,7 @@ export default function Home() {
 
   // Skeleton loader component
   const EpisodeCardSkeleton = () => (
-    <Card className='border-0 bg-white dark:bg-slate-800 !pt-0 pb-6 overflow-hidden flex flex-col h-full'>
+    <Card className='border-0 bg-white dark:bg-slate-800 pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-lg'>
       {/* Image skeleton */}
       <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse' />
       
@@ -45,7 +45,7 @@ export default function Home() {
       </CardHeader>
       
       {/* Content skeleton */}
-      <CardContent className='space-y-4 flex-grow flex flex-col'>
+      <CardContent className='space-y-4 grow flex flex-col'>
         {/* Description skeleton */}
         <div className='space-y-2'>
           <div className='h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
@@ -68,7 +68,7 @@ export default function Home() {
   );
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
+    <main className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
       <div className='max-w-6xl mx-auto py-12'>
         {/* Header */}
         <div className='text-center mb-12'>
@@ -127,7 +127,7 @@ export default function Home() {
                 return (
                   <Card
                     key={episode.id}
-                    className='hover:shadow-lg transition-shadow border-0 bg-white dark:bg-slate-800 !pt-0 pb-6 overflow-hidden flex flex-col h-full'
+                    className='hover:shadow-lg transition-shadow border-0 bg-white dark:bg-slate-800 pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-lg'
                   >
                     {episode.imageUrl && (
                       <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700'>
@@ -162,8 +162,8 @@ export default function Home() {
                         {basicInfo.protagonists}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className='space-y-4 flex-grow flex flex-col'>
-                      <p className='text-sm text-gray-700 dark:text-gray-300 line-clamp-3'>
+                    <CardContent className='space-y-4 grow flex flex-col'>
+                      <p className='text-sm text-gray-700 dark:text-gray-300 leading-relaxed'>
                         {basicInfo.description}
                       </p>
 
