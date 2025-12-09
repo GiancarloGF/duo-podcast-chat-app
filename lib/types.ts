@@ -30,7 +30,9 @@ export interface Character {
 
 export interface Episode {
   id: string;
+  number?: number;
   title: string;
+  url?: string;
   imageUrl: string;
   summaryText: string;
   summaryHtml: string;

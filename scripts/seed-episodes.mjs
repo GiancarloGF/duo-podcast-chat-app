@@ -12,7 +12,9 @@ const __dirname = path.dirname(__filename);
 const EpisodeSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
+    number: Number,
     title: String,
+    url: String,
     imageUrl: String,
     summaryText: String,
     summaryHtml: String,
@@ -53,8 +55,10 @@ function mapJsonToEpisode(id, json) {
   }
 
   return {
-    id: id,
-    title: json.episodeTitle,
+    id: json.id || id, // Use id from JSON if available, otherwise use provided id
+    number: json.number,
+    title: json.title,
+    url: json.url,
     imageUrl: json.imageUrl,
     summaryText: json.summaryText,
     summaryHtml: json.summaryHtml,

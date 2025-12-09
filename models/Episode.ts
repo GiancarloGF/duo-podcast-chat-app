@@ -30,7 +30,9 @@ const CharacterSchema = new Schema({
 const EpisodeSchema = new Schema(
   {
     id: { type: String, required: true, unique: true }, // 'ep-1'
+    number: Number,
     title: String,
+    url: String,
     imageUrl: String,
     summaryText: String,
     summaryHtml: String,

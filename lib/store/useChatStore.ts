@@ -11,6 +11,7 @@ interface ChatState {
   // Actions
   loadData: (options?: { full?: boolean }) => Promise<void>;
   loadEpisodeDetails: (episodeId: string) => Promise<Episode | null>;
+  loadEpisodeWithChat: (episodeId: string) => Promise<{ episode: Episode; chat: Chat | null } | null>;
   initializeChat: (episodeId: string) => Promise<Chat | null>;
   getChatByEpisodeId: (episodeId: string) => Chat | undefined;
   updateLocalChatProgress: (
@@ -126,6 +127,153 @@ export const useChatStore = create<ChatState>()(
           return episode;
         } catch (error) {
           console.error('Failed to load episode details:', error);
+          return null;
+        }
+      },
+
+      loadEpisodeWithChat: async (episodeId: string) => {
+        try {
+          const query = `
+            query EpisodeWithChat($episodeId: String!) {
+              episodeWithChat(episodeId: $episodeId) {
+                episode {
+                  id
+                  title
+                  imageUrl
+                  summaryText
+                  summaryHtml
+                  languageLevel
+                  themes
+                  characters {
+                    name
+                    role
+                  }
+                  messages {
+                    id
+                    sender
+                    senderType
+                    language
+                    requiresTranslation
+                    content
+                    contentHtml
+                    contentMarkdown
+                    officialTranslation
+                    keyPoints {
+                      type
+                      concept
+                      word
+                      example
+                      definition_es
+                      definition_en
+                    }
+                  }
+                }
+                chat {
+                  id
+                  episodeId
+                  userId
+                  status
+                  progress
+                  messages {
+                    id
+                    episodeMessageId
+                    sender
+                    message
+                    isUserMessage
+                    translationFeedback {
+                      analysis
+                      score
+                      suggestions
+                      differences
+                      detailedAnalysis {
+                        grammar
+                        vocabulary
+                        construction
+                      }
+                      phrasalVerbs {
+                        relevant
+                        suggestions
+                      }
+                    }
+                    timestamp
+                  }
+                  createdAt
+                  updatedAt
+                }
+              }
+            }
+          `;
+
+          const res = await fetch('/api/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query,
+              variables: { episodeId },
+            }),
+          });
+
+          const { data, errors } = await res.json();
+
+          if (errors?.length) {
+            throw new Error(errors[0]?.message || 'GraphQL error');
+          }
+
+          const result = data?.episodeWithChat;
+          if (!result) {
+            throw new Error('No data returned');
+          }
+
+          const episode: Episode = result.episode;
+          const chat: Chat | null = result.chat
+            ? {
+                ...result.chat,
+                _id: result.chat.id,
+                messages: (result.chat.messages || []).map((msg: any) => ({
+                  ...msg,
+                  timestamp:
+                    typeof msg.timestamp === 'string'
+                      ? new Date(msg.timestamp).getTime()
+                      : msg.timestamp,
+                })),
+              }
+            : null;
+
+          // Update store with episode and chat
+          set((state) => {
+            // Update or add episode
+            const existingEpisodeIndex = state.episodes.findIndex(
+              (e) => e.id === episodeId
+            );
+            const updatedEpisodes = [...state.episodes];
+            if (existingEpisodeIndex >= 0) {
+              updatedEpisodes[existingEpisodeIndex] = episode;
+            } else {
+              updatedEpisodes.push(episode);
+            }
+
+            // Update or add chat if it exists
+            let updatedChats = [...state.chats];
+            if (chat) {
+              const existingChatIndex = updatedChats.findIndex(
+                (c) => c.episodeId === episodeId
+              );
+              if (existingChatIndex >= 0) {
+                updatedChats[existingChatIndex] = chat;
+              } else {
+                updatedChats.push(chat);
+              }
+            }
+
+            return {
+              episodes: updatedEpisodes,
+              chats: updatedChats,
+            };
+          });
+
+          return { episode, chat };
+        } catch (error) {
+          console.error('Failed to load episode with chat:', error);
           return null;
         }
       },

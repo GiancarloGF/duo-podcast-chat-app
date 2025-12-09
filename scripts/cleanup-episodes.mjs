@@ -6,7 +6,9 @@ import mongoose from 'mongoose';
 const EpisodeSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
+    number: Number,
     title: String,
+    url: String,
     imageUrl: String,
     summaryText: String,
     summaryHtml: String,

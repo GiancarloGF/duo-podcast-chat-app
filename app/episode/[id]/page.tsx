@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import type {
   Episode,
@@ -24,52 +24,103 @@ export default function EpisodePage() {
   const router = useRouter();
   const episodeId = params.id as string;
 
-  const {
-    episodes,
-    chats,
-    initializeChat,
-    updateLocalChatProgress,
-    syncChatToDB,
-    loadData,
-    loadEpisodeDetails,
-  } = useChatStore();
+  // Use targeted selectors to get only what we need and prevent unnecessary re-renders
+  const episode = useChatStore((state) =>
+    state.episodes.find((e) => e.id === episodeId)
+  );
+  const chat = useChatStore((state) =>
+    state.chats.find((c) => c.episodeId === episodeId)
+  );
+  const episodesLength = useChatStore((state) => state.episodes.length);
+  const initializeChat = useChatStore((state) => state.initializeChat);
+  const updateLocalChatProgress = useChatStore(
+    (state) => state.updateLocalChatProgress
+  );
+  const syncChatToDB = useChatStore((state) => state.syncChatToDB);
+  const loadData = useChatStore((state) => state.loadData);
+  const loadEpisodeWithChat = useChatStore(
+    (state) => state.loadEpisodeWithChat
+  );
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false); // Track skip action specifically
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<UserTranslation | null>(null);
+  const [isLoadingEpisodeData, setIsLoadingEpisodeData] = useState(false);
+  const loadingRef = useRef(false); // Track if a load is in progress
+  const loadedEpisodeIdRef = useRef<string | null>(null); // Track which episode we've loaded
 
-  // Derived state
-  const episode = episodes.find((e) => e.id === episodeId);
-  const chat = chats.find((c) => c.episodeId === episodeId);
-  const loading = !episode; // If we have episodes, we are good. Chat might be loading/creating.
+  // Loading if episode doesn't exist or if we're currently loading episode data
+  const loading = !episode || isLoadingEpisodeData;
 
-  useEffect(() => {
-    // If deep linked and no data, load data
-    if (episodes.length === 0) {
-      loadData({ full: true });
-    }
-  }, [episodes.length, loadData]);
-
-  useEffect(() => {
-    // Ensure full episode data (with messages) is available
-    if (episode && (!episode.messages || episode.messages.length === 0)) {
-      loadEpisodeDetails(episodeId);
-    }
-  }, [episode, episodeId, loadEpisodeDetails]);
+  // Derived values for stable comparison
+  const episodeHasMessages = episode?.messages && episode.messages.length > 0;
+  const episodeMessagesLength = episode?.messages?.length ?? 0;
+  const chatExists = !!chat;
 
   useEffect(() => {
-    // Initialize chat if it doesn't exist and we have the episode
-    if (episode && !chat && !isProcessing) {
-      // Avoid infinite loop if init fails, maybe check a flag?
-      // For now assume it works.
-      const init = async () => {
-        await initializeChat(episodeId);
-      };
-      init();
+    // If deep linked and no data, load summary first
+    if (episodesLength === 0) {
+      loadData();
     }
-  }, [episode, chat, episodeId, initializeChat, isProcessing]);
+  }, [episodesLength, loadData]);
+
+  useEffect(() => {
+    // Reset loaded ref if episodeId changes
+    if (loadedEpisodeIdRef.current !== episodeId) {
+      loadedEpisodeIdRef.current = null;
+      loadingRef.current = false;
+    }
+
+    // Get current state inside effect to avoid stale closures
+    const state = useChatStore.getState();
+    const currentEpisode = state.episodes.find((e) => e.id === episodeId);
+    const currentEpisodeHasMessages =
+      currentEpisode?.messages && currentEpisode.messages.length > 0;
+
+    // Skip if we've already loaded this episode and it has messages
+    if (
+      loadedEpisodeIdRef.current === episodeId &&
+      currentEpisodeHasMessages
+    ) {
+      return;
+    }
+
+    // Load episode with chat in a single call if:
+    // 1. Episode doesn't exist OR
+    // 2. Episode exists but doesn't have messages
+    // And we're not already loading
+    const needsLoading = !currentEpisode || !currentEpisodeHasMessages;
+
+    // Prevent multiple simultaneous calls
+    if (needsLoading && !isLoadingEpisodeData && !loadingRef.current) {
+      loadingRef.current = true;
+      setIsLoadingEpisodeData(true);
+      loadEpisodeWithChat(episodeId)
+        .then((result) => {
+          if (result) {
+            loadedEpisodeIdRef.current = episodeId;
+            // If chat doesn't exist after loading, initialize it
+            if (!result.chat) {
+              // Small delay to ensure state is updated
+              setTimeout(() => {
+                initializeChat(episodeId);
+              }, 50);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading episode with chat:', error);
+          loadedEpisodeIdRef.current = null; // Reset on error so we can retry
+        })
+        .finally(() => {
+          setIsLoadingEpisodeData(false);
+          loadingRef.current = false;
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [episodeId]); // Only depend on episodeId to prevent infinite loops
 
   if (loading || !episode) {
     return (
@@ -91,7 +142,14 @@ export default function EpisodePage() {
   const progress = chat?.progress || 0;
   const currentMessageIndex = progress;
   const currentMessage = episode.messages[currentMessageIndex];
-  const episodeComplete = currentMessageIndex >= episode.messages.length;
+  // Only mark as complete if:
+  // 1. Episode has messages loaded (episode.messages.length > 0)
+  // 2. Current message index is >= total messages
+  // 3. Chat status is 'completed' (to avoid showing completion screen for new chats)
+  const episodeComplete =
+    episode.messages.length > 0 &&
+    currentMessageIndex >= episode.messages.length &&
+    chat?.status === 'completed';
 
   const displayedMessages = episode.messages.slice(
     0,
