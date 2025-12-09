@@ -19,110 +19,98 @@ import { useChatStore } from '@/lib/store/useChatStore';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-export default function EpisodePage() {
+export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
-  const episodeId = params.id as string;
+  const chatId = params.chatId as string;
 
-  // Use targeted selectors to get only what we need and prevent unnecessary re-renders
-  const episode = useChatStore((state) =>
-    state.episodes.find((e) => e.id === episodeId)
-  );
+  // Use targeted selectors
   const chat = useChatStore((state) =>
-    state.chats.find((c) => c.episodeId === episodeId)
+    state.chats.find((c) => (c._id || c.id) === chatId)
   );
-  const episodesLength = useChatStore((state) => state.episodes.length);
-  const initializeChat = useChatStore((state) => state.initializeChat);
+  const episode = useChatStore((state) =>
+    chat ? state.episodes.find((e) => e.id === chat.episodeId) : undefined
+  );
+  const loadChatById = useChatStore((state) => state.loadChatById);
+  const loadEpisodeById = useChatStore((state) => state.loadEpisodeById);
   const updateLocalChatProgress = useChatStore(
     (state) => state.updateLocalChatProgress
   );
   const syncChatToDB = useChatStore((state) => state.syncChatToDB);
-  const loadData = useChatStore((state) => state.loadData);
-  const loadEpisodeWithChat = useChatStore(
-    (state) => state.loadEpisodeWithChat
-  );
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSkipping, setIsSkipping] = useState(false); // Track skip action specifically
+  const [isSkipping, setIsSkipping] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<UserTranslation | null>(null);
-  const [isLoadingEpisodeData, setIsLoadingEpisodeData] = useState(false);
-  const loadingRef = useRef(false); // Track if a load is in progress
-  const loadedEpisodeIdRef = useRef<string | null>(null); // Track which episode we've loaded
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isLoadingEpisode, setIsLoadingEpisode] = useState(false);
 
-  // Loading if episode doesn't exist or if we're currently loading episode data
-  const loading = !episode || isLoadingEpisodeData;
+  // Loading states
+  const isLoading = isLoadingChat || isLoadingEpisode;
+  const isEpisodeReady =
+    episode && episode.messages && episode.messages.length > 0;
+  const canInteract = isEpisodeReady && !isLoading;
 
-  // Derived values for stable comparison
-  const episodeHasMessages = episode?.messages && episode.messages.length > 0;
-  const episodeMessagesLength = episode?.messages?.length ?? 0;
-  const chatExists = !!chat;
-
+  // Load chat by ID
   useEffect(() => {
-    // If deep linked and no data, load summary first
-    if (episodesLength === 0) {
-      loadData();
-    }
-  }, [episodesLength, loadData]);
-
-  useEffect(() => {
-    // Reset loaded ref if episodeId changes
-    if (loadedEpisodeIdRef.current !== episodeId) {
-      loadedEpisodeIdRef.current = null;
-      loadingRef.current = false;
-    }
-
-    // Get current state inside effect to avoid stale closures
-    const state = useChatStore.getState();
-    const currentEpisode = state.episodes.find((e) => e.id === episodeId);
-    const currentEpisodeHasMessages =
-      currentEpisode?.messages && currentEpisode.messages.length > 0;
-
-    // Skip if we've already loaded this episode and it has messages
-    if (
-      loadedEpisodeIdRef.current === episodeId &&
-      currentEpisodeHasMessages
-    ) {
-      return;
-    }
-
-    // Load episode with chat in a single call if:
-    // 1. Episode doesn't exist OR
-    // 2. Episode exists but doesn't have messages
-    // And we're not already loading
-    const needsLoading = !currentEpisode || !currentEpisodeHasMessages;
-
-    // Prevent multiple simultaneous calls
-    if (needsLoading && !isLoadingEpisodeData && !loadingRef.current) {
-      loadingRef.current = true;
-      setIsLoadingEpisodeData(true);
-      loadEpisodeWithChat(episodeId)
-        .then((result) => {
-          if (result) {
-            loadedEpisodeIdRef.current = episodeId;
-            // If chat doesn't exist after loading, initialize it
-            if (!result.chat) {
-              // Small delay to ensure state is updated
-              setTimeout(() => {
-                initializeChat(episodeId);
-              }, 50);
-            }
+    if (!chat && !isLoadingChat) {
+      setIsLoadingChat(true);
+      loadChatById(chatId)
+        .then((loadedChat) => {
+          if (!loadedChat) {
+            console.error('Chat not found');
+            router.push('/');
           }
         })
         .catch((error) => {
-          console.error('Error loading episode with chat:', error);
-          loadedEpisodeIdRef.current = null; // Reset on error so we can retry
+          console.error('Error loading chat:', error);
+          router.push('/');
         })
         .finally(() => {
-          setIsLoadingEpisodeData(false);
-          loadingRef.current = false;
+          setIsLoadingChat(false);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [episodeId]); // Only depend on episodeId to prevent infinite loops
+  }, [chatId, chat, isLoadingChat, loadChatById, router]);
 
-  if (loading || !episode) {
+  // Load episode after chat is loaded
+  useEffect(() => {
+    if (!chat || !chat.episodeId) return;
+
+    const currentEpisode = useChatStore
+      .getState()
+      .episodes.find((e) => e.id === chat.episodeId);
+    const currentEpisodeHasMessages =
+      currentEpisode?.messages && currentEpisode.messages.length > 0;
+
+    if (currentEpisodeHasMessages) return;
+
+    if (!currentEpisodeHasMessages && !isLoadingEpisode) {
+      setIsLoadingEpisode(true);
+      loadEpisodeById(chat.episodeId)
+        .then((loadedEpisode) => {
+          if (!loadedEpisode) {
+            console.error('Failed to load episode');
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading episode:', error);
+        })
+        .finally(() => {
+          setIsLoadingEpisode(false);
+        });
+    }
+  }, [chat?.episodeId, isLoadingEpisode, loadEpisodeById]);
+
+  // Show loading screen
+  if (isLoading || !chat || !episode || !isEpisodeReady) {
+    let loadingMessage = 'Cargando...';
+    if (isLoadingChat) {
+      loadingMessage = 'Cargando chat...';
+    } else if (isLoadingEpisode || !isEpisodeReady) {
+      loadingMessage = 'Cargando episodio...';
+    }
+
     return (
       <div className='min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4'>
         <div className='text-center'>
@@ -130,9 +118,7 @@ export default function EpisodePage() {
             className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4'
             aria-hidden='true'
           ></div>
-          <p className='text-gray-600 dark:text-gray-400'>
-            Cargando episodio...
-          </p>
+          <p className='text-gray-600 dark:text-gray-400'>{loadingMessage}</p>
         </div>
       </div>
     );
@@ -142,10 +128,6 @@ export default function EpisodePage() {
   const progress = chat?.progress || 0;
   const currentMessageIndex = progress;
   const currentMessage = episode.messages[currentMessageIndex];
-  // Only mark as complete if:
-  // 1. Episode has messages loaded (episode.messages.length > 0)
-  // 2. Current message index is >= total messages
-  // 3. Chat status is 'completed' (to avoid showing completion screen for new chats)
   const episodeComplete =
     episode.messages.length > 0 &&
     currentMessageIndex >= episode.messages.length &&
@@ -169,8 +151,6 @@ export default function EpisodePage() {
           feedbackAvailable[msg.episodeMessageId] = true;
         }
 
-        // Reconstruct UserTranslation object for Feedback Modal
-        // We need to find the original official translation
         const originalMsg = episode.messages.find(
           (m) => m.id === msg.episodeMessageId
         );
@@ -180,7 +160,7 @@ export default function EpisodePage() {
           officialTranslation: originalMsg?.officialTranslation || '',
           timestamp:
             typeof msg.timestamp === 'number' ? msg.timestamp : Date.now(),
-          skipped: msg.message === '', // Assuming empty message is skip
+          skipped: msg.message === '',
           feedback: msg.translationFeedback,
         });
       }
@@ -193,7 +173,7 @@ export default function EpisodePage() {
     currentMessage?.requiresTranslation;
 
   const handleTranslation = async (translation: string) => {
-    if (!currentMessage || !chat) return;
+    if (!canInteract || !currentMessage || !chat) return;
 
     const isSkipAction = !translation;
     if (isSkipAction) setIsSkipping(true);
@@ -202,7 +182,6 @@ export default function EpisodePage() {
 
     try {
       let feedback = null;
-      // Only get feedback if actual translation provided
       if (translation) {
         feedback = await AIService.getFeedbackWithRetry(
           currentMessage.content,
@@ -213,7 +192,6 @@ export default function EpisodePage() {
 
       const newMessages = [...chat.messages];
 
-      // 1. Add User Message (ONLY if translation provided)
       if (translation) {
         const userMsgId = `user-msg-${Date.now()}`;
         const userMsg: ChatMessage = {
@@ -228,12 +206,6 @@ export default function EpisodePage() {
         newMessages.push(userMsg);
       }
 
-      // 2. Add THE Episode Message to the chat history as well?
-      // The requirement "Los mensajes que se han agregado al chat" implies it.
-      // But displayedMessages is derived from Episode static data.
-      // Storing it in Chat.messages is redundant for display but good for "Transcript" in DB.
-      // I will add it for DB completeness but UI uses 'episode' static data for display to keep rich content.
-      // We will add it as a "host" or "protagonist" message.
       const epMsgCopy: ChatMessage = {
         id: `ep-msg-copy-${Date.now()}`,
         episodeMessageId: currentMessage.id,
@@ -247,10 +219,8 @@ export default function EpisodePage() {
       const newProgress = currentMessageIndex + 1;
       const isComplete = newProgress >= episode.messages.length;
 
-      // Optimistic update
       updateLocalChatProgress(chat._id || '', newProgress, newMessages);
 
-      // Sync to DB
       await syncChatToDB(chat._id || '', {
         progress: newProgress,
         messages: newMessages,
@@ -266,12 +236,12 @@ export default function EpisodePage() {
   };
 
   const handleSkip = () => {
-    handleTranslation(''); // Treat as empty translation
+    if (!canInteract) return;
+    handleTranslation('');
   };
 
   const handleNext = () => {
-    // For non-translation messages, just advance progress
-    // And maybe add the message to history?
+    if (!canInteract) return;
     if (!currentMessage || !chat) return;
 
     const newMessages = [...chat.messages];
@@ -324,14 +294,13 @@ export default function EpisodePage() {
         : 0;
 
     return (
-      <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
+      <div className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
         <div className='max-w-2xl mx-auto py-8 sm:py-12'>
           <div className='bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 sm:p-8 text-center'>
             <div className='mb-6'>
-              <div
-                className='text-5xl sm:text-6xl mb-4'
-                aria-hidden='true'
-              ></div>
+              <div className='text-5xl sm:text-6xl mb-4' aria-hidden='true'>
+                🎉
+              </div>
               <h1 className='text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2'>
                 ¡Episodio Completado!
               </h1>
@@ -397,7 +366,7 @@ export default function EpisodePage() {
         <div className='max-w-4xl mx-auto flex items-center justify-between gap-4'>
           <div className='flex items-center gap-2 sm:gap-4 flex-1 min-w-0'>
             <Link href='/'>
-              <Button variant='ghost' size='sm' className='gap-2 flex-shrink-0'>
+              <Button variant='ghost' size='sm' className='gap-2 shrink-0'>
                 <ChevronLeft className='w-4 h-4' aria-hidden='true' />
                 <span className='hidden sm:inline'>Atrás</span>
               </Button>
@@ -413,7 +382,7 @@ export default function EpisodePage() {
           </div>
 
           {/* Progress Bar */}
-          <div className='w-24 sm:w-32 flex-shrink-0'>
+          <div className='w-24 sm:w-32 shrink-0'>
             <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
               <div
                 className='bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all'
@@ -468,13 +437,13 @@ export default function EpisodePage() {
               onSubmit={handleTranslation}
               onSkip={handleSkip}
               isLoading={isProcessing}
-              disabled={isProcessing}
+              disabled={isProcessing || !canInteract}
             />
           ) : (
             <div className='flex justify-center'>
               <Button
                 onClick={handleNext}
-                disabled={isProcessing}
+                disabled={isProcessing || !canInteract}
                 className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
               >
                 Siguiente
@@ -575,7 +544,7 @@ export default function EpisodePage() {
                   </div>
                 )}
 
-                {/* Phrasal Verbs Section - Only if relevant */}
+                {/* Phrasal Verbs Section */}
                 {selectedFeedback.feedback.phrasalVerbs?.relevant && (
                   <div className='bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg p-3'>
                     <h5 className='font-bold text-indigo-700 dark:text-indigo-300 text-sm mb-2 flex items-center gap-2'>

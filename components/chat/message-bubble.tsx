@@ -43,17 +43,19 @@ export function MessageBubble({
   const isProtagonistMessage = message.senderType === 'protagonist';
 
   // Get the first letter of the sender's name for the avatar
-  const avatarInitial = message.sender.charAt(0).toUpperCase();
+  const avatarInitial = (message.sender || '?').charAt(0).toUpperCase();
 
   // Consistent random-ish color for protagonist background
   const protagonistBgColor = useMemo(() => {
-    if (isProtagonistMessage) return stringToPastelColor(message.sender);
+    if (isProtagonistMessage && message.sender)
+      return stringToPastelColor(message.sender);
     return undefined;
   }, [message.sender, isProtagonistMessage]);
 
   // Consistent random-ish color for protagonist avatar
   const protagonistAvatarColor = useMemo(() => {
-    if (isProtagonistMessage) return stringToDarkColor(message.sender);
+    if (isProtagonistMessage && message.sender)
+      return stringToDarkColor(message.sender);
     return undefined;
   }, [message.sender, isProtagonistMessage]);
 
@@ -85,7 +87,7 @@ export function MessageBubble({
     <div
       className={containerClasses}
       role='article'
-      aria-label={`Mensaje de ${message.sender}`}
+      aria-label={`Mensaje de ${message.sender || 'Desconocido'}`}
     >
       {/* Avatar */}
       <div
@@ -113,7 +115,7 @@ export function MessageBubble({
             className='text-xs font-bold text-gray-700 dark:text-gray-300 ml-1'
             id={`sender-${message.id}`}
           >
-            {message.sender}
+            {message.sender || 'Desconocido'}
           </div>
         )}
 

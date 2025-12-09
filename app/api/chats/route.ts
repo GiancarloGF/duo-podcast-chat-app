@@ -10,9 +10,11 @@ export async function GET() {
     await dbConnect();
     const Chat = getChatModel();
     // Fetch all chats for the current user
-    const chats = await Chat.find({ userId: FAKE_USER_ID }).sort({
-      updatedAt: -1,
-    });
+    const chats = await Chat.find({ userId: FAKE_USER_ID })
+      .select('id episodeId userId status progress updatedAt')
+      .sort({
+        updatedAt: -1,
+      });
     return NextResponse.json(chats);
   } catch (error) {
     console.error('Error fetching chats:', error);

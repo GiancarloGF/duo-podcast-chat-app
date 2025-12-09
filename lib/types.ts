@@ -54,7 +54,8 @@ export interface ChatMessage {
 }
 
 export interface Chat {
-  _id?: string; // Optional because Mongoose adds it, receiving from API
+  _id?: string;
+  id?: string; // Add this for compatibility with frontend code that might check .id
   episodeId: string;
   userId: string;
   status: 'idle' | 'initialized' | 'completed';

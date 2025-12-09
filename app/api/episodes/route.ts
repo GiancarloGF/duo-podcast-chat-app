@@ -6,7 +6,9 @@ export async function GET() {
   try {
     await dbConnect();
     const Episode = getEpisodeModel();
-    const episodes = await Episode.find({}).sort({ createdAt: -1 }); // Or sort by some order field
+    const episodes = await Episode.find({})
+      .select('id number title imageUrl summaryText themes characters')
+      .sort({ createdAt: -1 });
     return NextResponse.json(episodes);
   } catch (error) {
     console.error('Error fetching episodes:', error);

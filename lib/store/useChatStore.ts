@@ -10,8 +10,8 @@ interface ChatState {
 
   // Actions
   loadData: (options?: { full?: boolean }) => Promise<void>;
-  loadEpisodeDetails: (episodeId: string) => Promise<Episode | null>;
-  loadEpisodeWithChat: (episodeId: string) => Promise<{ episode: Episode; chat: Chat | null } | null>;
+  loadChatById: (chatId: string) => Promise<Chat | null>;
+  loadEpisodeById: (episodeId: string) => Promise<Episode | null>;
   initializeChat: (episodeId: string) => Promise<Chat | null>;
   getChatByEpisodeId: (episodeId: string) => Chat | undefined;
   updateLocalChatProgress: (
@@ -31,73 +31,29 @@ export const useChatStore = create<ChatState>()(
       error: null,
 
       loadData: async (options?: { full?: boolean }) => {
-        const fetchFull = options?.full;
         set({ isLoading: true, error: null });
         try {
-          if (fetchFull) {
-            const epsRes = await fetch('/api/episodes');
-            const episodes = await epsRes.json();
-            const chatsRes = await fetch('/api/chats');
-            const chats = await chatsRes.json();
-            set({ episodes, chats, isLoading: false });
-            return;
-          }
+          // Fetch episodes summary
+          const epsRes = await fetch('/api/episodes');
+          if (!epsRes.ok) throw new Error('Failed to fetch episodes');
+          const episodesData = await epsRes.json();
 
-          const query = `
-            query HomeSummary {
-              homeSummary {
-                episodes {
-                  id
-                  title
-                  imageUrl
-                  summaryText
-                  summaryHtml
-                  languageLevel
-                  themes
-                  messageCount
-                  characters {
-                    name
-                    role
-                  }
-                }
-                chats {
-                  id
-                  episodeId
-                  userId
-                  status
-                  progress
-                }
-              }
-            }
-          `;
+          const episodes: Episode[] = episodesData.map((episode: any) => ({
+            ...episode,
+            // Ensure messages is initialized if missing (summary view)
+            messages: episode.messages || [],
+          }));
 
-          const res = await fetch('/api/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query }),
-          });
+          // Fetch user chats summary
+          const chatsRes = await fetch('/api/chats');
+          if (!chatsRes.ok) throw new Error('Failed to fetch chats');
+          const chatsData = await chatsRes.json();
 
-          const { data, errors } = await res.json();
-
-          if (errors?.length) {
-            throw new Error(errors[0]?.message || 'GraphQL error');
-          }
-
-          const homeSummary = data?.homeSummary;
-          const episodes: Episode[] = (homeSummary?.episodes || []).map(
-            (episode: any) => ({
-              ...episode,
-              messages: [],
-            })
-          );
-
-          const chats: Chat[] = (homeSummary?.chats || []).map(
-            (chat: any) => ({
-              ...chat,
-              _id: chat.id || chat._id,
-              messages: chat.messages || [],
-            })
-          );
+          const chats: Chat[] = chatsData.map((chat: any) => ({
+            ...chat,
+            _id: chat._id || chat.id,
+            messages: chat.messages || [],
+          }));
 
           set({ episodes, chats, isLoading: false });
         } catch (error) {
@@ -106,7 +62,45 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      loadEpisodeDetails: async (episodeId: string) => {
+      loadChatById: async (chatId: string) => {
+        try {
+          const res = await fetch(`/api/chats/${chatId}`);
+          if (!res.ok) throw new Error('Failed to load chat');
+          const chat: Chat = await res.json();
+
+          // Ensure timestamp conversion if needed
+          const formattedChat = {
+            ...chat,
+            messages: (chat.messages || []).map((msg: any) => ({
+              ...msg,
+              timestamp:
+                typeof msg.timestamp === 'string'
+                  ? new Date(msg.timestamp).getTime()
+                  : msg.timestamp,
+            })),
+          };
+
+          set((state) => {
+            const existingIndex = state.chats.findIndex(
+              (c) => (c._id || c.id) === chatId
+            );
+            const updatedChats = [...state.chats];
+            if (existingIndex >= 0) {
+              updatedChats[existingIndex] = formattedChat;
+            } else {
+              updatedChats.push(formattedChat);
+            }
+            return { chats: updatedChats };
+          });
+
+          return formattedChat;
+        } catch (error) {
+          console.error('Error loading chat:', error);
+          return null;
+        }
+      },
+
+      loadEpisodeById: async (episodeId: string) => {
         try {
           const res = await fetch(`/api/episodes/${episodeId}`);
           if (!res.ok) throw new Error('Failed to load episode');
@@ -116,164 +110,18 @@ export const useChatStore = create<ChatState>()(
             const existingIndex = state.episodes.findIndex(
               (e) => e.id === episodeId
             );
+            const updatedEpisodes = [...state.episodes];
             if (existingIndex >= 0) {
-              const updated = [...state.episodes];
-              updated[existingIndex] = episode;
-              return { episodes: updated };
+              updatedEpisodes[existingIndex] = episode;
+            } else {
+              updatedEpisodes.push(episode);
             }
-            return { episodes: [...state.episodes, episode] };
+            return { episodes: updatedEpisodes };
           });
 
           return episode;
         } catch (error) {
-          console.error('Failed to load episode details:', error);
-          return null;
-        }
-      },
-
-      loadEpisodeWithChat: async (episodeId: string) => {
-        try {
-          const query = `
-            query EpisodeWithChat($episodeId: String!) {
-              episodeWithChat(episodeId: $episodeId) {
-                episode {
-                  id
-                  title
-                  imageUrl
-                  summaryText
-                  summaryHtml
-                  languageLevel
-                  themes
-                  characters {
-                    name
-                    role
-                  }
-                  messages {
-                    id
-                    sender
-                    senderType
-                    language
-                    requiresTranslation
-                    content
-                    contentHtml
-                    contentMarkdown
-                    officialTranslation
-                    keyPoints {
-                      type
-                      concept
-                      word
-                      example
-                      definition_es
-                      definition_en
-                    }
-                  }
-                }
-                chat {
-                  id
-                  episodeId
-                  userId
-                  status
-                  progress
-                  messages {
-                    id
-                    episodeMessageId
-                    sender
-                    message
-                    isUserMessage
-                    translationFeedback {
-                      analysis
-                      score
-                      suggestions
-                      differences
-                      detailedAnalysis {
-                        grammar
-                        vocabulary
-                        construction
-                      }
-                      phrasalVerbs {
-                        relevant
-                        suggestions
-                      }
-                    }
-                    timestamp
-                  }
-                  createdAt
-                  updatedAt
-                }
-              }
-            }
-          `;
-
-          const res = await fetch('/api/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              query,
-              variables: { episodeId },
-            }),
-          });
-
-          const { data, errors } = await res.json();
-
-          if (errors?.length) {
-            throw new Error(errors[0]?.message || 'GraphQL error');
-          }
-
-          const result = data?.episodeWithChat;
-          if (!result) {
-            throw new Error('No data returned');
-          }
-
-          const episode: Episode = result.episode;
-          const chat: Chat | null = result.chat
-            ? {
-                ...result.chat,
-                _id: result.chat.id,
-                messages: (result.chat.messages || []).map((msg: any) => ({
-                  ...msg,
-                  timestamp:
-                    typeof msg.timestamp === 'string'
-                      ? new Date(msg.timestamp).getTime()
-                      : msg.timestamp,
-                })),
-              }
-            : null;
-
-          // Update store with episode and chat
-          set((state) => {
-            // Update or add episode
-            const existingEpisodeIndex = state.episodes.findIndex(
-              (e) => e.id === episodeId
-            );
-            const updatedEpisodes = [...state.episodes];
-            if (existingEpisodeIndex >= 0) {
-              updatedEpisodes[existingEpisodeIndex] = episode;
-            } else {
-              updatedEpisodes.push(episode);
-            }
-
-            // Update or add chat if it exists
-            let updatedChats = [...state.chats];
-            if (chat) {
-              const existingChatIndex = updatedChats.findIndex(
-                (c) => c.episodeId === episodeId
-              );
-              if (existingChatIndex >= 0) {
-                updatedChats[existingChatIndex] = chat;
-              } else {
-                updatedChats.push(chat);
-              }
-            }
-
-            return {
-              episodes: updatedEpisodes,
-              chats: updatedChats,
-            };
-          });
-
-          return { episode, chat };
-        } catch (error) {
-          console.error('Failed to load episode with chat:', error);
+          console.error('Error loading episode:', error);
           return null;
         }
       },

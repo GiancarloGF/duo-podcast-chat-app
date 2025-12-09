@@ -28,7 +28,7 @@ export default function Home() {
   const handleStartChat = async (episodeId: string) => {
     const chat = await initializeChat(episodeId);
     if (chat) {
-      router.push(`/episode/${episodeId}`); // Use episode ID as param, logic in page will look up chat
+      router.push(`/chat/${chat._id || chat.id}`);
     }
   };
 
@@ -37,13 +37,13 @@ export default function Home() {
     <Card className='border-0 bg-white dark:bg-slate-800 pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-lg'>
       {/* Image skeleton */}
       <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse' />
-      
+
       {/* Header skeleton */}
       <CardHeader className='pt-3'>
         <div className='h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2' />
         <div className='h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
       </CardHeader>
-      
+
       {/* Content skeleton */}
       <CardContent className='space-y-4 grow flex flex-col'>
         {/* Description skeleton */}
@@ -111,7 +111,7 @@ export default function Home() {
           <div className='space-y-8'>
             {/* Helper function to render episode card */}
             {(() => {
-              const renderEpisodeCard = (episode: typeof episodes[0]) => {
+              const renderEpisodeCard = (episode: (typeof episodes)[0]) => {
                 const basicInfo = getEpisodeBasicInfo(episode);
                 const chat = chats.find((c) => c.episodeId === episode.id);
                 const isInitialized = !!chat;
@@ -222,7 +222,7 @@ export default function Home() {
                       {/* CTA Button */}
                       <div className='mt-auto pt-4'>
                         {isInitialized ? (
-                          <Link href={`/episode/${episode.id}`}>
+                          <Link href={`/chat/${chat?._id || chat?.id}`}>
                             <Button className='w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'>
                               Continuar
                             </Button>
