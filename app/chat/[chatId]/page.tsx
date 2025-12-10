@@ -46,6 +46,9 @@ export default function ChatPage() {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [isLoadingEpisode, setIsLoadingEpisode] = useState(false);
 
+  // Track if we've attempted to load this chatId to prevent infinite loops
+  const chatLoadAttemptedRef = useRef<string | null>(null);
+
   // Loading states
   const isLoading = isLoadingChat || isLoadingEpisode;
   const isEpisodeReady =
@@ -54,7 +57,22 @@ export default function ChatPage() {
 
   // Load chat by ID
   useEffect(() => {
-    if (!chat && !isLoadingChat) {
+    // Reset the ref when chatId changes
+    if (chatLoadAttemptedRef.current !== chatId) {
+      chatLoadAttemptedRef.current = null;
+    }
+
+    // Load if chat doesn't exist OR if it exists but has no messages (incomplete data)
+    const needsLoading =
+      !chat || (chat && (!chat.messages || chat.messages.length === 0));
+
+    // Only load if we haven't attempted to load this chatId yet
+    if (
+      needsLoading &&
+      !isLoadingChat &&
+      chatLoadAttemptedRef.current !== chatId
+    ) {
+      chatLoadAttemptedRef.current = chatId;
       setIsLoadingChat(true);
       loadChatById(chatId)
         .then((loadedChat) => {
