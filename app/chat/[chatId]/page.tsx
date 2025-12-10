@@ -219,7 +219,12 @@ export default function ChatPage() {
       const newProgress = currentMessageIndex + 1;
       const isComplete = newProgress >= episode.messages.length;
 
-      updateLocalChatProgress(chat._id || '', newProgress, newMessages);
+      updateLocalChatProgress(
+        chat._id || '',
+        newProgress,
+        newMessages,
+        isComplete ? 'completed' : 'initialized'
+      );
 
       await syncChatToDB(chat._id || '', {
         progress: newProgress,
@@ -258,7 +263,12 @@ export default function ChatPage() {
     const newProgress = currentMessageIndex + 1;
     const isComplete = newProgress >= episode.messages.length;
 
-    updateLocalChatProgress(chat._id || '', newProgress, newMessages);
+    updateLocalChatProgress(
+      chat._id || '',
+      newProgress,
+      newMessages,
+      isComplete ? 'completed' : 'initialized'
+    );
 
     syncChatToDB(chat._id || '', {
       progress: newProgress,
@@ -269,7 +279,7 @@ export default function ChatPage() {
 
   const handleRestartEpisode = async () => {
     if (!chat) return;
-    updateLocalChatProgress(chat._id || '', 0, []);
+    updateLocalChatProgress(chat._id || '', 0, [], 'initialized');
     await syncChatToDB(chat._id || '', {
       progress: 0,
       messages: [],
@@ -507,7 +517,7 @@ export default function ChatPage() {
 
                 {/* Detailed Analysis Categories */}
                 {selectedFeedback.feedback.detailedAnalysis && (
-                  <div className='grid gap-4 sm:grid-cols-3 text-sm'>
+                  <div className='space-y-4 text-sm'>
                     <div className='space-y-1'>
                       <h5 className='font-semibold text-gray-900 dark:text-white flex items-center gap-2'>
                         📖 Gramática

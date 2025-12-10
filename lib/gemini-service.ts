@@ -57,10 +57,10 @@ ${context ? `Contexto extra: ${context}` : ''}
 INSTRUCCIONES CLAVE:
 1. **Puntuación (0-100)**: Sé justo pero motivador.
 2. **Análisis General**: Breve resumen del desempeño.
-3. **Análisis Detallado**:
-   - **Gramática**: Errores gramaticales específicos.
-   - **Vocabulario**: Elección de palabras.
-   - **Construcción**: Estructura de la oración.
+3. **Análisis Detallado** - IMPORTANTE: Solo menciona las secciones donde hay errores. Si no hay error en una categoría, deja ese campo vacío (""):
+   - **Gramática**: Menciona SOLO si hay errores gramaticales específicos. Si está correcto, deja vacío.
+   - **Vocabulario**: Menciona SOLO si hay errores o mejoras en la elección de palabras. Si está correcto, deja vacío.
+   - **Construcción**: Menciona SOLO si hay errores en la estructura de la oración. Si está correcto, deja vacío.
 4. **Phrasal Verbs**:
    - ¡IMPORTANTE! Si se puede usar un phrasal verb para sonar más natural, sugíérelo.
    - Da ejemplos concretos.

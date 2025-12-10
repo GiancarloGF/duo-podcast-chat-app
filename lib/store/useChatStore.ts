@@ -17,7 +17,8 @@ interface ChatState {
   updateLocalChatProgress: (
     chatId: string,
     progress: number,
-    messages: ChatMessage[]
+    messages: ChatMessage[],
+    status?: Chat['status']
   ) => void;
   syncChatToDB: (chatId: string, data: Partial<Chat>) => Promise<void>;
 }
@@ -159,23 +160,38 @@ export const useChatStore = create<ChatState>()(
       updateLocalChatProgress: (
         chatId: string,
         progress: number,
-        messages: ChatMessage[]
+        messages: ChatMessage[],
+        status?: Chat['status']
       ) => {
         set((state) => ({
           chats: state.chats.map((c) =>
-            // Check both _id and client-side id if needed, but DB _id is safest
-            (c as any)._id === chatId ? { ...c, progress, messages } : c
+            (c as any)._id === chatId || (c as any).id === chatId
+              ? { ...c, progress, messages, ...(status && { status }) }
+              : c
           ),
         }));
       },
 
       syncChatToDB: async (chatId: string, data: Partial<Chat>) => {
         try {
-          await fetch(`/api/chats/${chatId}`, {
+          const res = await fetch(`/api/chats/${chatId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
           });
+
+          if (!res.ok) {
+            throw new Error('Failed to sync chat to DB');
+          }
+
+          const updatedChat = await res.json();
+
+          // Update the local store with the DB response to ensure consistency
+          set((state) => ({
+            chats: state.chats.map((c) =>
+              (c._id || c.id) === chatId ? updatedChat : c
+            ),
+          }));
         } catch (error) {
           console.error('Error syncing chat to DB:', error);
         }

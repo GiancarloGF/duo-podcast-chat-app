@@ -9,9 +9,9 @@ export async function GET() {
   try {
     await dbConnect();
     const Chat = getChatModel();
-    // Fetch all chats for the current user
+    // Fetch all chats for the current user with all fields
     const chats = await Chat.find({ userId: FAKE_USER_ID })
-      .select('id episodeId userId status progress updatedAt')
+      .lean() // Convert to plain JS objects
       .sort({
         updatedAt: -1,
       });

@@ -7,9 +7,18 @@ export async function GET() {
     await dbConnect();
     const Episode = getEpisodeModel();
     const episodes = await Episode.find({})
-      .select('id number title imageUrl summaryText themes characters')
-      .sort({ createdAt: -1 });
-    return NextResponse.json(episodes);
+      .select('id number title imageUrl summaryText themes characters messages')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Calculate messageCount for each episode
+    const episodesWithCount = episodes.map((ep: any) => ({
+      ...ep,
+      messageCount: ep.messages?.length || 0,
+      messages: [], // Don't send full messages array for list view
+    }));
+
+    return NextResponse.json(episodesWithCount);
   } catch (error) {
     console.error('Error fetching episodes:', error);
     return NextResponse.json(
