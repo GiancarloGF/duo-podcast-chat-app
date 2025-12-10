@@ -11,10 +11,11 @@ export async function GET() {
     const Chat = getChatModel();
     // Fetch all chats for the current user with all fields
     const chats = await Chat.find({ userId: FAKE_USER_ID })
-      .lean() // Convert to plain JS objects
-      .sort({
-        updatedAt: -1,
-      });
+      // .select() define qué campos quieres incluir (espacio como separador)
+      // El campo '_id' siempre se incluye por defecto a menos que lo excluyas explícitamente.
+      .select('userId episodeId status progress')
+      .sort({ updatedAt: -1 }) // Puedes ordenar por updatedAt aunque no lo devuelvas
+      .lean(); // Convierte a objeto plano de JS (más rápido)
     return NextResponse.json(chats);
   } catch (error) {
     console.error('Error fetching chats:', error);
