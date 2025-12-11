@@ -221,7 +221,7 @@ export default function ChatPage() {
           translationFeedback: feedback || undefined,
           timestamp: Date.now(),
         };
-        console.log("handleTranslation: userMsg", userMsg);
+        console.log('handleTranslation: userMsg', userMsg);
         newMessages.push(userMsg);
       }
 
@@ -447,19 +447,23 @@ export default function ChatPage() {
       )}
 
       {/* Chat Area */}
-      <ChatContainer
-        messages={displayedMessages}
-        userTranslations={userTranslations}
-        feedbackAvailable={feedbackAvailable}
-        onFeedbackClick={(messageId) => {
-          const trans = allTranslations.find((t) => t.messageId === messageId);
-          if (trans) setSelectedFeedback(trans);
-        }}
-        isLoading={isProcessing && !isSkipping}
-      />
+      <main className='flex-1 overflow-y-auto'>
+        <ChatContainer
+          messages={displayedMessages}
+          userTranslations={userTranslations}
+          feedbackAvailable={feedbackAvailable}
+          onFeedbackClick={(messageId) => {
+            const trans = allTranslations.find(
+              (t) => t.messageId === messageId
+            );
+            if (trans) setSelectedFeedback(trans);
+          }}
+          isLoading={isProcessing && !isSkipping}
+        />
+      </main>
 
       {/* Input Area */}
-      <footer className='bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-4'>
+      <footer className='sticky bottom-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-4'>
         <div className='max-w-4xl mx-auto'>
           {needsTranslation ? (
             <TranslationInput

@@ -108,7 +108,7 @@ export function TranslationInput({
           onKeyDown={handleKeyDown}
           placeholder='Type / for commands'
           disabled={isLoading || disabled}
-          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 resize-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-[15px] leading-relaxed overflow-hidden'
+          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-[15px] leading-relaxed overflow-hidden'
           rows={1}
         />
 
