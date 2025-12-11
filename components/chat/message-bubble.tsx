@@ -176,7 +176,14 @@ export function MessageBubble({
                         <div className='opacity-90'>{point.definition_es}</div>
                         {point.example && (
                           <div className='italic mt-0.5 opacity-75'>
-                            {point.example}
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p: ({ children }) => <>{children}</>,
+                              }}
+                            >
+                              {point.example}
+                            </ReactMarkdown>
                           </div>
                         )}
                       </div>
