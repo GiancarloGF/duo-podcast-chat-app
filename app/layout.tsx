@@ -5,13 +5,14 @@ import type { Metadata } from 'next';
 // import { Analytics } from "@vercel/analytics/next"
 import './globals.css';
 
-import { Nunito } from 'next/font/google';
+import { Varela_Round } from 'next/font/google';
 
 // Initialize fonts
-const nunito = Nunito({
+const varela_round = Varela_Round({
   subsets: ['latin'],
-  variable: '--font-nunito',
+  variable: '--font-varela-round',
   display: 'swap',
+  weight: '400',
 });
 
 export const metadata: Metadata = {
@@ -45,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='es'>
-      <body className={`${nunito.variable} font-sans antialiased`}>
+      <body className={`${varela_round.variable} font-sans antialiased`}>
         {children}
         {/* <Analytics /> */}
       </body>
