@@ -31,6 +31,8 @@ export class AIService {
         throw new Error(data.error || 'Failed to get feedback');
       }
 
+      console.log("AI Service: Feedback received", data.feedback);
+
       return data.feedback;
     } catch (error) {
       console.error('Error fetching feedback:', error);

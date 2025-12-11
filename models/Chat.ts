@@ -11,6 +11,15 @@ const MessageSchema = new Schema({
     score: Number,
     suggestions: [String],
     differences: String,
+    detailedAnalysis: {
+      grammar: String,
+      vocabulary: String,
+      construction: String,
+    },
+    phrasalVerbs: {
+      relevant: Boolean,
+      suggestions: [String],
+    },
   },
   timestamp: { type: Date, default: Date.now },
 });

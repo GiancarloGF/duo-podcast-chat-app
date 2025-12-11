@@ -1,16 +1,17 @@
+☐ Mejorar prompt de feedback para obtener correcciones y frasal verbs.
 ✔ Utilizar correctamente el archivo json con la estructura correcta @done(25-12-03 23:32)
 Persistencia de datos en el navegador:
-    ☐ Instalar Zustand para el manejo de estado local.
-    ☐ Definir store para los datos de la aplicación.
-    ☐ Definir store para la información de episodios completados, no completados.
-    ☐ Definir store para información del chat.
+    ✔ Instalar Zustand para el manejo de estado local. @done(25-12-10 11:11)
+    ✔ Definir store para los datos de la aplicación. @done(25-12-10 11:11)
+    ✔ Definir store para la información de episodios completados, no completados. @done(25-12-10 11:11)
+    ✔ Definir store para información del chat. @done(25-12-10 11:11)
 
 Persistencia de datos en base de datos:
-    ☐ Instalar Supabase o Firebase para la persistencia de datos.
     ☐ Implementar autenticación.
-    ☐ Crear base de datos para la lista de episodios.
-    ☐ Crear base de datos para los chats iniciados por el usuario. Cada chat debe de contener información del episodio, los mensajes ya mostrados y datos adicionales (Ejm: isCompleted).
+    ✔ Instalar MongoDB para la persistencia de datos. @done(25-12-10 11:12)
+    ✔ Crear base de datos para la lista de episodios. @done(25-12-10 11:12)
+    ✔ Crear base de datos para los chats iniciados por el usuario. Cada chat debe de contener información del episodio, los mensajes ya mostrados y datos adicionales (Ejm: isCompleted). @done(25-12-10 11:12)
 
-☐ Agregar avatar a los mensajes del chat. Usuario a la derecha, los demás a la izquierda.
+✔ Agregar avatar a los mensajes del chat. Usuario a la derecha, los demás a la izquierda. @done(25-12-10 11:12)
 ☐ Refactorizar el uso de componentes. Utilizar shadcn para los componentes.
 ☐ Cargar más episodios en formato json

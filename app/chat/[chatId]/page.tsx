@@ -221,6 +221,7 @@ export default function ChatPage() {
           translationFeedback: feedback || undefined,
           timestamp: Date.now(),
         };
+        console.log("handleTranslation: userMsg", userMsg);
         newMessages.push(userMsg);
       }
 
@@ -627,6 +628,20 @@ export default function ChatPage() {
                         )
                       )}
                     </ul>
+                  </div>
+                )}
+
+                {/* Differences Section */}
+                {selectedFeedback.feedback.differences && (
+                  <div>
+                    <h5 className='font-semibold text-gray-900 dark:text-white text-sm mb-2'>
+                      🔍 Diferencias Clave
+                    </h5>
+                    <div className='text-sm text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg'>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {selectedFeedback.feedback.differences}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 )}
 
