@@ -26,11 +26,14 @@ export async function getAllEpisodes(): Promise<Episode[]> {
         } as Episode)
     );
 
-    const episodesWithCount = sanitizedEpisodes.map((ep: any) => ({
-      ...ep,
-      messageCount: ep.messages?.length || 0,
-      messages: [], // Don't send full messages array for list view
-    } as Episode));
+    const episodesWithCount = sanitizedEpisodes.map(
+      (ep: any) =>
+        ({
+          ...ep,
+          messageCount: ep.messages?.length || 0,
+          messages: [], // Don't send full messages array for list view
+        } as Episode)
+    );
 
     return episodesWithCount;
 
@@ -41,7 +44,7 @@ export async function getAllEpisodes(): Promise<Episode[]> {
     // };
   } catch (error) {
     console.error('Error al obtener los episodios:', error);
-    throw new Error('Error al obtener los episodios');
+    throw new Error('Error al obtener los episodios: ' + error);
     // return {
     //     isSuccess: false,
     //     data: [],
