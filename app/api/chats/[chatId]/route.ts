@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
+import dbConnect from '@/lib/db/conection';
 import { getChatModel } from '@/models/Chat';
 
 const FAKE_USER_ID = 'fake-user-123';

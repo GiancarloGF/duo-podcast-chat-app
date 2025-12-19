@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
+import dbConnect from '@/lib/db/conection';
 import { getChatModel } from '@/models/Chat';
 import { getEpisodeModel } from '@/models/Episode';
 
@@ -43,7 +43,8 @@ export async function POST(request: Request) {
     const Chat = getChatModel();
 
     // Check if the episode exists
-    const episode = await Episode.findOne({ id: episodeId });
+    const episode = await Episode.findOne({ _id: episodeId });
+
     if (!episode) {
       return NextResponse.json({ error: 'Episode not found' }, { status: 404 });
     }
