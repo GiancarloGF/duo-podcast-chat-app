@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type {
   Episode,
@@ -17,7 +17,7 @@ import { ErrorAlert } from '@/components/chat/error-alert';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, RotateCcw, Home } from 'lucide-react';
 import Link from 'next/link';
-import { useChatStore } from '@/lib/store/useChatStore';
+
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -34,11 +34,11 @@ export function ChatContainer({
 }: ChatContainerProps) {
   const router = useRouter();
 
-  // Store sync
-  const updateLocalChatProgress = useChatStore(
-    (state) => state.updateLocalChatProgress
-  );
-  const syncChatToDB = useChatStore((state) => state.syncChatToDB);
+  // Store sync removed in favor of local handling and server actions/api calls
+  // const updateLocalChatProgress = useChatStore(
+  //   (state) => state.updateLocalChatProgress
+  // );
+  // const syncChatToDB = useChatStore((state) => state.syncChatToDB);
 
   // Initialize store with server data if needed, or rely on internal state mostly?
   // We'll use internal state for immediate rendering and sync to store in background.
@@ -52,6 +52,30 @@ export function ChatContainer({
       setChat(initialChat);
     }
   }, [initialChat]);
+
+  const syncChatToDB = useCallback(
+    async (chatId: string, data: Partial<Chat>) => {
+      try {
+        const res = await fetch(`/api/chats/${chatId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to sync chat to DB');
+        }
+
+        // Optional: Update local state with DB response if needed (e.g. timestamps)
+        // const updatedChat = await res.json();
+        // setChat(prev => ({ ...prev, ...updatedChat }));
+      } catch (error) {
+        console.error('Error syncing chat to DB:', error);
+        // Constructively, we might want to notify user or retry
+      }
+    },
+    []
+  );
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
@@ -73,91 +97,167 @@ export function ChatContainer({
   // Calculate rendering state
   const progress = chat.progress || 0;
   const currentMessageIndex = progress;
-  // Ensure we don't go out of bounds if messages are missing
-  const currentMessage = initialEpisode.messages[currentMessageIndex];
 
-  const episodeComplete =
-    initialEpisode.messages.length > 0 &&
-    currentMessageIndex >= initialEpisode.messages.length;
+  // Ensure we don't go out of bounds if messages are missing
+  const currentMessage = useMemo(
+    () => initialEpisode.messages[currentMessageIndex],
+    [initialEpisode.messages, currentMessageIndex]
+  );
+
+  const episodeComplete = useMemo(
+    () =>
+      initialEpisode.messages.length > 0 &&
+      currentMessageIndex >= initialEpisode.messages.length,
+    [initialEpisode.messages.length, currentMessageIndex]
+  );
+
   // We can rely on index check or chat status.
   // chat.status === 'completed' might be safer but index is the driver.
 
-  const displayedMessages = initialEpisode.messages.slice(
-    0,
-    currentMessageIndex + (episodeComplete ? 0 : 1)
+  const displayedMessages = useMemo(
+    () =>
+      initialEpisode.messages.slice(
+        0,
+        currentMessageIndex + (episodeComplete ? 0 : 1)
+      ),
+    [initialEpisode.messages, currentMessageIndex, episodeComplete]
   );
 
   // Construct userTranslations map from Chat History
-  const userTranslations: Record<string, string> = {};
-  const feedbackAvailable: Record<string, boolean> = {};
-  const allTranslations: UserTranslation[] = [];
+  const { userTranslations, feedbackAvailable, allTranslations } =
+    useMemo(() => {
+      const userTranslations: Record<string, string> = {};
+      const feedbackAvailable: Record<string, boolean> = {};
+      const allTranslations: UserTranslation[] = [];
 
-  if (chat) {
-    chat.messages.forEach((msg) => {
-      if (msg.isUserMessage && msg.episodeMessageId) {
-        userTranslations[msg.episodeMessageId] = msg.message;
-        if (msg.translationFeedback) {
-          feedbackAvailable[msg.episodeMessageId] = true;
-        }
+      if (chat) {
+        chat.messages.forEach((msg) => {
+          if (msg.isUserMessage && msg.episodeMessageId) {
+            userTranslations[msg.episodeMessageId] = msg.message;
+            if (msg.translationFeedback) {
+              feedbackAvailable[msg.episodeMessageId] = true;
+            }
 
-        const originalMsg = initialEpisode.messages.find(
-          (m) => m.id === msg.episodeMessageId
-        );
-        allTranslations.push({
-          messageId: msg.episodeMessageId,
-          userTranslation: msg.message,
-          officialTranslation: originalMsg?.officialTranslation || '',
-          timestamp:
-            typeof msg.timestamp === 'number' ? msg.timestamp : Date.now(),
-          skipped: msg.message === '',
-          feedback: msg.translationFeedback,
+            const originalMsg = initialEpisode.messages.find(
+              (m) => m.id === msg.episodeMessageId
+            );
+            allTranslations.push({
+              messageId: msg.episodeMessageId,
+              userTranslation: msg.message,
+              officialTranslation: originalMsg?.officialTranslation || '',
+              timestamp:
+                typeof msg.timestamp === 'number' ? msg.timestamp : Date.now(),
+              skipped: msg.message === '',
+              feedback: msg.translationFeedback,
+            });
+          }
         });
       }
-    });
-  }
+      return { userTranslations, feedbackAvailable, allTranslations };
+    }, [chat, initialEpisode.messages]);
 
-  const needsTranslation =
-    !episodeComplete &&
-    currentMessage?.language === 'es' &&
-    currentMessage?.requiresTranslation;
+  const needsTranslation = useMemo(
+    () =>
+      !episodeComplete &&
+      currentMessage?.language === 'es' &&
+      currentMessage?.requiresTranslation,
+    [episodeComplete, currentMessage]
+  );
 
   // Interaction handlers
   const canInteract = !isProcessing && !episodeComplete;
 
-  const handleTranslation = async (translation: string) => {
-    if (!canInteract || !currentMessage) return;
+  const handleTranslation = useCallback(
+    async (translation: string) => {
+      if (!canInteract || !currentMessage) return;
 
-    const isSkipAction = !translation;
-    if (isSkipAction) setIsSkipping(true);
-    setIsProcessing(true);
-    setAiError(null);
+      const isSkipAction = !translation;
+      if (isSkipAction) setIsSkipping(true);
+      setIsProcessing(true);
+      setAiError(null);
 
-    try {
-      let feedback = null;
-      if (translation) {
-        feedback = await AIService.getFeedbackWithRetry(
-          currentMessage.content,
-          currentMessage.officialTranslation || '',
-          translation
+      try {
+        let feedback = null;
+        if (translation) {
+          feedback = await AIService.getFeedbackWithRetry(
+            currentMessage.content,
+            currentMessage.officialTranslation || '',
+            translation
+          );
+        }
+
+        // Optimization: use functional update and local vars to avoid dependency on chat state deep changes
+        setChat((prev) => {
+          const newMessages = [...prev.messages];
+
+          if (translation) {
+            const userMsgId = `user-msg-${Date.now()}`;
+            const userMsg: ChatMessage = {
+              id: userMsgId,
+              episodeMessageId: currentMessage.id,
+              sender: 'user',
+              message: translation,
+              isUserMessage: true,
+              translationFeedback: feedback || undefined,
+              timestamp: Date.now(),
+            };
+            newMessages.push(userMsg);
+          }
+
+          const epMsgCopy: ChatMessage = {
+            id: `ep-msg-copy-${Date.now()}`,
+            episodeMessageId: currentMessage.id,
+            sender: currentMessage.sender,
+            message: currentMessage.content,
+            isUserMessage: false,
+            timestamp: Date.now(),
+          };
+          newMessages.push(epMsgCopy);
+
+          const newProgress = prev.progress + 1; // Use prev.progress instead of currentMessageIndex for atomicity
+          const isComplete = newProgress >= initialEpisode.messages.length;
+
+          const newStatus = isComplete ? 'completed' : 'initialized';
+
+          // Fire and forget sync
+          syncChatToDB(prev._id || prev.id || '', {
+            progress: newProgress,
+            messages: newMessages,
+            status: newStatus,
+          });
+
+          return {
+            ...prev,
+            messages: newMessages,
+            progress: newProgress,
+            status: newStatus,
+          };
+        });
+      } catch (error) {
+        console.error('Error processing translation:', error);
+        setAiError(
+          'Error procesando tu traducción. Por favor intenta de nuevo.'
         );
+        // Revert state if needed? For now we just show error.
+      } finally {
+        setIsProcessing(false);
+        setIsSkipping(false);
       }
+    },
+    [canInteract, currentMessage, initialEpisode.messages.length, syncChatToDB]
+  );
 
-      const newMessages = [...chat.messages];
+  const handleSkip = useCallback(() => {
+    if (!canInteract) return;
+    handleTranslation('');
+  }, [canInteract, handleTranslation]);
 
-      if (translation) {
-        const userMsgId = `user-msg-${Date.now()}`;
-        const userMsg: ChatMessage = {
-          id: userMsgId,
-          episodeMessageId: currentMessage.id,
-          sender: 'user',
-          message: translation,
-          isUserMessage: true,
-          translationFeedback: feedback || undefined,
-          timestamp: Date.now(),
-        };
-        newMessages.push(userMsg);
-      }
+  const handleNext = useCallback(() => {
+    if (!canInteract) return;
+    if (!currentMessage) return;
 
+    setChat((prev) => {
+      const newMessages = [...prev.messages];
       const epMsgCopy: ChatMessage = {
         id: `ep-msg-copy-${Date.now()}`,
         episodeMessageId: currentMessage.id,
@@ -168,88 +268,31 @@ export function ChatContainer({
       };
       newMessages.push(epMsgCopy);
 
-      const newProgress = currentMessageIndex + 1;
+      const newProgress = prev.progress + 1;
       const isComplete = newProgress >= initialEpisode.messages.length;
-
       const newStatus = isComplete ? 'completed' : 'initialized';
 
-      // Update local state immediately
-      setChat((prev) => ({
-        ...prev,
-        messages: newMessages,
-        progress: newProgress,
-        status: newStatus,
-      }));
-
-      // Sync to store/DB
-      updateLocalChatProgress(
-        chat._id || chat.id || '',
-        newProgress,
-        newMessages,
-        newStatus
-      );
-
-      await syncChatToDB(chat._id || chat.id || '', {
+      syncChatToDB(prev._id || prev.id || '', {
         progress: newProgress,
         messages: newMessages,
         status: newStatus,
       });
-    } catch (error) {
-      console.error('Error processing translation:', error);
-      setAiError('Error procesando tu traducción. Por favor intenta de nuevo.');
-      // Revert state if needed? For now we just show error.
-    } finally {
-      setIsProcessing(false);
-      setIsSkipping(false);
-    }
-  };
 
-  const handleSkip = () => {
-    if (!canInteract) return;
-    handleTranslation('');
-  };
-
-  const handleNext = () => {
-    if (!canInteract) return;
-    if (!currentMessage) return;
-
-    const newMessages = [...chat.messages];
-    const epMsgCopy: ChatMessage = {
-      id: `ep-msg-copy-${Date.now()}`,
-      episodeMessageId: currentMessage.id,
-      sender: currentMessage.sender,
-      message: currentMessage.content,
-      isUserMessage: false,
-      timestamp: Date.now(),
-    };
-    newMessages.push(epMsgCopy);
-
-    const newProgress = currentMessageIndex + 1;
-    const isComplete = newProgress >= initialEpisode.messages.length;
-    const newStatus = isComplete ? 'completed' : 'initialized';
-
-    setChat((prev) => ({
-      ...prev,
-      messages: newMessages,
-      progress: newProgress,
-      status: newStatus,
-    }));
-
-    updateLocalChatProgress(
-      chat._id || chat.id || '',
-      newProgress,
-      newMessages,
-      newStatus
-    );
-
-    syncChatToDB(chat._id || chat.id || '', {
-      progress: newProgress,
-      messages: newMessages,
-      status: newStatus,
+      return {
+        ...prev,
+        messages: newMessages,
+        progress: newProgress,
+        status: newStatus,
+      };
     });
-  };
+  }, [
+    canInteract,
+    currentMessage,
+    initialEpisode.messages.length,
+    syncChatToDB,
+  ]);
 
-  const handleRestartEpisode = async () => {
+  const handleRestartEpisode = useCallback(async () => {
     const emptyMessages: ChatMessage[] = [];
 
     setChat((prev) => ({
@@ -259,16 +302,15 @@ export function ChatContainer({
       status: 'initialized',
     }));
 
-    updateLocalChatProgress(chatId, 0, emptyMessages, 'initialized');
     await syncChatToDB(chatId, {
       progress: 0,
       messages: emptyMessages,
       status: 'initialized',
     });
     setAiError(null);
-  };
+  }, [chatId, syncChatToDB]);
 
-  if (episodeComplete) {
+  const renderCompletionScreen = () => {
     const completedTranslations = allTranslations.filter(
       (t) => !t.skipped
     ).length;
@@ -348,6 +390,10 @@ export function ChatContainer({
         </div>
       </div>
     );
+  };
+
+  if (episodeComplete) {
+    return renderCompletionScreen();
   }
 
   return (
