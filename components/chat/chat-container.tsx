@@ -200,7 +200,6 @@ export function ChatContainer({
 
   const handleSkip = useCallback(async () => {
     if (isProcessing) return;
-    setIsProcessing(true);
 
     try {
       const nextIndex = (userProgress.currentMessageIndex || 0) + 1;
@@ -220,8 +219,6 @@ export function ChatContainer({
       await updateProgress(userId, initialEpisode.id, nextIndex, nextStatus);
     } catch (error) {
       console.error('Error skipping:', error);
-    } finally {
-      setIsProcessing(false);
     }
   }, [
     userProgress.currentMessageIndex,
@@ -234,7 +231,6 @@ export function ChatContainer({
   const handleNext = useCallback(async () => {
     // Same logic as Skip for now
     if (isProcessing) return;
-    setIsProcessing(true);
 
     try {
       const nextIndex = (userProgress.currentMessageIndex || 0) + 1;
@@ -251,8 +247,6 @@ export function ChatContainer({
       await updateProgress(userId, initialEpisode.id, nextIndex, nextStatus);
     } catch (error) {
       console.error('Error next:', error);
-    } finally {
-      setIsProcessing(false);
     }
   }, [
     userProgress.currentMessageIndex,

@@ -129,7 +129,7 @@ export interface EpisodeWithProgress {
   summaryText: string;
 
   // Datos del Progreso (Calculados)
-  progressId?: string;
+  progressId: string | undefined;
   status: 'new' | 'started' | 'completed';
   percentCompleted: number; // 0 a 100
   lastActiveAt: Date | null;

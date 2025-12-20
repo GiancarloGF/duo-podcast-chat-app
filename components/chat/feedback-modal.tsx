@@ -3,6 +3,8 @@
 import type { TranslationFeedback, UserTranslation } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface FeedbackModalProps {
   feedback: TranslationFeedback;
@@ -92,7 +94,15 @@ export function FeedbackModal({
                       Gramática
                     </h4>
                     <p className='text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap'>
-                      {feedback.detailedAnalysis.grammar}
+                      {/* {feedback.detailedAnalysis.grammar} */}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <>{children}</>,
+                        }}
+                      >
+                        {feedback.detailedAnalysis.grammar}
+                      </ReactMarkdown>
                     </p>
                   </div>
                 )}
@@ -102,7 +112,15 @@ export function FeedbackModal({
                       Vocabulario
                     </h4>
                     <p className='text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap'>
-                      {feedback.detailedAnalysis.vocabulary}
+                      {/* {feedback.detailedAnalysis.vocabulary} */}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <>{children}</>,
+                        }}
+                      >
+                        {feedback.detailedAnalysis.vocabulary}
+                      </ReactMarkdown>
                     </p>
                   </div>
                 )}
@@ -112,7 +130,15 @@ export function FeedbackModal({
                       Construcción
                     </h4>
                     <p className='text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap'>
-                      {feedback.detailedAnalysis.construction}
+                      {/* {feedback.detailedAnalysis.construction} */}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <>{children}</>,
+                        }}
+                      >
+                        {feedback.detailedAnalysis.construction}
+                      </ReactMarkdown>
                     </p>
                   </div>
                 )}
@@ -136,14 +162,14 @@ export function FeedbackModal({
                       (suggestion, idx) => (
                         <li
                           key={idx}
-                          className='flex gap-3 text-sm text-gray-700 dark:text-gray-300'
+                          className='flex gap-3 text-sm  dark:text-gray-300'
                         >
                           <span className='flex-shrink-0 w-6 h-6 bg-amber-200 dark:bg-amber-800 rounded-full flex items-center justify-center text-amber-900 dark:text-amber-200 font-semibold text-xs'>
                             {idx + 1}
                           </span>
-                          <span className='whitespace-pre-wrap'>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {suggestion}
-                          </span>
+                          </ReactMarkdown>
                         </li>
                       )
                     )}
@@ -179,7 +205,9 @@ export function FeedbackModal({
                     <span className='flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center text-green-700 dark:text-green-300 font-semibold text-xs'>
                       {idx + 1}
                     </span>
-                    <span>{suggestion}</span>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {suggestion}
+                    </ReactMarkdown>
                   </li>
                 ))}
               </ul>

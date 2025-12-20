@@ -1,7 +1,7 @@
 import { getAllEpisodes } from '@/lib/actions/get-all-episodes';
 import { getAllUserProgress } from '@/lib/actions/get-all-user-progress';
 import { EpisodeCard } from '@/components/home/episode-card';
-import { EpisodeWithProgress } from '@/lib/types';
+import { EpisodeWithProgress, UserProgress } from '@/lib/types';
 import { CONSTANTS } from '@/constants';
 
 export default async function Home() {
@@ -16,7 +16,7 @@ export default async function Home() {
 
   // Convertimos el array de progresos en un Objeto/Mapa donde la CLAVE es el ID del episodio.
   // Esto permite buscar en tiempo O(1) en lugar de recorrer el array una y otra vez.
-  const progressMap = new Map();
+  const progressMap: Map<string, UserProgress> = new Map();
 
   userProgressList.forEach((prog) => {
     // Asumiendo que episodeId viene como ObjectId o String
@@ -53,6 +53,7 @@ export default async function Home() {
       title: ep.title,
       imageUrl: ep.imageUrl,
       messageCount: ep.messageCount,
+      progressId: progress?.id,
       status,
       summaryText: ep.summaryText,
       percentCompleted: percent,
