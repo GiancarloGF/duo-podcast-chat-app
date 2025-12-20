@@ -1,74 +1,65 @@
-import Link from 'next/link';
-import { getEpisodeBasicInfo } from '@/lib/episode-loader';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { getAllEpisodes } from '@/lib/db/get-all-episodes';
-import { getAllChats } from '@/lib/db/get-all-chats';
-import { InitializeChatButton } from '@/components/home/initialize-chat-button';
+import { getAllEpisodes } from '@/lib/actions/get-all-episodes';
+import { getAllUserProgress } from '@/lib/actions/get-all-user-progress';
 import { EpisodeCard } from '@/components/home/episode-card';
+import { EpisodeWithProgress } from '@/lib/types';
+import { CONSTANTS } from '@/constants';
 
 export default async function Home() {
-  const episodes = await getAllEpisodes();
-  console.log("Episodios cargados", episodes);
-  const chats = await getAllChats();
-  console.log("Chats cargados", chats);
-  // const { episodes, chats, loadData, initializeChat, isLoading } =
-  //   useChatStore();
-  // const router = useRouter();
+  // Strategy: "Fetch Paralelo + Map Lookup"
+  const [episodes, userProgressList] = await Promise.all([
+    getAllEpisodes(),
+    getAllUserProgress(CONSTANTS.FAKE_USER_ID),
+  ]);
 
-  // useEffect(() => {
-  //   loadData();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []); // Only run once on mount
+  console.log('Episodios cargados', episodes.length);
+  console.log('Progreso cargado', userProgressList.length);
 
-  // const handleStartChat = async (episodeId: string) => {
-  //   console.log('handleStartChat:episodeId', episodeId);
-  //   // const chat = await initializeChat(episodeId);
-  //   // if (chat) {
-  //   //   router.push(`/chat/${chat._id || chat.id}`);
-  //   // }
-  // };
+  // Convertimos el array de progresos en un Objeto/Mapa donde la CLAVE es el ID del episodio.
+  // Esto permite buscar en tiempo O(1) en lugar de recorrer el array una y otra vez.
+  const progressMap = new Map();
 
-  // Skeleton loader component
-  // const EpisodeCardSkeleton = () => (
-  //   <Card className='border-0 bg-white dark:bg-slate-800 pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-lg'>
-  //     {/* Image skeleton */}
-  //     <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse' />
+  userProgressList.forEach((prog) => {
+    // Asumiendo que episodeId viene como ObjectId o String
+    progressMap.set(prog.episodeId.toString(), prog);
+  });
 
-  //     {/* Header skeleton */}
-  //     <CardHeader className='pt-3'>
-  //       <div className='h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2' />
-  //       <div className='h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
-  //     </CardHeader>
+  const enrichedEpisodes = episodes.map((ep) => {
+    const epId = ep.id;
+    const progress = progressMap.get(epId); // Búsqueda instantánea
 
-  //     {/* Content skeleton */}
-  //     <CardContent className='space-y-4 grow flex flex-col'>
-  //       {/* Description skeleton */}
-  //       <div className='space-y-2'>
-  //         <div className='h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
-  //         <div className='h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
-  //         <div className='h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
-  //       </div>
+    let status = 'new';
+    let percent = 0;
+    let lastActive = null;
+    let currentIndex = 0;
 
-  //       {/* Tags skeleton */}
-  //       <div className='flex flex-wrap gap-2'>
-  //         <div className='h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse' />
-  //         <div className='h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse' />
-  //       </div>
+    if (progress) {
+      status = progress.status; // 'started' o 'completed'
+      currentIndex = progress.currentMessageIndex;
+      lastActive = progress.lastActiveAt;
 
-  //       {/* Button skeleton */}
-  //       <div className='mt-auto pt-4'>
-  //         <div className='h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse' />
-  //       </div>
-  //     </CardContent>
-  //   </Card>
-  // );
+      // Cálculo seguro del porcentaje
+      if (ep.messageCount > 0) {
+        percent = Math.round(
+          (progress.currentMessageIndex / ep.messageCount) * 100
+        );
+      }
+      // Capar al 100% por si acaso
+      percent = Math.min(percent, 100);
+    }
+
+    return {
+      id: epId,
+      slug: ep.slug,
+      title: ep.title,
+      imageUrl: ep.imageUrl,
+      messageCount: ep.messageCount,
+      status,
+      summaryText: ep.summaryText,
+      percentCompleted: percent,
+      lastActiveAt: lastActive,
+      currentMessageIndex: currentIndex,
+    } as EpisodeWithProgress;
+  });
 
   return (
     <main className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
@@ -91,55 +82,18 @@ export default async function Home() {
         {/* Episodes Sections */}
         <div className='space-y-8'>
           {/* Helper function to render episode card */}
-          {(() => {
-            const renderEpisodeCard = (episode: (typeof episodes)[0]) => {
-              const chat = chats.find((c) => c.episodeId === episode.id);
-              return <EpisodeCard episode={episode} chat={chat} key={episode.id} />;
-            };
-
-            // Separate episodes into two groups
-            const episodesInProgress = episodes.filter((episode) => {
-              const chat = chats.find((c) => c.episodeId === episode.id);
-              return !!chat && chat.status !== 'completed';
-            });
-
-            const availableEpisodes = episodes.filter((episode) => {
-              const chat = chats.find((c) => c.episodeId === episode.id);
-              return !chat;
-            });
-
-            return (
-              <>
-                {/* En Progreso Section */}
-                {episodesInProgress.length > 0 && (
-                  <div>
-                    <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>
-                      En Progreso
-                    </h2>
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                      {episodesInProgress.map((episode) =>
-                        renderEpisodeCard(episode)
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Disponibles Section */}
-                {availableEpisodes.length > 0 && (
-                  <div>
-                    <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>
-                      Disponibles
-                    </h2>
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                      {availableEpisodes.map((episode) =>
-                        renderEpisodeCard(episode)
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            );
-          })()}
+          {enrichedEpisodes.length > 0 && (
+            <div>
+              <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>
+                Episodios
+              </h2>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {enrichedEpisodes.map((episode) => (
+                  <EpisodeCard episode={episode} key={episode.id} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

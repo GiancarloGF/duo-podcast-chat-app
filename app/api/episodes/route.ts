@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db/conection';
-import { getEpisodeModel } from '@/models/Episode';
+import { getEpisodeModel } from '@/lib/db/models/Episode';
 
 export async function GET() {
   try {

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const KeyPointSchema = new Schema({
   type: String,
@@ -29,7 +29,7 @@ const CharacterSchema = new Schema({
 
 const EpisodeSchema = new Schema(
   {
-    id: { type: String, required: true, unique: true }, // 'ep-1'
+    id: { type: String, required: true, unique: true },
     number: Number,
     title: String,
     url: String,

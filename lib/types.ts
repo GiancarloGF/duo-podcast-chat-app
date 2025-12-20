@@ -10,12 +10,11 @@ export interface KeyPoint {
   definition_en: string;
 }
 
-export interface Message {
+export interface EpisodeMessage {
   id: string;
   sender: string;
   senderType: SenderType | string;
   language: MessageLanguage;
-  requiresTranslation: boolean;
   content: string; // Was contentText
   contentHtml: string;
   contentMarkdown: string;
@@ -30,7 +29,8 @@ export interface Character {
 
 export interface Episode {
   id: string;
-  number?: number;
+  slug: string;
+  number: number;
   title: string;
   url?: string;
   imageUrl: string;
@@ -39,33 +39,46 @@ export interface Episode {
   languageLevel: string;
   themes: string[];
   characters: Character[];
-  messages: Message[];
-  messageCount?: number;
+  messages: EpisodeMessage[];
+  messageCount: number;
 }
 
+export interface Interaction {
+  messageId: string;
+  userInput: string;
+  translationFeedback: TranslationFeedback | undefined;
+  isCorrect: boolean;
+  timestamp: Date;
+}
+
+// UI Type for rendering messages (Interleaved list)
 export interface ChatMessage {
-  id: string; // Unique ID for this specific chat message (e.g. generated or episode msg id)
-  episodeMessageId?: string; // If it relates to an episode message
+  id: string;
+  episodeMessageId?: string;
   sender: string;
-  message: string;
+  message?: EpisodeMessage;
+  content: string;
   isUserMessage: boolean;
   translationFeedback?: TranslationFeedback;
-  timestamp?: number | string; // Date from DB
+  timestamp: number | string;
 }
 
-export interface Chat {
-  _id?: string;
-  id?: string; // Add this for compatibility with frontend code that might check .id
-  episodeId: string;
+export interface UserProgress {
+  id?: string;
   userId: string;
-  status: 'idle' | 'initialized' | 'completed';
-  progress: number;
-  messages: ChatMessage[];
-  createdAt?: string;
-  updatedAt?: string;
+  episodeId: string;
+  currentMessageIndex: number;
+  interactions: Interaction[];
+  status: 'started' | 'completed';
+  lastActiveAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface TranslationFeedback {
+  userTranslation: string;
+  officialTranslation: string;
+  originalContent: string;
   analysis: string;
   score: number;
   suggestions: string[];
@@ -104,4 +117,21 @@ export interface UserStats {
   totalSkipped: number;
   completedEpisodes: number;
   averageScore: number;
+}
+
+export interface EpisodeWithProgress {
+  // Datos del Episodio
+  id: string;
+  slug: string;
+  title: string;
+  imageUrl: string;
+  messageCount: number;
+  summaryText: string;
+
+  // Datos del Progreso (Calculados)
+  progressId?: string;
+  status: 'new' | 'started' | 'completed';
+  percentCompleted: number; // 0 a 100
+  lastActiveAt: Date | null;
+  currentMessageIndex: number;
 }

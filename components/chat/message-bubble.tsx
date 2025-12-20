@@ -1,6 +1,6 @@
 'use client';
 
-import type { Message } from '@/lib/types';
+import type { ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { Languages } from 'lucide-react';
 
 interface MessageBubbleProps {
-  message: Message;
+  message: ChatMessage;
   showFeedbackButton?: boolean;
   onFeedbackClick?: (messageId: string) => void;
 }
@@ -38,26 +38,28 @@ export function MessageBubble({
   onFeedbackClick,
 }: MessageBubbleProps) {
   const [isTranslated, setIsTranslated] = useState(false);
-  const isUserMessage = message.senderType === 'user';
-  const isHostMessage = message.senderType === 'host';
-  const isProtagonistMessage = message.senderType === 'protagonist';
+  const isUserMessage = message.isUserMessage;
+  const isHostMessage = message?.message?.senderType === 'host';
+  const isProtagonistMessage = message?.message?.senderType === 'protagonist';
 
   // Get the first letter of the sender's name for the avatar
-  const avatarInitial = (message.sender || '?').charAt(0).toUpperCase();
+  const avatarInitial = (message?.message?.sender || '?')
+    .charAt(0)
+    .toUpperCase();
 
   // Consistent random-ish color for protagonist background
   const protagonistBgColor = useMemo(() => {
-    if (isProtagonistMessage && message.sender)
-      return stringToPastelColor(message.sender);
+    if (isProtagonistMessage && message?.message?.sender)
+      return stringToPastelColor(message.message.sender);
     return undefined;
-  }, [message.sender, isProtagonistMessage]);
+  }, [message?.message?.sender, isProtagonistMessage]);
 
   // Consistent random-ish color for protagonist avatar
   const protagonistAvatarColor = useMemo(() => {
-    if (isProtagonistMessage && message.sender)
-      return stringToDarkColor(message.sender);
+    if (isProtagonistMessage && message?.message?.sender)
+      return stringToDarkColor(message.message.sender);
     return undefined;
-  }, [message.sender, isProtagonistMessage]);
+  }, [message?.message?.sender, isProtagonistMessage]);
 
   // Avatar colors based on sender type
   const avatarClasses = cn(
@@ -81,13 +83,13 @@ export function MessageBubble({
     isUserMessage && 'flex-row-reverse justify-start ml-auto'
   );
 
-  const hasTranslation = !!message.officialTranslation;
+  const hasTranslation = !!message?.message?.officialTranslation;
 
   return (
     <div
       className={containerClasses}
       role='article'
-      aria-label={`Mensaje de ${message.sender || 'Desconocido'}`}
+      aria-label={`Mensaje de ${message?.message?.sender || 'Desconocido'}`}
     >
       {/* Avatar */}
       <div
@@ -147,14 +149,17 @@ export function MessageBubble({
           <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {isTranslated
-                ? message.officialTranslation || ''
-                : message.contentMarkdown || message.content}
+                ? message?.message?.officialTranslation || ''
+                : message?.message?.contentMarkdown ||
+                  message?.message?.content ||
+                  message.translationFeedback?.userTranslation ||
+                  ''}
             </ReactMarkdown>
           </div>
 
           {/* Key Points Display - NOW INSIDE BUBBLE */}
-          {message.keyPoints &&
-            message.keyPoints.length > 0 &&
+          {message?.message?.keyPoints &&
+            message?.message?.keyPoints?.length > 0 &&
             !isTranslated && (
               <div className='text-xs text-gray-600 dark:text-gray-300 mt-3 pt-3 border-t border-gray-400/20 dark:border-gray-500/30'>
                 <details className='cursor-pointer group/details'>
@@ -162,7 +167,7 @@ export function MessageBubble({
                     Puntos clave
                   </summary>
                   <div className='mt-2 space-y-2'>
-                    {message.keyPoints.map((point, idx) => (
+                    {message.message.keyPoints.map((point, idx) => (
                       <div
                         key={idx}
                         className='text-xs border-l-2 border-blue-400/50 pl-2'

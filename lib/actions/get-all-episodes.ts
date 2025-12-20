@@ -1,41 +1,47 @@
-import { getChatModel } from '@/models/Chat';
-import dbConnect from './conection';
-import { getEpisodeModel } from '@/models/Episode';
-import { Episode } from '../types';
+import dbConnect from '@/lib/db/conection';
+import { getEpisodeModel } from '@/lib/db/models/Episode';
+import { Episode } from '@/lib/types';
 
 export async function getAllEpisodes(): Promise<Episode[]> {
   try {
     await dbConnect();
     const Episode = getEpisodeModel();
-    const episodes = await Episode.find({})
-      .select('id number title imageUrl summaryText themes characters messages')
-      .sort({ createdAt: -1 })
-      .lean();
+    const episodes = await Episode.aggregate([
+      {
+        $project: {
+          _id: 1,
+          slug: 1,
+          number: 1,
+          title: 1,
+          imageUrl: 1,
+          summaryText: 1,
+          languageLevel: 1,
+          themes: 1,
+          messageCount: { $size: { $ifNull: ['$messages', []] } },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ]);
 
     const sanitizedEpisodes = episodes.map(
       (episode) =>
         ({
           id: episode._id.toString(),
+          slug: episode.slug,
           number: episode.number,
           title: episode.title,
           imageUrl: episode.imageUrl,
           summaryText: episode.summaryText,
+          summaryHtml: '',
+          languageLevel: episode.languageLevel,
           themes: episode.themes,
-          characters: episode.characters,
-          messages: episode.messages,
+          characters: [],
+          messages: [], // No traemos messages desde la DB
+          messageCount: episode.messageCount ?? 0,
         } as Episode)
     );
 
-    const episodesWithCount = sanitizedEpisodes.map(
-      (ep: any) =>
-        ({
-          ...ep,
-          messageCount: ep.messages?.length || 0,
-          messages: [], // Don't send full messages array for list view
-        } as Episode)
-    );
-
-    return episodesWithCount;
+    return sanitizedEpisodes;
 
     // return {
     //     isSuccess: true,

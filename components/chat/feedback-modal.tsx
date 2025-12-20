@@ -1,23 +1,23 @@
 'use client';
 
-import type { UserTranslation } from '@/lib/types';
+import type { TranslationFeedback, UserTranslation } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
 interface FeedbackModalProps {
-  translation: UserTranslation;
+  feedback: TranslationFeedback;
   onClose: () => void;
   isOpen: boolean;
 }
 
 export function FeedbackModal({
-  translation,
+  feedback,
   onClose,
   isOpen,
 }: FeedbackModalProps) {
-  if (!isOpen || !translation.feedback) return null;
+  if (!isOpen || !feedback) return null;
 
-  const feedback = translation.feedback;
+  console.log('Feedback:', feedback);
 
   return (
     <div className='fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4'>
@@ -55,7 +55,7 @@ export function FeedbackModal({
               Traducción Oficial
             </h3>
             <div className='bg-gray-100 dark:bg-slate-800 p-3 rounded-lg text-gray-900 dark:text-gray-100 text-sm'>
-              {translation.officialTranslation}
+              {feedback.officialTranslation}
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export function FeedbackModal({
               Tu Traducción
             </h3>
             <div className='bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg text-gray-900 dark:text-gray-100 text-sm'>
-              {translation.userTranslation}
+              {feedback.userTranslation}
             </div>
           </div>
 
