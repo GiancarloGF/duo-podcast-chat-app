@@ -13,6 +13,176 @@ interface MessageBubbleProps {
   onFeedbackClick?: (messageId: string) => void;
 }
 
+// Token type for text tokenization
+type Token = {
+  type: 'word' | 'non-word';
+  text: string;
+  sentence?: string; // The sentence containing this token (only for word tokens)
+};
+
+// Sentence boundary information
+type SentenceBoundary = {
+  start: number;
+  end: number;
+  text: string;
+};
+
+// Function to find sentence boundaries in text
+function findSentenceBoundaries(text: string): SentenceBoundary[] {
+  const boundaries: SentenceBoundary[] = [];
+  // Match sentences ending with . ! ? followed by space, newline, or end of string
+  // Also handle cases where punctuation might be followed by quotes or other punctuation
+  const sentenceRegex = /[^.!?\n]*[.!?]+[\s"')]*/g;
+  let match;
+  let lastEnd = 0;
+
+  while ((match = sentenceRegex.exec(text)) !== null) {
+    const start = match.index;
+    const end = match.index + match[0].length;
+    const sentenceText = text.slice(start, end).trim();
+
+    if (sentenceText.length > 0) {
+      boundaries.push({
+        start: start,
+        end: end,
+        text: sentenceText,
+      });
+    }
+    lastEnd = end;
+  }
+
+  // Handle remaining text that doesn't end with sentence punctuation
+  if (lastEnd < text.length) {
+    const remaining = text.slice(lastEnd).trim();
+    if (remaining.length > 0) {
+      boundaries.push({
+        start: lastEnd,
+        end: text.length,
+        text: remaining,
+      });
+    }
+  }
+
+  // If no sentences found (e.g., text without punctuation), return the whole text
+  if (boundaries.length === 0) {
+    return [
+      {
+        start: 0,
+        end: text.length,
+        text: text.trim(),
+      },
+    ];
+  }
+
+  return boundaries;
+}
+
+// Function to find which sentence a word belongs to
+function findSentenceForWord(
+  wordIndex: number,
+  boundaries: SentenceBoundary[]
+): string {
+  for (const boundary of boundaries) {
+    if (wordIndex >= boundary.start && wordIndex < boundary.end) {
+      return boundary.text;
+    }
+  }
+  // Fallback: return the first sentence or empty string
+  return boundaries[0]?.text || '';
+}
+
+// Function to tokenize text into words and non-words with sentence information
+function tokenizeText(text: string): Token[] {
+  const tokens: Token[] = [];
+  const wordRegex = /\p{L}+/gu; // Unicode letters (including accented characters)
+  const sentenceBoundaries = findSentenceBoundaries(text);
+  let lastIndex = 0;
+
+  let match;
+  while ((match = wordRegex.exec(text)) !== null) {
+    // Add non-word token before the word (if any)
+    if (match.index > lastIndex) {
+      tokens.push({
+        type: 'non-word',
+        text: text.slice(lastIndex, match.index),
+      });
+    }
+
+    // Find the sentence containing this word
+    const sentence = findSentenceForWord(match.index, sentenceBoundaries);
+
+    // Add word token with sentence information
+    tokens.push({
+      type: 'word',
+      text: match[0],
+      sentence: sentence,
+    });
+
+    lastIndex = wordRegex.lastIndex;
+  }
+
+  // Add remaining non-word token at the end (if any)
+  if (lastIndex < text.length) {
+    tokens.push({
+      type: 'non-word',
+      text: text.slice(lastIndex),
+    });
+  }
+
+  return tokens;
+}
+
+// Clickable word component
+function ClickableWord({
+  word,
+  sentence,
+}: {
+  word: string;
+  sentence?: string;
+}) {
+  const handleClick = () => {
+    console.log({ word, sentence: sentence || '' });
+  };
+
+  return (
+    <span
+      onClick={handleClick}
+      className='cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
+      role='button'
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+    >
+      {word}
+    </span>
+  );
+}
+
+// Clickable text renderer component
+function ClickableTextRenderer({ text }: { text: string }) {
+  const tokens = useMemo(() => tokenizeText(text), [text]);
+
+  return (
+    <>
+      {tokens.map((token, index) =>
+        token.type === 'word' ? (
+          <ClickableWord
+            key={index}
+            word={token.text}
+            sentence={token.sentence}
+          />
+        ) : (
+          <span key={index}>{token.text}</span>
+        )
+      )}
+    </>
+  );
+}
+
 // Function to generate consistent pastel colors from a string
 function stringToPastelColor(str: string) {
   let hash = 0;
@@ -147,14 +317,25 @@ export function MessageBubble({
 
           {/* Render Markdown Content */}
           <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {isTranslated
-                ? message?.message?.officialTranslation || ''
-                : message?.message?.contentMarkdown ||
+            {isProtagonistMessage && !isTranslated ? (
+              <ClickableTextRenderer
+                text={
+                  message?.message?.contentMarkdown ||
                   message?.message?.content ||
                   message.translationFeedback?.userTranslation ||
-                  ''}
-            </ReactMarkdown>
+                  ''
+                }
+              />
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {isTranslated
+                  ? message?.message?.officialTranslation || ''
+                  : message?.message?.contentMarkdown ||
+                    message?.message?.content ||
+                    message.translationFeedback?.userTranslation ||
+                    ''}
+              </ReactMarkdown>
+            )}
           </div>
 
           {/* Key Points Display - NOW INSIDE BUBBLE */}
