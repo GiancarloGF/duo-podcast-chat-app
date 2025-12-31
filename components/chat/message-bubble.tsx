@@ -7,6 +7,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Languages } from 'lucide-react';
 
+import { WordDefinitionModal } from './word-definition-modal';
+
 interface MessageBubbleProps {
   message: ChatMessage;
   showFeedbackButton?: boolean;
@@ -132,16 +134,18 @@ function tokenizeText(text: string): Token[] {
   return tokens;
 }
 
-// Clickable word component
 function ClickableWord({
   word,
   sentence,
+  onWordClick,
 }: {
   word: string;
   sentence?: string;
+  onWordClick: (word: string, sentence: string) => void;
 }) {
-  const handleClick = () => {
-    console.log({ word, sentence: sentence || '' });
+  const handleClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    onWordClick(word, sentence || '');
   };
 
   return (
@@ -153,7 +157,7 @@ function ClickableWord({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          handleClick(e);
         }
       }}
     >
@@ -163,7 +167,13 @@ function ClickableWord({
 }
 
 // Clickable text renderer component
-function ClickableTextRenderer({ text }: { text: string }) {
+function ClickableTextRenderer({
+  text,
+  onWordClick,
+}: {
+  text: string;
+  onWordClick: (word: string, sentence: string) => void;
+}) {
   const tokens = useMemo(() => tokenizeText(text), [text]);
 
   return (
@@ -174,6 +184,7 @@ function ClickableTextRenderer({ text }: { text: string }) {
             key={index}
             word={token.text}
             sentence={token.sentence}
+            onWordClick={onWordClick}
           />
         ) : (
           <span key={index}>{token.text}</span>
@@ -208,6 +219,11 @@ export function MessageBubble({
   onFeedbackClick,
 }: MessageBubbleProps) {
   const [isTranslated, setIsTranslated] = useState(false);
+  const [selectedWord, setSelectedWord] = useState<{
+    word: string;
+    sentence: string;
+  } | null>(null);
+
   const isUserMessage = message.isUserMessage;
   const isHostMessage = message?.message?.senderType === 'host';
   const isProtagonistMessage = message?.message?.senderType === 'protagonist';
@@ -325,6 +341,9 @@ export function MessageBubble({
                   message.translationFeedback?.userTranslation ||
                   ''
                 }
+                onWordClick={(word, sentence) =>
+                  setSelectedWord({ word, sentence })
+                }
               />
             ) : (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -391,6 +410,14 @@ export function MessageBubble({
           )}
         </div>
       </div>
+      {selectedWord && (
+        <WordDefinitionModal
+          isOpen={!!selectedWord}
+          onClose={() => setSelectedWord(null)}
+          word={selectedWord.word}
+          sentence={selectedWord.sentence}
+        />
+      )}
     </div>
   );
 }

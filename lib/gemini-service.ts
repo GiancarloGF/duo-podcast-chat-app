@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 import { feedbackSchema, type TranslationFeedback } from './feedback-schema';
 
 export class GeminiService {
@@ -68,5 +69,36 @@ INSTRUCCIONES CLAVE:
 
 Usa Markdown para resaltar palabras clave (**palabra**).
 Tu respuesta debe seguir estrictamente el esquema JSON proporcionado.`;
+  }
+
+  static async getWordDefinition(
+    word: string,
+    sentence: string
+  ): Promise<{ meaning: string; example: string }> {
+    const prompt = `Define the word "${word}" based on its usage in this sentence: "${sentence}".
+Provide:
+1. "meaning": A concise definition fitting this specific context.
+2. "example": A short usage example of the word in a similar context.
+Output JSON format.`;
+
+    const schema = z.object({
+      meaning: z.string(),
+      example: z.string(),
+    });
+
+    const response = await this.client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseJsonSchema: zodToJsonSchema(schema),
+      },
+    });
+
+    if (!response.text) {
+      throw new Error('No response from Gemini for definition');
+    }
+
+    return schema.parse(JSON.parse(response.text));
   }
 }
