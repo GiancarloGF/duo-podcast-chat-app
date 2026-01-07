@@ -101,4 +101,58 @@ Output JSON format.`;
 
     return schema.parse(JSON.parse(response.text));
   }
+  static async getDetailedWordDefinition(
+    word: string,
+    sentence: string
+  ): Promise<{
+    definedWord: string;
+    partOfSpeech: string;
+    synonyms: string[];
+    typeOf: string;
+    definition: string;
+    otherExamples: string[];
+    summary: string;
+  }> {
+    const schema = z.object({
+      definedWord: z
+        .string()
+        .describe('The word or phrasal verb being defined'),
+      partOfSpeech: z.string(),
+      synonyms: z.array(z.string()),
+      typeOf: z.string().describe('Category or classification of the word'),
+      definition: z.string().describe('Precise definition in context'),
+      otherExamples: z
+        .array(z.string())
+        .describe('2-3 other sentences using this word/phrase'),
+      summary: z
+        .string()
+        .describe('Explanation of usage in this specific context'),
+    });
+
+    const prompt = `Analyze the word "${word}" in the context of the sentence: "${sentence}".
+    
+    Tasks:
+    1. Identify if "${word}" is part of a phrasal verb or compound word in this specific sentence (e.g. if word is "get" and sentence is "I get up early", the target is "get up").
+    2. Define that target word/phrase specifically for this context.
+    3. Provide synonyms, part of speech, and a "typeOf" classification.
+    4. Provide 2-3 other example sentences.
+    5. Write a summary explaining why this specific definition applies here.
+    
+    Return pure JSON matching the schema.`;
+
+    const response = await this.client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseJsonSchema: zodToJsonSchema(schema),
+      },
+    });
+
+    if (!response.text) {
+      throw new Error('No response from Gemini for detailed definition');
+    }
+
+    return schema.parse(JSON.parse(response.text));
+  }
 }

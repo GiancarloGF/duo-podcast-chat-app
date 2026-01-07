@@ -8,8 +8,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Volume2, Loader2, BookmarkPlus, Check } from 'lucide-react';
+import { Loader2, BookmarkPlus, Check } from 'lucide-react';
 import { saveWord } from '@/lib/actions/save-word';
+import { getWordDefinition } from '@/lib/actions/get-word-definition';
 import { toast } from 'sonner';
 
 interface WordDefinitionModalProps {
@@ -19,29 +20,21 @@ interface WordDefinitionModalProps {
   sentence: string;
 }
 
-interface DictionaryEntry {
-  word: string;
-  phonetic?: string;
-  phonetics: Array<{
-    text?: string;
-    audio?: string;
-  }>;
-  meanings: Array<{
-    partOfSpeech: string;
-    definitions: Array<{
-      definition: string;
-      example?: string;
-    }>;
-  }>;
-}
-
 export function WordDefinitionModal({
   isOpen,
   onClose,
   word,
   sentence,
 }: WordDefinitionModalProps) {
-  const [definition, setDefinition] = useState<DictionaryEntry | null>(null);
+  const [definitionData, setDefinitionData] = useState<{
+    definedWord: string;
+    partOfSpeech: string;
+    synonyms: string[];
+    typeOf: string;
+    definition: string;
+    otherExamples: string[];
+    summary: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -50,7 +43,7 @@ export function WordDefinitionModal({
   useEffect(() => {
     if (isOpen && word) {
       fetchDefinition();
-      setIsSaved(false); // Reset saved state on new word
+      setIsSaved(false);
     }
   }, [isOpen, word]);
 
@@ -58,38 +51,32 @@ export function WordDefinitionModal({
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
-          word
-        )}`
-      );
-      if (!response.ok) {
-        throw new Error('Definition not found');
+      const result = await getWordDefinition(word, sentence);
+      if (result.success && result.data) {
+        setDefinitionData(result.data);
+      } else {
+        throw new Error(result.error || 'Failed to fetch definition');
       }
-      const data = await response.json();
-      setDefinition(data[0]);
     } catch (err) {
       setError('Could not find definition for this word.');
-      setDefinition(null);
+      setDefinitionData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const getAccentLabel = (url: string) => {
-    if (url.includes('-uk.mp3')) return 'UK';
-    if (url.includes('-us.mp3')) return 'US';
-    if (url.includes('-au.mp3')) return 'AU';
-    return 'General';
-  };
-
   const handleSave = async () => {
+    if (!definitionData) return;
+
     setIsSaving(true);
     try {
-      const result = await saveWord(word, sentence);
+      // Save the DETECTED word (e.g., "get up") instead of the clicked word ("get")
+      const result = await saveWord(definitionData.definedWord, sentence);
       if (result.success) {
         setIsSaved(true);
-        toast.success('Word saved successfully with AI context!');
+        toast.success(
+          `Saved "${definitionData.definedWord}" to your collection!`
+        );
       } else {
         toast.error('Failed to save word.');
       }
@@ -103,104 +90,124 @@ export function WordDefinitionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className='sm:max-w-md max-h-[80vh] overflow-y-auto'>
+      <DialogContent className='sm:max-w-lg max-h-[85vh] overflow-y-auto'>
         <DialogHeader>
-          <div className='flex flex-col gap-2'>
-            <div className='flex items-center justify-between'>
-              <DialogTitle className='text-2xl font-bold capitalize'>
-                {word}
-              </DialogTitle>
-            </div>
-
-            {/* Pronunciations List */}
-            {definition?.phonetics.filter((p) => p.audio).length ? (
-              <div className='flex flex-wrap gap-2 mt-1'>
-                {definition.phonetics
-                  .filter((p) => p.audio && p.audio.trim() !== '')
-                  .map((phonetic, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() =>
-                        new Audio(phonetic.audio).play().catch(console.error)
-                      }
-                      className='flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm'
-                      title={`Listen to ${getAccentLabel(
-                        phonetic.audio!
-                      )} pronunciation`}
-                    >
-                      <Volume2 className='w-4 h-4 text-blue-500' />
-                      <span className='font-medium text-xs text-gray-600 dark:text-gray-300'>
-                        {getAccentLabel(phonetic.audio!)}
-                      </span>
-                      {phonetic.text && (
-                        <span className='text-xs text-gray-500 font-mono border-l border-gray-300 dark:border-gray-600 pl-2 ml-1'>
-                          {phonetic.text}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-              </div>
-            ) : definition?.phonetic ? (
-              <DialogDescription className='text-base font-mono'>
-                {definition.phonetic}
-              </DialogDescription>
-            ) : null}
+          <div className='flex items-baseline justify-between'>
+            <DialogTitle className='text-3xl font-bold text-primary capitalize'>
+              {definitionData?.definedWord || word}
+            </DialogTitle>
+            {definitionData?.partOfSpeech && (
+              <span className='px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-full italic'>
+                {definitionData.partOfSpeech}
+              </span>
+            )}
           </div>
+          {definitionData?.typeOf && (
+            <DialogDescription className='text-sm text-muted-foreground mt-1'>
+              Type: {definitionData.typeOf}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
-        <div className='space-y-4 my-2'>
+        <div className='mt-4 space-y-6'>
           {loading ? (
-            <div className='flex justify-center py-8'>
-              <Loader2 className='w-8 h-8 animate-spin text-gray-400' />
+            <div className='flex flex-col items-center justify-center py-12 space-y-4'>
+              <Loader2 className='w-10 h-10 animate-spin text-primary' />
+              <p className='text-sm text-muted-foreground animate-pulse'>
+                Analyzing context with Gemini AI...
+              </p>
             </div>
           ) : error ? (
-            <div className='text-center py-6 text-gray-500'>{error}</div>
-          ) : (
-            <div className='space-y-4'>
-              {definition?.meanings.map((meaning, index) => (
-                <div key={index} className='space-y-2'>
-                  <div className='font-semibold italic text-gray-600 dark:text-gray-400'>
-                    {meaning.partOfSpeech}
-                  </div>
-                  <ul className='list-disc pl-5 space-y-1 text-sm'>
-                    {meaning.definitions.slice(0, 3).map((def, idx) => (
-                      <li key={idx}>
-                        <span className='text-gray-800 dark:text-gray-200'>
-                          {def.definition}
+            <div className='p-4 text-center text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg'>
+              {error}
+            </div>
+          ) : definitionData ? (
+            <>
+              {/* Definition Section */}
+              <div className='space-y-2'>
+                <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
+                  Definition
+                </h4>
+                <p className='text-lg leading-relaxed font-medium text-foreground'>
+                  {definitionData.definition}
+                </p>
+              </div>
+
+              {/* Summary/Context Section */}
+              <div className='space-y-2'>
+                <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
+                  Context Analysis
+                </h4>
+                <div className='bg-muted/50 p-3 rounded-lg border border-border/50 text-sm text-muted-foreground leading-relaxed'>
+                  {definitionData.summary}
+                </div>
+              </div>
+
+              {/* Examples Section */}
+              {definitionData.otherExamples?.length > 0 && (
+                <div className='space-y-2'>
+                  <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
+                    Usage Examples
+                  </h4>
+                  <ul className='space-y-2'>
+                    {definitionData.otherExamples.map((ex, idx) => (
+                      <li key={idx} className='flex gap-2 text-sm group'>
+                        <span className='text-primary mt-1'>•</span>
+                        <span className='text-muted-foreground group-hover:text-foreground transition-colors'>
+                          {ex}
                         </span>
-                        {def.example && (
-                          <div className='text-gray-500 dark:text-gray-500 text-xs mt-0.5 italic'>
-                            "{def.example}"
-                          </div>
-                        )}
                       </li>
                     ))}
                   </ul>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+
+              {/* Synonyms Section */}
+              {definitionData.synonyms?.length > 0 && (
+                <div className='space-y-2'>
+                  <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
+                    Synonyms
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    {definitionData.synonyms.map((syn, idx) => (
+                      <span
+                        key={idx}
+                        className='px-2.5 py-1 text-xs rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors cursor-default'
+                      >
+                        {syn}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
         </div>
 
-        <div className='flex justify-end pt-2 border-t mt-2'>
+        {/* Footer Actions */}
+        <div className='flex justify-end pt-4 border-t mt-6'>
           <button
             onClick={handleSave}
-            disabled={isSaving || isSaved || !!error}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white transition-colors ${
-              isSaved
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-blue-600 hover:bg-blue-700'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled={isSaving || isSaved || loading || !definitionData}
+            className={`
+              relative flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-white shadow-sm transition-all
+              ${
+                isSaved
+                  ? 'bg-green-600 hover:bg-green-700 ring-green-200'
+                  : 'bg-primary hover:bg-primary/90 hover:shadow-md'
+              }
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+            `}
           >
             {isSaving ? (
               <>
                 <Loader2 className='w-4 h-4 animate-spin' />
-                <span>AI Generating...</span>
+                <span>Saving...</span>
               </>
             ) : isSaved ? (
               <>
                 <Check className='w-4 h-4' />
-                <span>Saved</span>
+                <span>Saved to Layout</span>
               </>
             ) : (
               <>
