@@ -61,6 +61,7 @@ export interface ChatMessage {
   isUserMessage: boolean;
   translationFeedback?: TranslationFeedback;
   timestamp: number | string;
+  isValidating?: boolean;
 }
 
 export interface UserProgress {

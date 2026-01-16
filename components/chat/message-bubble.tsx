@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Languages } from 'lucide-react';
+import { Languages, Sparkles } from 'lucide-react';
 
 import { WordDefinitionModal } from './word-definition-modal';
 
@@ -339,6 +339,7 @@ export function MessageBubble({
                   message?.message?.contentMarkdown ||
                   message?.message?.content ||
                   message.translationFeedback?.userTranslation ||
+                  message.content ||
                   ''
                 }
                 onWordClick={(word, sentence) =>
@@ -352,6 +353,7 @@ export function MessageBubble({
                   : message?.message?.contentMarkdown ||
                     message?.message?.content ||
                     message.translationFeedback?.userTranslation ||
+                    message.content ||
                     ''}
               </ReactMarkdown>
             )}
@@ -397,16 +399,29 @@ export function MessageBubble({
                 </details>
               </div>
             )}
+          {/* Feedback Button & Score */}
+          {message.isValidating && (
+            <div className='mt-3 flex items-center gap-2 text-sm font-medium text-violet-600 dark:text-violet-400 animate-pulse'>
+              <Sparkles className='w-4 h-4' />
+              <span>Validando feedback...</span>
+            </div>
+          )}
 
-          {/* Feedback Button */}
-          {showFeedbackButton && (
-            <button
-              onClick={() => onFeedbackClick?.(message.id)}
-              className='mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1'
-              aria-label={`Ver retroalimentación para el mensaje ${message.id}`}
-            >
-              Ver feedback
-            </button>
+          {showFeedbackButton && !message.isValidating && (
+            <div className='flex items-center gap-2 mt-2'>
+              <button
+                onClick={() => onFeedbackClick?.(message.id)}
+                className='text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1'
+                aria-label={`Ver retroalimentación para el mensaje ${message.id}`}
+              >
+                Ver feedback
+              </button>
+              {message.translationFeedback?.score !== undefined && (
+                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 select-none'>
+                  {message.translationFeedback.score}/100
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>

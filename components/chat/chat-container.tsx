@@ -47,6 +47,9 @@ export function ChatContainer({
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<TranslationFeedback | null>(null);
+  const [pendingTranslation, setPendingTranslation] = useState<string | null>(
+    null
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -108,10 +111,29 @@ export function ChatContainer({
             ? new Date(interaction.timestamp).getTime()
             : Date.now(),
         });
+      } else if (
+        pendingTranslation &&
+        currentMessageIndex === i // Only show pending for current message
+      ) {
+        // Show pending translation
+        messages.push({
+          id: `pending-${episodeMessage.id}`,
+          episodeMessageId: episodeMessage.id,
+          sender: 'Tú',
+          content: pendingTranslation,
+          isUserMessage: true,
+          isValidating: true, // New flag
+          timestamp: Date.now(),
+        });
       }
     }
     return messages;
-  }, [initialEpisode.messages, userProgress, currentMessageIndex]);
+  }, [
+    initialEpisode.messages,
+    userProgress,
+    currentMessageIndex,
+    pendingTranslation,
+  ]);
 
   const currentEpisodeMessage = useMemo(() => {
     if (currentMessageIndex >= initialEpisode.messages.length) return null;
@@ -134,6 +156,7 @@ export function ChatContainer({
       if (!canInteract || !currentEpisodeMessage) return;
 
       setIsProcessing(true);
+      setPendingTranslation(translation);
       setAiError(null);
 
       try {
@@ -186,6 +209,7 @@ export function ChatContainer({
         // Revert optimistic update if needed? For now, we leave it as error banner handles it.
       } finally {
         setIsProcessing(false);
+        setPendingTranslation(null);
       }
     },
     [
@@ -262,47 +286,88 @@ export function ChatContainer({
     // Calculate stats from userProgress
     const stats = userProgress?.interactions.reduce(
       (acc, curr) => {
-        if (curr.userInput) acc.completed++;
-        else acc.skipped++;
-        // Logic for skipped is fuzzy in new schema, assuming empty input = skipped
+        if (curr.userInput) {
+          acc.completed++;
+          if (curr.translationFeedback?.score) {
+            acc.totalScore += curr.translationFeedback.score;
+            acc.scoredCount++;
+          }
+        } else {
+          acc.skipped++;
+        }
         return acc;
       },
-      { completed: 0, skipped: 0 }
-    ) || { completed: 0, skipped: 0 };
+      { completed: 0, skipped: 0, totalScore: 0, scoredCount: 0 }
+    ) || { completed: 0, skipped: 0, totalScore: 0, scoredCount: 0 };
+
+    const averageScore =
+      stats.scoredCount > 0
+        ? Math.round(stats.totalScore / stats.scoredCount)
+        : 0;
 
     return (
-      <div className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
-        <div className='max-w-2xl mx-auto py-8 sm:py-12'>
-          <div className='bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 sm:p-8 text-center'>
-            <div className='mb-6'>
-              <div className='text-5xl sm:text-6xl mb-4' aria-hidden='true'>
-                🎉
-              </div>
-              <h1 className='text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2'>
-                ¡Episodio Completado!
-              </h1>
-            </div>
-            {/* Simple Stats Display */}
-            <div className='flex justify-center gap-8 mb-8'>
-              <div className='text-center'>
-                <div className='text-2xl font-bold text-blue-600'>
-                  {stats.completed}
+      <div className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4 flex items-center justify-center'>
+        <div className='max-w-md w-full'>
+          <div className='bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden'>
+            {/* Header Image */}
+            <div className='relative h-48 w-full bg-gray-200 dark:bg-gray-700'>
+              <img
+                src={initialEpisode.imageUrl}
+                alt={initialEpisode.title}
+                className='w-full h-full object-cover'
+              />
+              <div className='absolute inset-0 bg-black/30 flex items-end p-6'>
+                <div>
+                  <div className='text-white/90 text-sm font-medium uppercase tracking-wider mb-1'>
+                    Episodio Completado
+                  </div>
+                  <h1 className='text-2xl font-bold text-white leading-tight'>
+                    {initialEpisode.title}
+                  </h1>
                 </div>
-                <div className='text-sm text-gray-500'>Traducciones</div>
               </div>
-              {/* 
-                <div className='text-center'>
-                    <div className='text-2xl font-bold text-orange-600'>{stats.skipped}</div>
-                    <div className='text-sm text-gray-500'>Saltadas</div>
-                </div>
-                 */}
             </div>
 
-            <div className='space-y-3 flex flex-col'>
-              <Button onClick={() => router.push('/')} className='w-full'>
-                <Home className='w-4 h-4 mr-2' />
-                Volver al Inicio
-              </Button>
+            {/* Content */}
+            <div className='p-6'>
+              <div className='mb-6'>
+                <h3 className='text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2'>
+                  Resumen
+                </h3>
+                <p className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed line-clamp-3'>
+                  {initialEpisode.summaryText}
+                </p>
+              </div>
+
+              {/* Stats Grid */}
+              <div className='grid grid-cols-2 gap-4 mb-8'>
+                <div className='bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center'>
+                  <div className='text-3xl font-bold text-blue-600 dark:text-blue-400'>
+                    {stats.completed}
+                  </div>
+                  <div className='text-xs font-medium text-blue-800 dark:text-blue-200 mt-1'>
+                    Traducciones
+                  </div>
+                </div>
+                <div className='bg-violet-50 dark:bg-violet-900/20 rounded-xl p-4 text-center'>
+                  <div className='text-3xl font-bold text-violet-600 dark:text-violet-400'>
+                    {averageScore}%
+                  </div>
+                  <div className='text-xs font-medium text-violet-800 dark:text-violet-200 mt-1'>
+                    Precisión Media
+                  </div>
+                </div>
+              </div>
+
+              <div className='space-y-3'>
+                <Button
+                  onClick={() => router.push('/')}
+                  className='w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 py-6 text-lg'
+                >
+                  <Home className='w-5 h-5 mr-2' />
+                  Volver al Inicio
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -382,8 +447,12 @@ export function ChatContainer({
             </div>
           ))}
 
-          {/* Loading Indicator */}
-          {isProcessing && (
+          {/* Loading Indicator - Only show if processing but NO pending translation (e.g. initial load or skip) 
+              Actually, validting uses pendingTranslation, so we hide this for translation. 
+              Maybe keep for 'skip' or 'next' if they take time? 
+              For now only hide if there is a pending translation because that has its own indicator.
+          */}
+          {isProcessing && !pendingTranslation && (
             <div className='flex justify-end py-2 animate-in fade-in slide-in-from-bottom-2 duration-300'>
               <TypingIndicator />
             </div>
