@@ -150,4 +150,7 @@
   body {
     @apply bg-background text-foreground font-light leading-snug;
   }
+  strong, b {
+    font-weight: 700;
+  }
 }

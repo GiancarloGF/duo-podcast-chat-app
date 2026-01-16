@@ -47,9 +47,10 @@ export function ChatContainer({
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<TranslationFeedback | null>(null);
-  const [pendingTranslation, setPendingTranslation] = useState<string | null>(
-    null
-  );
+  const [pendingTranslation, setPendingTranslation] = useState<{
+    content: string;
+    episodeMessageId: string;
+  } | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -113,14 +114,14 @@ export function ChatContainer({
         });
       } else if (
         pendingTranslation &&
-        currentMessageIndex === i // Only show pending for current message
+        pendingTranslation.episodeMessageId === episodeMessage.id
       ) {
-        // Show pending translation
+        // Show pending translation ONLY for the specific message
         messages.push({
           id: `pending-${episodeMessage.id}`,
           episodeMessageId: episodeMessage.id,
           sender: 'Tú',
-          content: pendingTranslation,
+          content: pendingTranslation.content,
           isUserMessage: true,
           isValidating: true, // New flag
           timestamp: Date.now(),
@@ -156,7 +157,10 @@ export function ChatContainer({
       if (!canInteract || !currentEpisodeMessage) return;
 
       setIsProcessing(true);
-      setPendingTranslation(translation);
+      setPendingTranslation({
+        content: translation,
+        episodeMessageId: currentEpisodeMessage.id,
+      });
       setAiError(null);
 
       try {
