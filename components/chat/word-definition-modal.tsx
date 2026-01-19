@@ -29,6 +29,7 @@ export function WordDefinitionModal({
   const [definitionData, setDefinitionData] = useState<{
     definedWord: string;
     partOfSpeech: string;
+    spanishTranslation: string;
     synonyms: string[];
     typeOf: string;
     definition: string;
@@ -53,7 +54,7 @@ export function WordDefinitionModal({
     try {
       const result = await getWordDefinition(word, sentence);
       if (result.success && result.data) {
-        setDefinitionData(result.data);
+        setDefinitionData(result.data as any);
       } else {
         throw new Error(result.error || 'Failed to fetch definition');
       }
@@ -92,14 +93,21 @@ export function WordDefinitionModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className='sm:max-w-lg max-h-[85vh] overflow-y-auto'>
         <DialogHeader>
-          <div className='flex items-baseline justify-between'>
-            <DialogTitle className='text-3xl font-bold text-primary capitalize'>
-              {definitionData?.definedWord || word}
-            </DialogTitle>
-            {definitionData?.partOfSpeech && (
-              <span className='px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-full italic'>
-                {definitionData.partOfSpeech}
-              </span>
+          <div className='flex flex-col gap-1'>
+            <div className='flex items-baseline justify-between'>
+              <DialogTitle className='text-3xl font-bold text-primary capitalize'>
+                {definitionData?.definedWord || word}
+              </DialogTitle>
+              {definitionData?.partOfSpeech && (
+                <span className='px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-full italic'>
+                  {definitionData.partOfSpeech}
+                </span>
+              )}
+            </div>
+            {definitionData?.spanishTranslation && (
+              <p className='text-lg font-medium text-gray-600 dark:text-gray-300'>
+                {definitionData.spanishTranslation}
+              </p>
             )}
           </div>
           {definitionData?.typeOf && (

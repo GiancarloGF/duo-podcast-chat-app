@@ -406,18 +406,27 @@ export function ChatContainer({
             </div>
           </div>
 
-          <div className='w-24 sm:w-32 shrink-0'>
-            <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
-              <div
-                className='bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all'
-                style={{
-                  width: `${
-                    ((currentMessageIndex + 1) /
-                      initialEpisode.messages.length) *
-                    100
-                  }%`,
-                }}
-              />
+          <div className='flex items-center gap-3 shrink-0'>
+            <span className='text-xs font-medium text-gray-600 dark:text-gray-400 min-w-[2.5rem] text-right'>
+              {Math.round(
+                ((currentMessageIndex + 1) / initialEpisode.messages.length) *
+                  100
+              )}
+              %
+            </span>
+            <div className='w-24 sm:w-32'>
+              <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
+                <div
+                  className='bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all'
+                  style={{
+                    width: `${
+                      ((currentMessageIndex + 1) /
+                        initialEpisode.messages.length) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

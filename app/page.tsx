@@ -4,6 +4,8 @@ import { EpisodeCard } from '@/components/home/episode-card';
 import { EpisodeWithProgress, UserProgress } from '@/lib/types';
 import { CONSTANTS } from '@/constants';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   // Strategy: "Fetch Paralelo + Map Lookup"
   const [episodes, userProgressList] = await Promise.all([
@@ -38,13 +40,20 @@ export default async function Home() {
       lastActive = progress.lastActiveAt;
 
       // Cálculo seguro del porcentaje
+      // Usamos (currentMessageIndex + 1) para que coincida con el chat page (Message X of Y)
+      // Si el índice es 0, es el mensaje 1, entonces 1/count.
       if (ep.messageCount > 0) {
         percent = Math.round(
-          (progress.currentMessageIndex / ep.messageCount) * 100
+          ((progress.currentMessageIndex + 1) / ep.messageCount) * 100
         );
       }
       // Capar al 100% por si acaso
       percent = Math.min(percent, 100);
+
+      // Si está completado, forzamos 100%
+      if (status === 'completed') {
+        percent = 100;
+      }
     }
 
     return {
@@ -60,6 +69,14 @@ export default async function Home() {
       lastActiveAt: lastActive,
       currentMessageIndex: currentIndex,
     } as EpisodeWithProgress;
+  });
+
+  // Sort episodes: Completed at the end, then by logic (maybe recent?)
+  // For now: active/new first, completed last.
+  enrichedEpisodes.sort((a, b) => {
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (a.status !== 'completed' && b.status === 'completed') return -1;
+    return 0; // Maintain original order otherwise
   });
 
   return (

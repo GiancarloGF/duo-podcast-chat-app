@@ -57,15 +57,16 @@ ${context ? `Contexto extra: ${context}` : ''}
 
 INSTRUCCIONES CLAVE:
 1. **Puntuación (0-100)**: Sé justo pero motivador.
-2. **Análisis General**: Breve resumen del desempeño.
+2. **Análisis General**: Breve resumen del desempeño (en Español).
 3. **Análisis Detallado** - IMPORTANTE: Solo menciona las secciones donde hay errores. Si no hay error en una categoría, deja ese campo vacío (""):
-   - **Gramática**: Menciona SOLO si hay errores gramaticales específicos.
-   - **Vocabulario**: Menciona SOLO si hay errores o mejoras en la elección de palabras.
-   - **Construcción**: Menciona SOLO si hay errores en la estructura de la oración.
+   - **Gramática**: Menciona SOLO si hay errores gramaticales específicos (explica en Español).
+   - **Vocabulario**: Menciona SOLO si hay errores o mejoras en la elección de palabras (explica en Español).
+   - **Construcción**: Menciona SOLO si hay errores en la estructura de la oración (explica en Español).
 4. **Phrasal Verbs**:
    - ¡IMPORTANTE! Si se puede usar phrasal verbs para sonar más natural, sugíérelo.
    - Da ejemplos concretos.
-5. **Sugerencias**: Tips cortos para mejorar.
+   - **Toda la explicación y sugerencias deben ser en ESPAÑOL**.
+5. **Sugerencias**: Tips cortos para mejorar (en Español).
 
 Usa Markdown para resaltar palabras clave (**palabra**).
 Tu respuesta debe seguir estrictamente el esquema JSON proporcionado.`;
@@ -118,6 +119,11 @@ Output JSON format.`;
         .string()
         .describe('The word or phrasal verb being defined'),
       partOfSpeech: z.string(),
+      spanishTranslation: z
+        .string()
+        .describe(
+          'The Spanish translation of the word or phrase in this context'
+        ),
       synonyms: z.array(z.string()),
       typeOf: z.string().describe('Category or classification of the word'),
       definition: z.string().describe('Precise definition in context'),
@@ -134,9 +140,11 @@ Output JSON format.`;
     Tasks:
     1. Identify if "${word}" is part of a phrasal verb or compound word in this specific sentence (e.g. if word is "get" and sentence is "I get up early", the target is "get up").
     2. Define that target word/phrase specifically for this context.
-    3. Provide synonyms, part of speech, and a "typeOf" classification.
-    4. Provide 2-3 other example sentences.
-    5. Write a summary explaining why this specific definition applies here.
+    3. Provide the Spanish translation ("spanishTranslation") for this context.
+    4. Provide synonyms, part of speech, and a "typeOf" classification.
+    5. Provide 2-3 other example sentences.
+    6. Write a summary explaining why this specific definition applies here.
+    6. Write a summary explaining why this specific definition applies here.
     
     Return pure JSON matching the schema.`;
 
