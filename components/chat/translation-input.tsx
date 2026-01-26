@@ -24,9 +24,34 @@ export function TranslationInput({
   const [translation, setTranslation] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+  }, []);
+
+  // Scroll input into view when focused on mobile
+  useEffect(() => {
+    const handleFocus = () => {
+      // Small delay to ensure keyboard is opening
+      setTimeout(() => {
+        if (inputRef.current && window.innerWidth < 768) {
+          inputRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }, 300);
+    };
+
+    const textarea = inputRef.current;
+    if (textarea) {
+      textarea.addEventListener('focus', handleFocus);
+      return () => {
+        textarea.removeEventListener('focus', handleFocus);
+      };
+    }
   }, []);
 
   // Auto-resize textarea
@@ -90,7 +115,7 @@ export function TranslationInput({
   };
 
   return (
-    <div className='w-full max-w-4xl mx-auto px-4 pb-4'>
+    <div ref={containerRef} className='w-full max-w-4xl mx-auto px-4 pb-4'>
       {/* Validation Errors Popup - Show above input if any */}
       {validationErrors.length > 0 && (
         <div className='mb-2 p-2 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 flex items-center gap-2 animate-in slide-in-from-bottom-2'>

@@ -256,7 +256,9 @@ export function MessageBubble({
   );
 
   const bubbleClasses = cn(
-    'max-w-md break-words relative group/bubble', // Added group/bubble for hover effects if needed
+    'break-words relative group/bubble', // Added group/bubble for hover effects if needed
+    // Full width on mobile, max-width on desktop
+    'w-full md:max-w-md',
     isUserMessage
       ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl px-5 py-3' // User: Pill
       : isProtagonistMessage
@@ -266,7 +268,9 @@ export function MessageBubble({
 
   const containerClasses = cn(
     'flex gap-3 items-start mb-4',
-    isUserMessage && 'flex-row-reverse justify-start ml-auto'
+    isUserMessage && 'flex-row-reverse justify-start md:ml-auto md:justify-end',
+    // In mobile, make messages full width
+    'w-full'
   );
 
   const hasTranslation = !!message?.message?.officialTranslation;
@@ -277,9 +281,13 @@ export function MessageBubble({
       role='article'
       aria-label={`Mensaje de ${message?.message?.sender || 'Desconocido'}`}
     >
-      {/* Avatar */}
+      {/* Avatar - Hidden on mobile */}
       <div
-        className={cn(avatarClasses, isProtagonistMessage && 'text-white')}
+        className={cn(
+          avatarClasses,
+          isProtagonistMessage && 'text-white',
+          'hidden md:flex'
+        )}
         aria-hidden='true'
         style={
           isProtagonistMessage
@@ -294,7 +302,9 @@ export function MessageBubble({
       <div
         className={cn(
           'flex flex-col gap-1',
-          isUserMessage ? 'items-end' : 'items-start'
+          isUserMessage ? 'items-end md:items-end' : 'items-start',
+          // Full width on mobile
+          'w-full md:w-auto'
         )}
       >
         {/* Sender Name - Show for all except User to identify Protagonists */}

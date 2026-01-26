@@ -444,9 +444,9 @@ export function ChatContainer({
         </div>
       )}
 
-      {/* Chat Area */}
-      <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-slate-900'>
-        <div className='max-w-4xl mx-auto w-full pb-20'>
+      {/* Chat Area - Add padding bottom on mobile to account for fixed footer */}
+      <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-slate-900 pb-safe md:pb-4'>
+        <div className='max-w-4xl mx-auto w-full pb-20 md:pb-20'>
           {displayedMessages.map((msg) => (
             <div key={msg.id} className='mb-4'>
               <MessageBubble
@@ -475,8 +475,8 @@ export function ChatContainer({
         </div>
       </div>
 
-      {/* Input Area */}
-      <footer className='sticky bottom-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-4'>
+      {/* Input Area - Fixed on mobile to stay above keyboard */}
+      <footer className='fixed md:sticky bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-4 pb-safe md:pb-4 z-50'>
         <div className='max-w-4xl mx-auto'>
           {needsTranslation ? (
             <TranslationInput

@@ -71,12 +71,33 @@ export default async function Home() {
     } as EpisodeWithProgress;
   });
 
-  // Sort episodes: Completed at the end, then by logic (maybe recent?)
-  // For now: active/new first, completed last.
-  enrichedEpisodes.sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
-    return 0; // Maintain original order otherwise
+  // Separate episodes into three categories
+  const inProgressEpisodes = enrichedEpisodes.filter(
+    (ep) => ep.status === 'started'
+  );
+  const completedEpisodes = enrichedEpisodes.filter(
+    (ep) => ep.status === 'completed'
+  );
+  const availableEpisodes = enrichedEpisodes.filter((ep) => ep.status === 'new');
+
+  // Sort in-progress episodes by lastActiveAt (most recent first)
+  inProgressEpisodes.sort((a, b) => {
+    if (!a.lastActiveAt && !b.lastActiveAt) return 0;
+    if (!a.lastActiveAt) return 1;
+    if (!b.lastActiveAt) return -1;
+    return (
+      new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
+    );
+  });
+
+  // Sort completed episodes by lastActiveAt (most recent first)
+  completedEpisodes.sort((a, b) => {
+    if (!a.lastActiveAt && !b.lastActiveAt) return 0;
+    if (!a.lastActiveAt) return 1;
+    if (!b.lastActiveAt) return -1;
+    return (
+      new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
+    );
   });
 
   return (
@@ -98,18 +119,70 @@ export default async function Home() {
         </div> */}
 
         {/* Episodes Sections */}
-        <div className='space-y-8'>
-          {/* Helper function to render episode card */}
-          {enrichedEpisodes.length > 0 && (
+        <div className='space-y-12'>
+          {/* En Progreso Section */}
+          {inProgressEpisodes.length > 0 && (
             <div>
-              <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>
-                Episodios
-              </h2>
+              <div className='flex items-center gap-3 mb-6'>
+                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                  En Progreso
+                </h2>
+                <span className='px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'>
+                  {inProgressEpisodes.length}
+                </span>
+              </div>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                {enrichedEpisodes.map((episode) => (
+                {inProgressEpisodes.map((episode) => (
                   <EpisodeCard episode={episode} key={episode.id} />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Completados Section */}
+          {completedEpisodes.length > 0 && (
+            <div>
+              <div className='flex items-center gap-3 mb-6'>
+                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                  Completados
+                </h2>
+                <span className='px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'>
+                  {completedEpisodes.length}
+                </span>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {completedEpisodes.map((episode) => (
+                  <EpisodeCard episode={episode} key={episode.id} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Disponibles Section */}
+          {availableEpisodes.length > 0 && (
+            <div>
+              <div className='flex items-center gap-3 mb-6'>
+                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                  Disponibles
+                </h2>
+                <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                  {availableEpisodes.length}
+                </span>
+              </div>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {availableEpisodes.map((episode) => (
+                  <EpisodeCard episode={episode} key={episode.id} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {enrichedEpisodes.length === 0 && (
+            <div className='text-center py-12'>
+              <p className='text-lg text-gray-600 dark:text-gray-400'>
+                No hay episodios disponibles en este momento.
+              </p>
             </div>
           )}
         </div>
