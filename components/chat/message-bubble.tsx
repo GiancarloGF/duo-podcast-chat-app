@@ -82,7 +82,7 @@ function findSentenceBoundaries(text: string): SentenceBoundary[] {
 // Function to find which sentence a word belongs to
 function findSentenceForWord(
   wordIndex: number,
-  boundaries: SentenceBoundary[]
+  boundaries: SentenceBoundary[],
 ): string {
   for (const boundary of boundaries) {
     if (wordIndex >= boundary.start && wordIndex < boundary.end) {
@@ -188,7 +188,7 @@ function ClickableTextRenderer({
           />
         ) : (
           <span key={index}>{token.text}</span>
-        )
+        ),
       )}
     </>
   );
@@ -251,26 +251,26 @@ export function MessageBubble({
   const avatarClasses = cn(
     'w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-xs flex-shrink-0',
     isUserMessage && 'bg-gray-900 dark:bg-gray-600',
-    isHostMessage && 'bg-blue-600 dark:bg-blue-500'
+    isHostMessage && 'bg-blue-600 dark:bg-blue-500',
     // Protagonist uses inline style for custom color
   );
 
   const bubbleClasses = cn(
     'break-words relative group/bubble', // Added group/bubble for hover effects if needed
-    // Full width on mobile, max-width on desktop
-    'w-full md:max-w-md',
+    // Full width on mobile, fit content on desktop
+    'w-full md:w-fit md:max-w-md',
     isUserMessage
       ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl px-5 py-3' // User: Pill
       : isProtagonistMessage
-      ? 'text-gray-900 px-5 py-3 rounded-3xl' // Protagonist: Pill (color applied via style)
-      : 'px-0 py-1 text-gray-900 dark:text-gray-100' // Host: Text-only
+        ? 'text-gray-900 px-5 py-3 rounded-3xl' // Protagonist: Pill (color applied via style)
+        : 'px-0 py-1 text-gray-900 dark:text-gray-100', // Host: Text-only
   );
 
   const containerClasses = cn(
     'flex gap-3 items-start mb-4',
-    isUserMessage && 'flex-row-reverse justify-start md:ml-auto md:justify-end',
+    isUserMessage && 'flex-row-reverse justify-start md:ml-auto',
     // In mobile, make messages full width
-    'w-full'
+    'w-full',
   );
 
   const hasTranslation = !!message?.message?.officialTranslation;
@@ -286,7 +286,7 @@ export function MessageBubble({
         className={cn(
           avatarClasses,
           isProtagonistMessage && 'text-white',
-          'hidden md:flex'
+          'hidden md:flex',
         )}
         aria-hidden='true'
         style={
@@ -304,7 +304,7 @@ export function MessageBubble({
           'flex flex-col gap-1',
           isUserMessage ? 'items-end md:items-end' : 'items-start',
           // Full width on mobile
-          'w-full md:w-auto'
+          'w-full md:w-auto',
         )}
       >
         {/* Sender Name - Show for all except User to identify Protagonists */}
