@@ -1,60 +1,30 @@
-import dbConnect from '@/lib/db/conection';
-import { getEpisodeModel } from '@/lib/db/models/Episode';
+import { MongoStoryRepository } from '@/src/infrastructure/database/mongo/MongoStoryRepository';
 import { Episode } from '@/lib/types';
 
 export async function getAllEpisodes(): Promise<Episode[]> {
   try {
-    await dbConnect();
-    const Episode = getEpisodeModel();
-    const episodes = await Episode.aggregate([
-      {
-        $project: {
-          _id: 1,
-          slug: 1,
-          number: 1,
-          title: 1,
-          imageUrl: 1,
-          summaryText: 1,
-          languageLevel: 1,
-          themes: 1,
-          messageCount: { $size: { $ifNull: ['$messages', []] } },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ]);
+    const repo = new MongoStoryRepository();
+    const stories = await repo.getStories();
 
-    const sanitizedEpisodes = episodes.map(
-      (episode) =>
+    return stories.map(
+      (story) =>
         ({
-          id: episode._id.toString(),
-          slug: episode.slug,
-          number: episode.number,
-          title: episode.title,
-          imageUrl: episode.imageUrl,
-          summaryText: episode.summaryText,
-          summaryHtml: '',
-          languageLevel: episode.languageLevel,
-          themes: episode.themes,
-          characters: [],
-          messages: [], // No traemos messages desde la DB
-          messageCount: episode.messageCount ?? 0,
-        } as Episode)
+          id: story.id,
+          slug: story.slug,
+          number: story.number,
+          title: story.title,
+          imageUrl: story.imageUrl,
+          summaryText: story.summaryText,
+          summaryHtml: story.summaryHtml,
+          languageLevel: story.languageLevel,
+          themes: story.themes,
+          characters: story.characters,
+          messages: [], // Optimización: no enviamos mensajes a la lista
+          messageCount: story.messageCount ?? 0,
+        }) as Episode,
     );
-
-    return sanitizedEpisodes;
-
-    // return {
-    //     isSuccess: true,
-    //     data: episodesWithCount,
-    //     message: "Los episodios se han obtenido correctamente",
-    // };
   } catch (error) {
     console.error('Error al obtener los episodios:', error);
     throw new Error('Error al obtener los episodios: ' + error);
-    // return {
-    //     isSuccess: false,
-    //     data: [],
-    //     message: "Error al obtener los episodios",
-    // };
   }
 }
