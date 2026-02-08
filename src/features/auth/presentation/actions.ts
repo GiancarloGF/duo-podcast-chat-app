@@ -1,9 +1,9 @@
 'use server';
 
 import { getCurrentUser } from '@/features/auth/application/usecases/GetCurrentUser.usecase';
-import { StubAuthRepository } from '@/features/auth/infrastructure/repositories/StubAuthRepository';
+import { FirebaseAuthRepository } from '@/features/auth/infrastructure/repositories/FirebaseAuthRepository';
 
-const authRepo = new StubAuthRepository();
+const authRepo = new FirebaseAuthRepository();
 
 export async function getCurrentUserId(): Promise<string> {
   const user = await getCurrentUser(authRepo);
