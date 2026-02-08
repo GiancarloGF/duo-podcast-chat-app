@@ -2,6 +2,14 @@ import { getAllEpisodesAction, getAllUserProgress } from '@/features/stories/pre
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
 import type { EpisodeWithProgressDto } from '@/features/stories/application/dto/EpisodeWithProgress.dto';
 import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/shared/presentation/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +89,18 @@ export default async function StoriesPage() {
   return (
     <main className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
       <div className='max-w-6xl mx-auto py-12'>
+        <Breadcrumb className='mb-6'>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href='/'>Inicio</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Relatos</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className='text-center mb-12'>
           <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-2'>
             Relatos en Inglés
