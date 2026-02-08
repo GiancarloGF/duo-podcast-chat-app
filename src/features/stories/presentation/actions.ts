@@ -24,6 +24,14 @@ const episodeRepo = new MongoEpisodeRepository();
 const feedbackService = new GeminiTranslationService();
 const progressRepo = new MongoUserProgressRepository();
 
+async function requireCurrentUserId(): Promise<string> {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('Usuario no autenticado');
+  }
+  return userId;
+}
+
 // Episodes
 export async function getAllEpisodesAction(): Promise<Episode[]> {
   try {
@@ -74,12 +82,12 @@ export interface UpdateProgressResult {
 }
 
 export async function updateProgress(
-  userId: string,
   episodeId: string,
   newIndex: number,
   status: 'started' | 'completed' = 'started',
   interaction?: Interaction
 ): Promise<UpdateProgressResult> {
+  const userId = await requireCurrentUserId();
   return updateProgressUc(
     progressRepo,
     userId,
@@ -91,18 +99,19 @@ export async function updateProgress(
 }
 
 export async function getUserProgress(
-  userId: string,
   userProgressId: string
 ) {
+  const userId = await requireCurrentUserId();
   return getUserProgressUc(progressRepo, userId, userProgressId);
 }
 
-export async function getAllUserProgress(userId: string) {
+export async function getAllUserProgress() {
+  const userId = await requireCurrentUserId();
   return getAllUserProgressUc(progressRepo, userId);
 }
 
 export async function startChatByEpisode(episodeId: string) {
-  const userId = await getCurrentUserId();
+  const userId = await requireCurrentUserId();
   const { progressId } = await startEpisodeUc(progressRepo, userId, episodeId);
   revalidatePath('/');
   redirect(`/stories/chat/${progressId}`);

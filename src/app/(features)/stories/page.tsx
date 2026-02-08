@@ -2,15 +2,13 @@ import { getAllEpisodesAction, getAllUserProgress } from '@/features/stories/pre
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
 import type { EpisodeWithProgressDto } from '@/features/stories/application/dto/EpisodeWithProgress.dto';
 import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
-import { getCurrentUserId } from '@/features/auth/presentation/actions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function StoriesPage() {
-  const userId = await getCurrentUserId();
   const [episodes, userProgressList] = await Promise.all([
     getAllEpisodesAction(),
-    getAllUserProgress(userId),
+    getAllUserProgress(),
   ]);
 
   const progressMap: Map<string, UserProgress> = new Map();

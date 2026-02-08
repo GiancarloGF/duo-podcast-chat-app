@@ -1,5 +1,4 @@
 import { ChatContainer } from '@/features/stories/presentation/components/chat-container';
-import { getCurrentUserId } from '@/features/auth/presentation/actions';
 import { getEpisodeByIdAction, getUserProgress } from '@/features/stories/presentation/actions';
 import { notFound } from 'next/navigation';
 
@@ -9,10 +8,9 @@ export default async function StoriesChatPage({
   params: Promise<{ userProgressId: string }>;
 }) {
   const { userProgressId } = await params;
-  const userId = await getCurrentUserId();
 
   try {
-    const userProgress = await getUserProgress(userId, userProgressId);
+    const userProgress = await getUserProgress(userProgressId);
 
     if (!userProgress) {
       console.error(`User progress not found for episode: ${userProgressId}`);
@@ -30,7 +28,6 @@ export default async function StoriesChatPage({
         key={userProgressId}
         initialEpisode={episode}
         initialUserProgress={userProgress}
-        userId={userId}
       />
     );
   } catch (error) {

@@ -1,14 +1,11 @@
 'use client';
 
-import React from 'react';
 import {
   signInWithGoogle,
   signOut,
 } from '@/shared/infrastructure/firebase/auth';
 import { useUserSession } from '@/features/auth/presentation/hooks/useUserSession';
-import { User } from 'firebase/auth';
-
-import { SerializableUser } from '@/shared/domain/interfaces/SerializableUser';
+import type { SerializableUser } from '@/shared/domain/interfaces/SerializableUser';
 
 interface HeaderProps {
   initialUser: SerializableUser | null;
@@ -39,7 +36,7 @@ export function Header({ initialUser }: HeaderProps) {
         <div className='mr-4 hidden md:flex'>
           <a className='mr-6 flex items-center space-x-2' href='/'>
             <span className='hidden font-bold sm:inline-block'>
-              Podcast Chat
+              Relatos en Ingles
             </span>
           </a>
         </div>
@@ -62,7 +59,7 @@ export function Header({ initialUser }: HeaderProps) {
                   onClick={handleSignOut}
                   className='inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
                 >
-                  Sign Out
+                  Cerrar sesion
                 </button>
               </div>
             ) : (
@@ -70,7 +67,7 @@ export function Header({ initialUser }: HeaderProps) {
                 onClick={handleSignIn}
                 className='inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
               >
-                Sign In
+                Iniciar sesion
               </button>
             )}
           </nav>

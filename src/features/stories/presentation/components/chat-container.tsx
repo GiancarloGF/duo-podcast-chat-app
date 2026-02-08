@@ -20,13 +20,11 @@ import { FeedbackModal } from './feedback-modal';
 interface ChatContainerProps {
   initialEpisode: Episode;
   initialUserProgress: UserProgress;
-  userId: string;
 }
 
 export function ChatContainer({
   initialEpisode,
   initialUserProgress,
-  userId,
 }: ChatContainerProps) {
   const router = useRouter();
 
@@ -176,7 +174,6 @@ export function ChatContainer({
         }));
 
         await updateProgress(
-          userId,
           initialEpisode.id,
           nextIndex,
           nextStatus,
@@ -194,7 +191,6 @@ export function ChatContainer({
       canInteract,
       currentEpisodeMessage,
       initialEpisode.id,
-      userId,
       initialEpisode.messages.length,
       userProgress.currentMessageIndex,
     ]
@@ -215,14 +211,13 @@ export function ChatContainer({
         lastActiveAt: new Date(),
       }));
 
-      await updateProgress(userId, initialEpisode.id, nextIndex, nextStatus);
+      await updateProgress(initialEpisode.id, nextIndex, nextStatus);
     } catch (error) {
       console.error('Error skipping:', error);
     }
   }, [
     userProgress.currentMessageIndex,
     initialEpisode.messages.length,
-    userId,
     initialEpisode.id,
     isProcessing,
   ]);
@@ -242,14 +237,13 @@ export function ChatContainer({
         lastActiveAt: new Date(),
       }));
 
-      await updateProgress(userId, initialEpisode.id, nextIndex, nextStatus);
+      await updateProgress(initialEpisode.id, nextIndex, nextStatus);
     } catch (error) {
       console.error('Error next:', error);
     }
   }, [
     userProgress.currentMessageIndex,
     initialEpisode.messages.length,
-    userId,
     initialEpisode.id,
     isProcessing,
   ]);
