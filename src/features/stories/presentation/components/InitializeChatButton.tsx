@@ -2,7 +2,7 @@
 
 import { Button } from '@/shared/presentation/components/ui/button';
 import { useState } from 'react';
-import { startChatByEpisode } from '@/features/translations/presentation/actions';
+import { startChatByEpisode } from '@/features/stories/presentation/actions';
 
 export function InitializeChatButton({ episodeId }: { episodeId: string }) {
   const [isInitializing, setIsInitializing] = useState(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChatMessage } from '@/lib/types';
+import type { ChatMessage } from '@/features/stories/domain/types';
 import { cn } from '@/shared/presentation/utils';
 import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';

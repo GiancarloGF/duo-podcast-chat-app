@@ -1,6 +1,10 @@
-import type { TranslationFeedback } from '@/lib/types';
+import type { TranslationFeedback } from '@/features/stories/domain/entities/TranslationFeedback';
 
-export class AIService {
+/**
+ * Cliente para obtener feedback de traducción vía API (llamadas desde el navegador).
+ * La lógica de negocio está en GeminiTranslationService en el servidor.
+ */
+export class ClientFeedbackService {
   static async getFeedback(
     originalText: string,
     officialTranslation: string,
@@ -31,16 +35,13 @@ export class AIService {
         throw new Error(data.error || 'Failed to get feedback');
       }
 
-      console.log("AI Service: Feedback received", data.feedback);
-
-      return data.feedback;
+      return data.feedback as TranslationFeedback;
     } catch (error) {
       console.error('Error fetching feedback:', error);
       return null;
     }
   }
 
-  // Retry logic with exponential backoff
   static async getFeedbackWithRetry(
     originalText: string,
     officialTranslation: string,
@@ -69,7 +70,7 @@ export class AIService {
 
         console.warn(`Attempt ${attempt} failed, retrying in ${delay}ms`);
         await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2; // Exponential backoff
+        delay *= 2;
       }
     }
 

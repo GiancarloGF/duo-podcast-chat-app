@@ -5,7 +5,7 @@ import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/shared/presentation/components/ui/button';
 import { Send, SkipForward, AlertCircle } from 'lucide-react';
-import { TranslationValidationService } from '@/features/translations/infrastructure/services/TranslationValidationService';
+import { TranslationValidationService } from '@/features/stories/infrastructure/services/TranslationValidationService';
 import { cn } from '@/shared/presentation/utils';
 
 interface TranslationInputProps {

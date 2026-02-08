@@ -1,4 +1,4 @@
-import { GeminiTranslationService } from '@/features/translations/infrastructure/services/GeminiTranslationService';
+import { GeminiTranslationService } from '@/features/stories/infrastructure/services/GeminiTranslationService';
 
 export const maxDuration = 30;
 

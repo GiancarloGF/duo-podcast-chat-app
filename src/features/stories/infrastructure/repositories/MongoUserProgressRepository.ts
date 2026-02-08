@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
-import type { UserProgress } from '@/features/translations/domain/entities/UserProgress';
-import type { Interaction } from '@/features/translations/domain/entities/Interaction';
-import type { UserProgressRepository } from '@/features/translations/domain/repositories/UserProgressRepository.interface';
+import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
+import type { Interaction } from '@/features/stories/domain/entities/Interaction';
+import type { UserProgressRepository } from '@/features/stories/domain/repositories/UserProgressRepository.interface';
 import dbConnect from '@/shared/infrastructure/database/mongo/connection';
 import { getUserProgressModel } from '@/shared/infrastructure/database/mongo/models/UserProgress';
 

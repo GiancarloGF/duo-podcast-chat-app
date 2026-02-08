@@ -1,12 +1,11 @@
-import type { UserStats, EpisodeProgress } from './types';
+import type { UserStats, EpisodeProgress } from '@/features/stories/domain/types';
 
 const STORAGE_KEYS = {
   PROGRESS: 'podcast_progress_',
   STATS: 'podcast_stats',
 } as const;
 
-export const storage = {
-  // Episode Progress
+export const clientStorage = {
   getEpisodeProgress(episodeId: string): EpisodeProgress | null {
     try {
       const data = localStorage.getItem(`${STORAGE_KEYS.PROGRESS}${episodeId}`);
@@ -36,26 +35,15 @@ export const storage = {
     }
   },
 
-  // User Statistics
   getUserStats(): UserStats {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.STATS);
       return data
         ? JSON.parse(data)
-        : {
-            totalTranslations: 0,
-            totalSkipped: 0,
-            completedEpisodes: 0,
-            averageScore: 0,
-          };
+        : { totalTranslations: 0, totalSkipped: 0, completedEpisodes: 0, averageScore: 0 };
     } catch (error) {
       console.error('Error reading user stats:', error);
-      return {
-        totalTranslations: 0,
-        totalSkipped: 0,
-        completedEpisodes: 0,
-        averageScore: 0,
-      };
+      return { totalTranslations: 0, totalSkipped: 0, completedEpisodes: 0, averageScore: 0 };
     }
   },
 
@@ -67,7 +55,6 @@ export const storage = {
     }
   },
 
-  // Utility functions
   getAllEpisodeProgresses(): EpisodeProgress[] {
     try {
       const progresses: EpisodeProgress[] = [];
@@ -87,12 +74,8 @@ export const storage = {
 
   clearAllData(): void {
     try {
-      const keys = Object.keys(localStorage);
-      keys.forEach((key) => {
-        if (
-          key.startsWith(STORAGE_KEYS.PROGRESS) ||
-          key === STORAGE_KEYS.STATS
-        ) {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith(STORAGE_KEYS.PROGRESS) || key === STORAGE_KEYS.STATS) {
           localStorage.removeItem(key);
         }
       });

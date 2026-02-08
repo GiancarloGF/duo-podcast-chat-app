@@ -1,8 +1,7 @@
-import { getAllEpisodesAction } from '@/features/stories/presentation/actions';
-import { getAllUserProgress } from '@/features/translations/presentation/actions';
+import { getAllEpisodesAction, getAllUserProgress } from '@/features/stories/presentation/actions';
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
 import type { EpisodeWithProgressDto } from '@/features/stories/application/dto/EpisodeWithProgress.dto';
-import type { UserProgress } from '@/features/translations/domain/entities/UserProgress';
+import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
 import { getCurrentUserId } from '@/features/auth/presentation/actions';
 
 export const dynamic = 'force-dynamic';

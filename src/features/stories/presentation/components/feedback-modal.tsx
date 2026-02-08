@@ -1,6 +1,6 @@
 'use client';
 
-import type { TranslationFeedback, UserTranslation } from '@/lib/types';
+import type { TranslationFeedback } from '@/features/stories/domain/entities/TranslationFeedback';
 import { Button } from '@/shared/presentation/components/ui/button';
 import { X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -22,7 +22,6 @@ export function FeedbackModal({
   return (
     <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200'>
       <div className='bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-gray-100 dark:border-slate-800'>
-        {/* Header */}
         <div className='flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10'>
           <div>
             <h2 className='text-lg font-bold text-gray-900 dark:text-white'>
@@ -40,17 +39,13 @@ export function FeedbackModal({
           </button>
         </div>
 
-        {/* Scrollable Content */}
         <div className='overflow-y-auto p-6 space-y-8'>
-          {/* Main Score & Comparison Section */}
           <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-            {/* Score Card */}
             <div className='col-span-1 md:col-span-3 flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 border border-gray-100 dark:border-slate-800'>
               <div
                 className='w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mb-2'
                 style={{
                   background: `conic-gradient(var(--color-blue-500) ${feedback.score}%, transparent 0)`,
-                  // Quick hack for circular progress visual, or just simple color
                 }}
               >
                 <div className='w-14 h-14 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400'>
@@ -62,7 +57,6 @@ export function FeedbackModal({
               </span>
             </div>
 
-            {/* Translation Comparison */}
             <div className='col-span-1 md:col-span-9 space-y-4'>
               <div>
                 <label className='text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block'>
@@ -85,7 +79,6 @@ export function FeedbackModal({
 
           <div className='h-px bg-gray-100 dark:bg-slate-800' />
 
-          {/* Analysis Section */}
           <div className='space-y-4'>
             <h3 className='text-base font-bold text-gray-900 dark:text-white flex items-center gap-2'>
               Análisis General
@@ -95,7 +88,6 @@ export function FeedbackModal({
             </div>
           </div>
 
-          {/* Detailed Breakdown */}
           {feedback.detailedAnalysis && (
             <div className='space-y-4'>
               <h3 className='text-base font-bold text-gray-900 dark:text-white'>
@@ -163,7 +155,6 @@ export function FeedbackModal({
             </div>
           )}
 
-          {/* Suggestions & Corrections */}
           {(feedback.suggestions?.length > 0 ||
             feedback.phrasalVerbs?.suggestions?.length > 0) && (
             <div className='space-y-4'>
@@ -212,7 +203,6 @@ export function FeedbackModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className='p-4 px-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50'>
           <Button
             onClick={onClose}

@@ -1,4 +1,4 @@
-import { TranslationValidationService } from '@/features/translations/infrastructure/services/TranslationValidationService';
+import { TranslationValidationService } from '@/features/stories/infrastructure/services/TranslationValidationService';
 
 export async function POST(req: Request) {
   try {

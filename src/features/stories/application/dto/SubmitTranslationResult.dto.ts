@@ -1,4 +1,4 @@
-import type { TranslationFeedback } from '@/features/translations/domain/entities/TranslationFeedback';
+import type { TranslationFeedback } from '@/features/stories/domain/entities/TranslationFeedback';
 
 export interface SubmitTranslationResultDto {
   success: boolean;

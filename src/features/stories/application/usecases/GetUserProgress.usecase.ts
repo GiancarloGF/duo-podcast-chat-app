@@ -1,5 +1,5 @@
-import type { UserProgressRepository } from '@/features/translations/domain/repositories/UserProgressRepository.interface';
-import type { UserProgress } from '@/features/translations/domain/entities/UserProgress';
+import type { UserProgressRepository } from '@/features/stories/domain/repositories/UserProgressRepository.interface';
+import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
 
 export async function getUserProgress(
   repository: UserProgressRepository,

@@ -1,10 +1,9 @@
-import { ChatContainer } from '@/features/translations/presentation/components/chat-container';
+import { ChatContainer } from '@/features/stories/presentation/components/chat-container';
 import { getCurrentUserId } from '@/features/auth/presentation/actions';
-import { getEpisodeByIdAction } from '@/features/stories/presentation/actions';
-import { getUserProgress } from '@/features/translations/presentation/actions';
+import { getEpisodeByIdAction, getUserProgress } from '@/features/stories/presentation/actions';
 import { notFound } from 'next/navigation';
 
-export default async function ChatPage({
+export default async function StoriesChatPage({
   params,
 }: {
   params: Promise<{ userProgressId: string }>;

@@ -1,5 +1,5 @@
-import type { UserProgressRepository } from '@/features/translations/domain/repositories/UserProgressRepository.interface';
-import type { Interaction } from '@/features/translations/domain/entities/Interaction';
+import type { UserProgressRepository } from '@/features/stories/domain/repositories/UserProgressRepository.interface';
+import type { Interaction } from '@/features/stories/domain/entities/Interaction';
 
 export interface UpdateProgressResult {
   success: boolean;

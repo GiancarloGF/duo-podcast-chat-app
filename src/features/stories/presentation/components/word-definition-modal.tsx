@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/shared/presentation/components/ui/dialog';
 import { Loader2, BookmarkPlus, Check } from 'lucide-react';
-import { saveWord, getWordDefinition } from '@/features/translations/presentation/actions';
+import { saveWord, getWordDefinition } from '@/features/stories/presentation/actions';
 import { toast } from 'sonner';
 
 interface WordDefinitionModalProps {
@@ -53,7 +53,16 @@ export function WordDefinitionModal({
     try {
       const result = await getWordDefinition(word, sentence);
       if (result.success && result.data) {
-        setDefinitionData(result.data as any);
+        setDefinitionData(result.data as {
+          definedWord: string;
+          partOfSpeech: string;
+          spanishTranslation: string;
+          synonyms: string[];
+          typeOf: string;
+          definition: string;
+          otherExamples: string[];
+          summary: string;
+        });
       } else {
         throw new Error(result.error || 'Failed to fetch definition');
       }
@@ -70,7 +79,6 @@ export function WordDefinitionModal({
 
     setIsSaving(true);
     try {
-      // Save the DETECTED word (e.g., "get up") instead of the clicked word ("get")
       const result = await saveWord(definitionData.definedWord, sentence);
       if (result.success) {
         setIsSaved(true);
@@ -130,7 +138,6 @@ export function WordDefinitionModal({
             </div>
           ) : definitionData ? (
             <>
-              {/* Definition Section */}
               <div className='space-y-2'>
                 <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
                   Definition
@@ -140,7 +147,6 @@ export function WordDefinitionModal({
                 </p>
               </div>
 
-              {/* Summary/Context Section */}
               <div className='space-y-2'>
                 <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
                   Context Analysis
@@ -150,7 +156,6 @@ export function WordDefinitionModal({
                 </div>
               </div>
 
-              {/* Examples Section */}
               {definitionData.otherExamples?.length > 0 && (
                 <div className='space-y-2'>
                   <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
@@ -169,7 +174,6 @@ export function WordDefinitionModal({
                 </div>
               )}
 
-              {/* Synonyms Section */}
               {definitionData.synonyms?.length > 0 && (
                 <div className='space-y-2'>
                   <h4 className='text-sm font-semibold text-foreground/80 uppercase tracking-wider'>
@@ -191,7 +195,6 @@ export function WordDefinitionModal({
           ) : null}
         </div>
 
-        {/* Footer Actions */}
         <div className='flex justify-end pt-4 border-t mt-6'>
           <button
             onClick={handleSave}

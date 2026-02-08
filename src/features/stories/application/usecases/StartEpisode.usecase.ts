@@ -1,4 +1,4 @@
-import type { UserProgressRepository } from '@/features/translations/domain/repositories/UserProgressRepository.interface';
+import type { UserProgressRepository } from '@/features/stories/domain/repositories/UserProgressRepository.interface';
 
 export interface StartEpisodeResult {
   progressId: string;

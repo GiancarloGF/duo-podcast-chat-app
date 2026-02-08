@@ -1,7 +1,12 @@
-import type { UserStats, EpisodeProgress } from './types';
+import type {
+  UserStats,
+  EpisodeProgress,
+} from '@/features/stories/domain/types';
 
+/**
+ * Servicio de estadísticas derivadas del progreso de episodios.
+ */
 export class StatsService {
-  // Calculate user statistics from all episode progress
   static calculateUserStats(allProgress: EpisodeProgress[]): UserStats {
     let totalTranslations = 0;
     let totalSkipped = 0;
@@ -14,21 +19,22 @@ export class StatsService {
           totalSkipped++;
         } else {
           totalTranslations++;
-          if (translation.feedback?.score) {
+          if (translation.feedback?.score !== undefined) {
             allScores.push(translation.feedback.score);
           }
         }
       });
 
-      // Check if episode is completed (all messages processed)
-      if (progress.completedAt) {
+      if (progress.completedAt !== undefined) {
         completedEpisodes++;
       }
     });
 
     const averageScore =
       allScores.length > 0
-        ? Math.round(allScores.reduce((a, b) => a + b) / allScores.length)
+        ? Math.round(
+            allScores.reduce((a, b) => a + b, 0) / allScores.length
+          )
         : 0;
 
     return {
@@ -39,8 +45,12 @@ export class StatsService {
     };
   }
 
-  // Get progress summary for a specific episode
-  static getEpisodeStats(progress: EpisodeProgress) {
+  static getEpisodeStats(progress: EpisodeProgress): {
+    completed: number;
+    skipped: number;
+    withFeedback: number;
+    averageScore: number;
+  } {
     const completed = progress.translations.filter((t) => !t.skipped).length;
     const skipped = progress.translations.filter((t) => t.skipped).length;
     const withFeedback = progress.translations.filter((t) => t.feedback).length;
@@ -49,7 +59,7 @@ export class StatsService {
         ? Math.round(
             progress.translations
               .filter((t) => t.feedback)
-              .reduce((sum, t) => sum + (t.feedback?.score || 0), 0) /
+              .reduce((sum, t) => sum + (t.feedback?.score ?? 0), 0) /
               withFeedback
           )
         : 0;
@@ -62,7 +72,6 @@ export class StatsService {
     };
   }
 
-  // Determine user level based on average score
   static getLevel(averageScore: number): string {
     if (averageScore >= 90) return 'Advanced';
     if (averageScore >= 75) return 'Intermediate';
@@ -70,7 +79,6 @@ export class StatsService {
     return 'Starting';
   }
 
-  // Get streak information (days with translations)
   static getStreak(allProgress: EpisodeProgress[]): number {
     const dates = new Set<string>();
 

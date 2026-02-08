@@ -21,44 +21,45 @@
 - **Clean Architecture** – The codebase follows a feature-based structure under `src/` with `features/`, `shared/`, and `app/`.
 - `src/app/` – Next.js App Router (pages, layout, globals.css, API routes). All routes default to server components unless `'use client'` is declared.
 - `src/app/page.tsx` – landing page; uses `@/features/home` (GetHomeFeatures, FeatureList).
-- `src/app/stories/page.tsx` – dashboard listing episodes (`dynamic = 'force-dynamic'`); uses `@/features/stories` and `@/features/translations`.
-- `src/app/chat/[userProgressId]/page.tsx` – fetches progress + episode, hydrates `ChatContainer` from `@/features/translations/presentation/components`.
-- `src/app/api/*` – episodes, get-feedback, validate-translation; use shared DB and feature services.
-- `src/features/` – Each feature has `domain/` (entities, repository interfaces), `application/` (use cases, DTOs), `infrastructure/` (repositories, mappers, services), `presentation/` (components, hooks, stores, server actions). Features: `home`, `stories`, `translations`, `auth`, `phrasal-verbs` (placeholder).
-- `src/shared/` – `domain/` (errors, types), `infrastructure/` (database/mongo connection + models, config/constants), `presentation/` (components/ui, hooks, layouts, utils).
-- `lib/` – Remaining: `types.ts` (shared types used by UI), `storage.ts`, `stats.ts`, `store/`, `ai-service.ts`, `episode-loader.ts`. DB and actions have moved to `src/shared` and `src/features`.
+- `src/app/stories/page.tsx` – listado principal de episodios (`dynamic = 'force-dynamic'`); usa `@/features/stories`.
+- `src/app/stories/chat/[userProgressId]/page.tsx` – página del chat; obtiene progreso y episodio, hidrata `ChatContainer` desde `@/features/stories/presentation/components`.
+- `src/app/chat/[userProgressId]/page.tsx` – redirige a `/stories/chat/[userProgressId]` por compatibilidad.
+- `src/app/api/*` – episodes, get-feedback, validate-translation; usan DB compartida y servicios del feature stories.
+- `src/features/` – Cada feature tiene `domain/`, `application/`, `infrastructure/`, `presentation/`. Features: `home`, `stories` (episodios + chat/traducciones), `auth`, `phrasal-verbs` (placeholder).
+- `src/shared/` – `domain/` (errors, types), `infrastructure/` (database/mongo, config), `presentation/` (components/ui, hooks, layouts, utils).
+- El feature **stories** concentra: listado de episodios, chat de traducción, progreso de usuario, feedback Gemini, tipos UI (ChatMessage, etc.), `clientStorage`, `StatsService`, `episode-loader` para JSON estático y `ClientFeedbackService` para llamadas cliente a get-feedback.
 - `components/` – Legacy UI (chat, home, ui, stats); app routes import from `@/features/*` and `@/shared/*`. Prefer adding new UI under the corresponding feature’s `presentation/` or `shared/presentation/`.
 - `scripts/` – One-off maintenance tasks that speak directly to Mongo.
 
 ## Data & Execution Flow
 - Mongo connection lives in `src/shared/infrastructure/database/mongo/connection.ts`, caches via `globalThis`; call `await dbConnect()` before touching models. Models are in `src/shared/infrastructure/database/mongo/models/` (Episode → `master_data`; UserProgress, SavedWord, User → `chat-app`).
 - Episodes: `src/features/stories` (domain entities, EpisodeRepository, MongoEpisodeRepository, GetStories/GetEpisodeById use cases). Stories page and chat use `getAllEpisodesAction`, `getEpisodeByIdAction` from `@/features/stories/presentation/actions`.
-- User progress and translations: `src/features/translations` (UserProgress, Interaction, TranslationFeedback; UserProgressRepository, MongoUserProgressRepository; GeminiTranslationService, TranslationValidationService; use cases and presentation actions). Server actions with `'use server'` live in each feature’s `presentation/actions.ts` and call use cases.
-- Auth: `src/features/auth` (stub User, GetCurrentUser, StubAuthRepository). Use `getCurrentUserId()` from `@/features/auth/presentation/actions` instead of `CONSTANTS.FAKE_USER_ID` in new code.
-- Translation flow: client text → `TranslationValidationService` (optional) → `submitTranslation` / `updateProgress` (translations feature) → Gemini via `GeminiTranslationService` → Mongo via repositories → UI re-renders.
-- Local storage (`lib/storage.ts`) and statistics (`lib/stats.ts`) exist but aren’t yet wired into UI; confirm usage before extending.
+- User progress and translations: dentro de `src/features/stories` (UserProgress, Interaction, TranslationFeedback; UserProgressRepository, MongoUserProgressRepository; GeminiTranslationService, TranslationValidationService; use cases y actions en `presentation/actions.ts`).
+- Auth: `src/features/auth` (stub User, GetCurrentUser, StubAuthRepository). Usar `getCurrentUserId()` desde `@/features/auth/presentation/actions` en lugar de `CONSTANTS.FAKE_USER_ID`.
+- Flujo de traducción: texto cliente → `TranslationValidationService` (opcional) → `submitTranslation` / `updateProgress` (stories) → Gemini vía `GeminiTranslationService` → Mongo vía repositorios → UI.
+- Almacenamiento local: `src/features/stories/infrastructure/storage/client-storage.ts`. Estadísticas: `src/features/stories/application/services/StatsService.ts`; confirmar uso antes de extender.
 
 ## API & Server Actions Practices
 - API routes live under `src/app/api/*/route.ts` and must return `Response.json(...)` or `NextResponse`; include defensive validation plus minimal logging.
 - `src/app/api/get-feedback` uses `GeminiTranslationService.getFeedback`; surface `details` on 500s for debugging.
 - `src/app/api/validate-translation` uses `TranslationValidationService.validate`; keep it dependency-light (no DB).
 - `src/app/api/episodes` and `[id]` use shared DB connection and models; never assume cached Mongoose state.
-- Server Actions live in feature `presentation/actions.ts` (e.g. `@/features/translations/presentation/actions`). Those that redirect (e.g. `startChatByEpisode`) must call `revalidatePath('/')`.
+- Server Actions viven en `presentation/actions.ts` del feature (e.g. `@/features/stories/presentation/actions`). Las que redirigen (e.g. `startChatByEpisode` a `/stories/chat/${progressId}`) deben llamar `revalidatePath('/')`.
 - `submitTranslation` wraps Gemini errors and returns `{ success: false, message }` so the client can show `ErrorAlert` banners.
 - When mutating Mongo from repositories/actions, convert string IDs to `Types.ObjectId` where needed and output `_id` as strings to the client.
 
 ## Frontend Implementation Notes
 - Client components require `'use client'` at the top; server components must stay hook-free.
-- `ChatContainer` lives in `src/features/translations/presentation/components/`; it houses stateful logic, optimistic updates, `useMemo` for message interleaving, and fallback UI once an episode is complete.
-- `MessageBubble` tokenizes protagonist speeches to enable the word-definition modal. Keep memoized helpers pure; avoid referencing browser APIs there.
-- `WordDefinitionModal` triggers server actions from `@/features/translations/presentation/actions` (`getWordDefinition`, `saveWord`) and surfaces toast notifications with `sonner`; keep these client-only.
+- `ChatContainer` está en `src/features/stories/presentation/components/`; concentra la lógica de estado, actualizaciones optimistas, `useMemo` para mensajes entrelazados y la UI de episodio completado.
+- `MessageBubble` tokeniza los discursos del protagonista para el modal de definición de palabras. Mantener helpers memoizados puros; evitar APIs del navegador ahí.
+- `WordDefinitionModal` usa server actions de `@/features/stories/presentation/actions` (`getWordDefinition`, `saveWord`) y toasts con `sonner`; mantener solo en cliente.
 - Markdown rendering uses `react-markdown` + `remark-gfm`; wrap paragraphs with custom renderers when trimming margins.
 - Navigation uses `<Link>` plus `useRouter()` for imperative transitions (e.g., completion CTA). Keep those interactions on the client side.
 - Keep Spanish localization consistent (`Atrás`, `Continuar`, etc.); do not regress to English when extending UI strings.
 
 ## Styling & Theming
 - Tailwind CSS v4 is imported globally through `app/globals.css` with `@theme inline`. Avoid editing generated `tailwind.config`; rely on CSS variables declared in `:root`/`.dark` scopes.
-- Use `cn` utility (`lib/utils.ts`) to merge classes; it already wraps `clsx` + `tailwind-merge`.
+- Usar la utilidad `cn` (`@/shared/presentation/utils`) para combinar clases; ya envuelve `clsx` + `tailwind-merge`.
 - Components lean on shadcn’s `cva` variants; extend via `className` overrides rather than forking primitives.
 - Typography is anchored by `Varela_Round` (see `src/app/layout.tsx`). Apply `font-sans` to new layout wrappers if needed.
 - Provide gradients or textured backgrounds (see `src/app/page.tsx`, Stories page); avoid flat #fff canvases in new surfaces.
@@ -67,17 +68,17 @@
 ## TypeScript & Code Style Guidelines
 - TS config enforces `strict`, `moduleResolution: bundler`, and path aliases `@/*`, `@/features/*`, `@/shared/*`. Prefer these over long relative paths.
 - Follow file-local conventions: shadcn files omit semicolons, while most server code includes them. Match the surrounding style.
-- Domain types live in each feature’s `domain/entities/` (e.g. `Episode` in stories, `UserProgress`/`TranslationFeedback` in translations). `lib/types.ts` remains for backward compatibility and shared UI types (e.g. `ChatMessage`).
-- Validate runtime data with `zod` where applicable (e.g. `src/features/translations/infrastructure/services/feedback-schema.ts`); prefer schema-driven parsing.
+- Los tipos de dominio viven en `domain/entities/` de cada feature (en stories: Episode, UserProgress, TranslationFeedback, Interaction, etc.). Tipos UI como `ChatMessage`, `EpisodeProgress`, `UserStats` están en `src/features/stories/domain/types.ts`.
+- Validar datos en runtime con `zod` donde aplique (e.g. `src/features/stories/infrastructure/services/feedback-schema.ts`); preferir parsing guiado por esquema.
 - Always annotate return types on exported functions and server actions to clarify serialized shape.
 - For async DB access, `await dbConnect()` first (from `@/shared/infrastructure/database/mongo/connection`), then use model getters from `@/shared/infrastructure/database/mongo/models/*`; never import `mongoose.model` statically.
 - When logging errors, use contextual prefixes (existing pattern: `console.error('Error fetching episode:', error)`), then throw/return meaningful errors.
 - Avoid broad `any` where you can map to known interfaces; when dealing with Mongo `lean()` results, destruct `_id` + convert to string early.
 
 ## Error Handling & Validation
-- Client-side validation uses `TranslationValidationService` from `@/features/translations/infrastructure/services`; reuse it before hitting the network to reduce load.
-- Server routes must guard required fields (see `get-feedback` early return). Respond with `status: 400/422` for user errors and `500` for infra issues.
-- `GeminiTranslationService` (translations feature) logs when responses are empty and throws; callers catch and convert to user-friendly messages.
+- La validación en cliente usa `TranslationValidationService` desde `@/features/stories/infrastructure/services`; reutilizarla antes de llamar a la red.
+- Las rutas API deben validar campos requeridos (ver early return en `get-feedback`). Responder con `status: 400/422` para errores de usuario y `500` para fallos de infra.
+- `GeminiTranslationService` (feature stories) registra y lanza cuando la respuesta está vacía; los llamadores capturan y convierten a mensajes amigables.
 - LocalStorage helpers should stay wrapped in `try/catch` to avoid SSR/Next hydration crashes; continue this pattern for any new browser storage utilities.
 
 ## Environment & Secrets
@@ -109,7 +110,7 @@
 - Read adjacent files before editing to mirror tone, localization, and formatting.
 - Favor incremental, well-scoped changes; the Mongo + Gemini stack is easy to break if you skip validation/logging.
 - Explain validation and manual QA steps in PR descriptions so future agents can reproduce them quickly.
-- If you need new infra (queues, cron, etc.), add it under `lib/` with isolated modules and expand this document accordingly.
+- Si necesitas nueva infra (queues, cron, etc.), añádela bajo `src/features/stories` o `src/shared` con módulos aislados y amplía este documento.
 
 ## UI Microcopy & Localization
 - Spanish is the default language for labels, buttons, and helper text; keep tone motivational yet concise.

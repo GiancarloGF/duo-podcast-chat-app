@@ -1,5 +1,5 @@
-import type { TranslationFeedback } from '@/features/translations/domain/entities/TranslationFeedback';
-import type { TranslationFeedbackService } from '@/features/translations/domain/repositories/TranslationFeedbackService.interface';
+import type { TranslationFeedback } from '@/features/stories/domain/entities/TranslationFeedback';
+import type { TranslationFeedbackService } from '@/features/stories/domain/repositories/TranslationFeedbackService.interface';
 import type { SubmitTranslationResultDto } from '../dto/SubmitTranslationResult.dto';
 
 export async function submitTranslation(
