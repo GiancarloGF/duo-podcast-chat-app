@@ -4,8 +4,6 @@ import type { Metadata } from 'next';
 
 // import { Analytics } from "@vercel/analytics/next"
 import './globals.css';
-import { Header } from '@/shared/presentation/components/Header';
-import { getAuthenticatedAppForUser } from '@/shared/infrastructure/firebase/serverApp';
 
 import { Varela_Round } from 'next/font/google';
 
@@ -46,20 +44,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { currentUser } = await getAuthenticatedAppForUser();
-  const serializableUser = currentUser
-    ? {
-        uid: currentUser.uid,
-        email: currentUser.email || null,
-        displayName: currentUser.displayName || null,
-        photoURL: currentUser.photoURL || null,
-      }
-    : null;
-
   return (
     <html lang='es'>
       <body className={`${varela_round.variable} font-sans antialiased`}>
-        <Header initialUser={serializableUser} />
         {children}
         {/* <Analytics /> */}
       </body>
