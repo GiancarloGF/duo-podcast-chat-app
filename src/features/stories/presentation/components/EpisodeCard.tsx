@@ -74,7 +74,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
 
         <div className='mt-auto pt-4'>
           {episode.status === 'started' && (
-            <Link href={`/chat/${episode.progressId}`}>
+            <Link href={`/stories/chat/${episode.progressId}`}>
               <Button className='w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'>
                 Continuar
               </Button>
