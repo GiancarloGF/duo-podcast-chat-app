@@ -5,12 +5,25 @@ import type { Metadata } from 'next';
 // import { Analytics } from "@vercel/analytics/next"
 import './globals.css';
 
-import { Varela_Round } from 'next/font/google';
+import { Bungee, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 
 // Initialize fonts
-const varela_round = Varela_Round({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-varela-round',
+  variable: '--font-space-grotesk',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  variable: '--font-ibm-plex-mono',
+  display: 'swap',
+  weight: ['400', '600'],
+});
+
+const bungee = Bungee({
+  subsets: ['latin'],
+  variable: '--font-bungee',
   display: 'swap',
   weight: '400',
 });
@@ -46,7 +59,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang='es'>
-      <body className={`${varela_round.variable} font-sans antialiased`}>
+      <body
+        className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${bungee.variable} font-sans antialiased`}
+      >
         {children}
         {/* <Analytics /> */}
       </body>

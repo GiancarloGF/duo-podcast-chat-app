@@ -34,17 +34,17 @@ export function ErrorAlert({
   if (!isVisible || !message) return null;
 
   return (
-    <div className='flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300'>
+    <div className='flex items-start gap-3 p-4 bg-[#ffe8e8] border-2 border-red-700 rounded-[8px] text-sm text-red-800 shadow-[4px_4px_0_0_#7f1d1d]'>
       <AlertCircle className='w-5 h-5 flex-shrink-0 mt-0.5' />
       <div className='flex-1'>
-        <p>{message}</p>
+        <p className='font-semibold'>{message}</p>
       </div>
       <button
         onClick={() => {
           setIsVisible(false);
           onDismiss?.();
         }}
-        className='flex-shrink-0 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200'
+        className='flex-shrink-0 text-red-700 hover:text-red-900'
       >
         <X className='w-4 h-4' />
       </button>

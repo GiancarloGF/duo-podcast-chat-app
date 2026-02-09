@@ -118,22 +118,22 @@ export function TranslationInput({
     <div ref={containerRef} className='w-full max-w-4xl mx-auto px-4 pb-4'>
       {/* Validation Errors Popup - Show above input if any */}
       {validationErrors.length > 0 && (
-        <div className='mb-2 p-2 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 flex items-center gap-2 animate-in slide-in-from-bottom-2'>
+        <div className='mb-2 p-2 bg-[#ffe8e8] text-red-700 text-xs rounded-[8px] border-2 border-red-700 shadow-[3px_3px_0_0_#7f1d1d] flex items-center gap-2 animate-in slide-in-from-bottom-2 font-semibold'>
           <AlertCircle className='w-4 h-4' />
           <span>{validationErrors[0]}</span>
         </div>
       )}
 
-      <div className='relative flex items-end gap-2 bg-gray-100 dark:bg-slate-800 rounded-4xl p-2 pr-2 shadow-sm border border-transparent focus-within:border-gray-300 dark:focus-within:border-slate-600 transition-colors'>
+      <div className='relative flex items-end gap-2 bg-card rounded-[10px] p-2 pr-2 border-2 border-border shadow-[5px_5px_0_0_var(--color-border)] transition-colors'>
         {/* Text Input */}
         <textarea
           ref={inputRef}
           value={translation}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder='Type / for commands'
+          placeholder='Escribe tu traduccion...'
           disabled={isLoading || disabled}
-          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-[15px] leading-relaxed overflow-hidden'
+          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-foreground placeholder-muted-foreground text-[15px] leading-relaxed overflow-hidden font-medium'
           rows={1}
         />
 
@@ -143,7 +143,7 @@ export function TranslationInput({
           <Button
             variant='ghost'
             size='icon'
-            className='h-9 w-9 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full'
+            className='h-9 w-9 text-muted-foreground hover:text-foreground rounded-[6px] border border-border bg-secondary/40'
             onClick={onSkip}
             disabled={isLoading || disabled}
             aria-label='Skip'
@@ -159,8 +159,8 @@ export function TranslationInput({
             className={cn(
               'h-9 w-9 rounded-full transition-all duration-200',
               translation.trim()
-                ? 'bg-black hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-200 dark:text-black'
-                : 'bg-gray-300 dark:bg-slate-700 text-gray-500 cursor-not-allowed'
+                ? 'bg-primary hover:brightness-95 text-primary-foreground border-2 border-border shadow-[3px_3px_0_0_var(--color-border)] rounded-[6px]'
+                : 'bg-muted text-muted-foreground border-2 border-border rounded-[6px] cursor-not-allowed'
             )}
           >
             <Send className='h-4 w-4 ml-0.5' />

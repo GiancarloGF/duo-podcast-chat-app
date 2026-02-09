@@ -87,7 +87,7 @@ export default async function StoriesPage() {
   });
 
   return (
-    <main className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4'>
+    <main className='min-h-screen p-4'>
       <div className='max-w-6xl mx-auto py-12'>
         <Breadcrumb className='mb-6'>
           <BreadcrumbList>
@@ -101,11 +101,11 @@ export default async function StoriesPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className='text-center mb-12'>
-          <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-2'>
+        <div className='mb-12 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+          <h1 className='text-4xl font-black text-foreground mb-2'>
             Relatos en Inglés
           </h1>
-          <p className='text-lg text-gray-600 dark:text-gray-300'>
+          <p className='text-lg text-muted-foreground font-medium'>
             Practica inglés traduciendo historias reales y fascinantes
           </p>
         </div>
@@ -114,10 +114,10 @@ export default async function StoriesPage() {
           {inProgressEpisodes.length > 0 && (
             <div>
               <div className='flex items-center gap-3 mb-6'>
-                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                <h2 className='text-2xl font-black text-foreground'>
                   En Progreso
                 </h2>
-                <span className='px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'>
+                <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-primary text-primary-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
                   {inProgressEpisodes.length}
                 </span>
               </div>
@@ -132,10 +132,10 @@ export default async function StoriesPage() {
           {completedEpisodes.length > 0 && (
             <div>
               <div className='flex items-center gap-3 mb-6'>
-                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                <h2 className='text-2xl font-black text-foreground'>
                   Completados
                 </h2>
-                <span className='px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'>
+                <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-accent text-accent-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
                   {completedEpisodes.length}
                 </span>
               </div>
@@ -150,10 +150,10 @@ export default async function StoriesPage() {
           {availableEpisodes.length > 0 && (
             <div>
               <div className='flex items-center gap-3 mb-6'>
-                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                <h2 className='text-2xl font-black text-foreground'>
                   Disponibles
                 </h2>
-                <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-secondary text-secondary-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
                   {availableEpisodes.length}
                 </span>
               </div>
@@ -166,8 +166,8 @@ export default async function StoriesPage() {
           )}
 
           {enrichedEpisodes.length === 0 && (
-            <div className='text-center py-12'>
-              <p className='text-lg text-gray-600 dark:text-gray-400'>
+            <div className='text-center py-12 rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)]'>
+              <p className='text-lg text-muted-foreground font-semibold'>
                 No hay episodios disponibles en este momento.
               </p>
             </div>

@@ -44,15 +44,15 @@ export function Header({ initialUser }: HeaderProps) {
   };
 
   return (
-    <header className='w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60'>
-      <div className='mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8'>
+    <header className='w-full border-b-2 border-border bg-card'>
+      <div className='mx-auto flex min-h-18 w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8'>
         <div className='flex min-w-0 flex-1 items-center'>
           <a className='flex flex-col leading-tight' href='/'>
-            <span className='text-base font-bold tracking-tight text-foreground sm:text-lg'>
+            <span className='text-lg font-black uppercase tracking-wide text-foreground sm:text-xl'>
               Ruway App
             </span>
-            <span className='text-xs text-muted-foreground sm:text-sm'>
-              Practica tu Ingles
+            <span className='text-[11px] font-semibold uppercase text-muted-foreground sm:text-xs'>
+              Practica Tu Ingles
             </span>
           </a>
         </div>
@@ -62,8 +62,8 @@ export function Header({ initialUser }: HeaderProps) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className='rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'>
-                    <Avatar className='h-9 w-9 border'>
+                  <button className='rounded-[6px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'>
+                    <Avatar className='h-10 w-10'>
                       {user.photoURL ? (
                         <AvatarImage src={user.photoURL} alt={userDisplayName} />
                       ) : null}
@@ -72,7 +72,7 @@ export function Header({ initialUser }: HeaderProps) {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56'>
-                  <DropdownMenuLabel className='truncate'>
+                  <DropdownMenuLabel className='truncate uppercase tracking-wide font-bold'>
                     {userDisplayName}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

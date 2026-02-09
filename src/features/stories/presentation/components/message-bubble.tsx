@@ -149,11 +149,11 @@ function ClickableWord({
   };
 
   return (
-    <span
-      onClick={handleClick}
-      className='cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
-      role='button'
-      tabIndex={0}
+      <span
+        onClick={handleClick}
+        className='cursor-pointer transition-colors hover:text-primary hover:underline hover:decoration-dotted hover:underline-offset-2 focus-visible:underline focus-visible:decoration-dotted focus-visible:underline-offset-2'
+        role='button'
+        tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -249,9 +249,9 @@ export function MessageBubble({
 
   // Avatar colors based on sender type
   const avatarClasses = cn(
-    'w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-xs flex-shrink-0',
-    isUserMessage && 'bg-gray-900 dark:bg-gray-600',
-    isHostMessage && 'bg-blue-600 dark:bg-blue-500',
+    'w-8 h-8 rounded-[6px] border-2 border-border flex items-center justify-center text-white font-bold text-xs flex-shrink-0',
+    isUserMessage && 'bg-foreground',
+    isHostMessage && 'bg-primary',
     // Protagonist uses inline style for custom color
   );
 
@@ -260,10 +260,10 @@ export function MessageBubble({
     // Full width on mobile, fit content on desktop
     'w-full md:w-fit md:max-w-md',
     isUserMessage
-      ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl px-5 py-3' // User: Pill
+      ? 'bg-secondary text-secondary-foreground rounded-[10px] border-2 border-border px-5 py-3 shadow-[4px_4px_0_0_var(--color-border)]' // User: Pill
       : isProtagonistMessage
-        ? 'text-gray-900 px-5 py-3 rounded-3xl' // Protagonist: Pill (color applied via style)
-        : 'px-0 py-1 text-gray-900 dark:text-gray-100', // Host: Text-only
+        ? 'text-gray-900 px-5 py-3 rounded-[10px] border-2 border-border shadow-[4px_4px_0_0_var(--color-border)]' // Protagonist: Pill (color applied via style)
+        : 'bg-white text-gray-900 rounded-[10px] border-2 border-border px-5 py-3 shadow-[4px_4px_0_0_var(--color-border)]', // Host: Card style
   );
 
   const containerClasses = cn(
@@ -333,7 +333,7 @@ export function MessageBubble({
             <div className='absolute top-2 right-2 opacity-0 group-hover/bubble:opacity-100 transition-opacity'>
               <button
                 onClick={() => setIsTranslated(!isTranslated)}
-                className='p-1.5 rounded-full bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-gray-700 dark:text-gray-200 transition-colors'
+                className='p-1.5 rounded-[6px] border border-border bg-card hover:bg-secondary text-foreground transition-colors'
                 title={isTranslated ? 'Ver original' : 'Ver traducción'}
               >
                 <Languages size={14} />
@@ -342,7 +342,7 @@ export function MessageBubble({
           )}
 
           {/* Render Markdown Content */}
-          <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
+            <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
             {isProtagonistMessage && !isTranslated ? (
               <ClickableTextRenderer
                 text={
@@ -373,16 +373,16 @@ export function MessageBubble({
           {message?.message?.keyPoints &&
             message?.message?.keyPoints?.length > 0 &&
             !isTranslated && (
-              <div className='text-xs text-gray-600 dark:text-gray-300 mt-3 pt-3 border-t border-gray-400/20 dark:border-gray-500/30'>
+              <div className='text-xs text-muted-foreground mt-3 pt-3 border-t-2 border-border/30'>
                 <details className='cursor-pointer group/details'>
-                  <summary className='font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded px-1 -ml-1 inline-flex items-center gap-1 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                    <summary className='font-bold uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring rounded-[4px] px-1 -ml-1 inline-flex items-center gap-1 hover:text-foreground transition-colors'>
                     Puntos clave
                   </summary>
                   <div className='mt-2 space-y-2'>
                     {message.message.keyPoints.map((point, idx) => (
                       <div
                         key={idx}
-                        className='text-xs border-l-2 border-blue-400/50 pl-2'
+                        className='text-xs border-l-2 border-primary/70 pl-2'
                       >
                         <div className='font-semibold'>
                           {point.word}{' '}
@@ -411,7 +411,7 @@ export function MessageBubble({
             )}
           {/* Feedback Button & Score */}
           {message.isValidating && (
-            <div className='mt-3 flex items-center gap-2 text-sm font-medium text-violet-600 dark:text-violet-400 animate-pulse'>
+            <div className='mt-3 flex items-center gap-2 text-sm font-bold text-primary animate-pulse'>
               <Sparkles className='w-4 h-4' />
               <span>Validando feedback...</span>
             </div>
@@ -419,18 +419,18 @@ export function MessageBubble({
 
           {showFeedbackButton && !message.isValidating && (
             <div className='flex items-center gap-2 mt-2'>
-              <button
-                onClick={() => onFeedbackClick?.(message.id)}
-                className='text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1'
-                aria-label={`Ver retroalimentación para el mensaje ${message.id}`}
-              >
-                Ver feedback
-              </button>
-              {message.translationFeedback?.score !== undefined && (
-                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 select-none'>
-                  {message.translationFeedback.score}/100
-                </span>
-              )}
+                <button
+                  onClick={() => onFeedbackClick?.(message.id)}
+                  className='text-xs font-bold uppercase text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded-[4px] px-2 py-1'
+                  aria-label={`Ver retroalimentación para el mensaje ${message.id}`}
+                >
+                  Ver feedback
+                </button>
+                {message.translationFeedback?.score !== undefined && (
+                  <span className='text-xs font-bold text-muted-foreground select-none'>
+                    {message.translationFeedback.score}/100
+                  </span>
+                )}
             </div>
           )}
         </div>

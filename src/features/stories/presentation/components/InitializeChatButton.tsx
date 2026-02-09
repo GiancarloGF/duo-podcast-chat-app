@@ -22,7 +22,7 @@ export function InitializeChatButton({ episodeId }: { episodeId: string }) {
   return (
     <Button
       onClick={initializeChat}
-      className='w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
+      className='w-full'
     >
       {isInitializing ? 'Cargando...' : 'Comenzar'}
     </Button>

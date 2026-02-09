@@ -271,21 +271,21 @@ export function ChatContainer({
         : 0;
 
     return (
-      <div className='min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-4 flex items-center justify-center'>
+      <div className='min-h-screen p-4 flex items-center justify-center'>
         <div className='max-w-md w-full'>
-          <div className='bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden'>
-            <div className='relative h-48 w-full bg-gray-200 dark:bg-gray-700'>
+          <div className='bg-card rounded-[10px] border-2 border-border shadow-[8px_8px_0_0_var(--color-border)] overflow-hidden'>
+            <div className='relative h-48 w-full bg-muted border-b-2 border-border'>
               <img
                 src={initialEpisode.imageUrl}
                 alt={initialEpisode.title}
                 className='w-full h-full object-cover'
               />
-              <div className='absolute inset-0 bg-black/30 flex items-end p-6'>
+              <div className='absolute inset-0 bg-[rgba(25,21,20,0.4)] flex items-end p-6'>
                 <div>
-                  <div className='text-white/90 text-sm font-medium uppercase tracking-wider mb-1'>
+                  <div className='text-white text-sm font-bold uppercase tracking-wider mb-1'>
                     Episodio Completado
                   </div>
-                  <h1 className='text-2xl font-bold text-white leading-tight'>
+                  <h1 className='text-2xl font-black text-white leading-tight'>
                     {initialEpisode.title}
                   </h1>
                 </div>
@@ -294,28 +294,28 @@ export function ChatContainer({
 
             <div className='p-6'>
               <div className='mb-6'>
-                <h3 className='text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2'>
+                <h3 className='text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2'>
                   Resumen
                 </h3>
-                <p className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed line-clamp-3'>
+                <p className='text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium'>
                   {initialEpisode.summaryText}
                 </p>
               </div>
 
               <div className='grid grid-cols-2 gap-4 mb-8'>
-                <div className='bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center'>
-                  <div className='text-3xl font-bold text-blue-600 dark:text-blue-400'>
+                <div className='bg-secondary rounded-[8px] p-4 text-center border-2 border-border shadow-[4px_4px_0_0_var(--color-border)]'>
+                  <div className='text-3xl font-black text-secondary-foreground'>
                     {stats.completed}
                   </div>
-                  <div className='text-xs font-medium text-blue-800 dark:text-blue-200 mt-1'>
+                  <div className='text-xs font-bold text-secondary-foreground mt-1 uppercase'>
                     Traducciones
                   </div>
                 </div>
-                <div className='bg-violet-50 dark:bg-violet-900/20 rounded-xl p-4 text-center'>
-                  <div className='text-3xl font-bold text-violet-600 dark:text-violet-400'>
+                <div className='bg-accent rounded-[8px] p-4 text-center border-2 border-border shadow-[4px_4px_0_0_var(--color-border)]'>
+                  <div className='text-3xl font-black text-accent-foreground'>
                     {averageScore}%
                   </div>
-                  <div className='text-xs font-medium text-violet-800 dark:text-violet-200 mt-1'>
+                  <div className='text-xs font-bold text-accent-foreground mt-1 uppercase'>
                     Precisión Media
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export function ChatContainer({
               <div className='space-y-3'>
                 <Button
                   onClick={() => router.push('/stories')}
-                  className='w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 py-6 text-lg'
+                  className='w-full py-6 text-lg'
                 >
                   <Home className='w-5 h-5 mr-2' />
                   Volver a Relatos
@@ -342,21 +342,21 @@ export function ChatContainer({
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col'>
-      <header className='bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-4 sticky top-0 z-40'>
+    <div className='min-h-screen flex flex-col'>
+      <header className='bg-card border-b-2 border-border p-4 sticky top-0 z-40'>
         <div className='max-w-4xl mx-auto flex items-center justify-between gap-4'>
           <div className='flex items-center gap-2 sm:gap-4 flex-1 min-w-0'>
             <Link href='/stories'>
-              <Button variant='ghost' size='sm' className='gap-2 shrink-0'>
+              <Button variant='outline' size='sm' className='gap-2 shrink-0'>
                 <ChevronLeft className='w-4 h-4' aria-hidden='true' />
                 <span className='hidden sm:inline'>Atrás</span>
               </Button>
             </Link>
             <div className='min-w-0 flex-1'>
-              <h1 className='font-bold text-gray-900 dark:text-white truncate'>
+              <h1 className='font-black text-foreground truncate'>
                 {initialEpisode.title || 'Episodio'}
               </h1>
-              <p className='text-xs text-gray-500 dark:text-gray-400'>
+              <p className='text-xs text-muted-foreground font-semibold uppercase'>
                 Mensaje {currentMessageIndex + 1} de{' '}
                 {initialEpisode.messages.length}
               </p>
@@ -364,7 +364,7 @@ export function ChatContainer({
           </div>
 
           <div className='flex items-center gap-3 shrink-0'>
-            <span className='text-xs font-medium text-gray-600 dark:text-gray-400 min-w-[2.5rem] text-right'>
+            <span className='text-xs font-bold text-foreground min-w-[2.5rem] text-right'>
               {Math.round(
                 ((currentMessageIndex + 1) / initialEpisode.messages.length) *
                   100
@@ -372,9 +372,9 @@ export function ChatContainer({
               %
             </span>
             <div className='w-24 sm:w-32'>
-              <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
+              <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
                 <div
-                  className='bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all'
+                  className='bg-primary h-full transition-all'
                   style={{
                     width: `${
                       ((currentMessageIndex + 1) /
@@ -390,7 +390,7 @@ export function ChatContainer({
       </header>
 
       {aiError && (
-        <div className='bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-4'>
+        <div className='bg-card border-b-2 border-border p-4'>
           <ErrorAlert
             message={aiError}
             onDismiss={() => setAiError(null)}
@@ -400,7 +400,7 @@ export function ChatContainer({
         </div>
       )}
 
-      <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-slate-900 pb-safe md:pb-4'>
+      <div className='flex-1 overflow-y-auto p-4 space-y-4 pb-safe md:pb-4'>
         <div className='max-w-4xl mx-auto w-full pb-20 md:pb-20'>
           {displayedMessages.map((msg) => (
             <div key={msg.id} className='mb-4'>
@@ -425,7 +425,7 @@ export function ChatContainer({
         </div>
       </div>
 
-      <footer className='fixed md:sticky bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-4 pb-safe md:pb-4 z-50'>
+      <footer className='fixed md:sticky bottom-0 left-0 right-0 bg-card border-t-2 border-border p-4 pb-safe md:pb-4 z-50'>
         <div className='max-w-4xl mx-auto'>
           {needsTranslation ? (
             <TranslationInput
@@ -439,7 +439,7 @@ export function ChatContainer({
               <Button
                 onClick={handleNext}
                 disabled={isProcessing || !canInteract}
-                className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
+                className='min-w-36'
               >
                 Siguiente
               </Button>

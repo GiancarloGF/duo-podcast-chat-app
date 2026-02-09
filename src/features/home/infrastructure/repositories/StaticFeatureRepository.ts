@@ -5,9 +5,9 @@ export class StaticFeatureRepository implements FeatureRepository {
   private features: Feature[] = [
     {
       id: 'stories',
-      title: 'English Stories',
+      title: 'Relatos en Ingles',
       description:
-        'Practice English by reading and listening to interactive stories.',
+        'Lee relatos en Ingles y practica tu comprensión y escritura.',
       route: '/stories',
       isEnabled: true,
     },

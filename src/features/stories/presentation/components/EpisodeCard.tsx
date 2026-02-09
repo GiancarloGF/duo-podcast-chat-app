@@ -20,10 +20,10 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
   return (
     <Card
       key={episode.id}
-      className='hover:shadow-lg transition-shadow border-0 bg-white dark:bg-slate-800 pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-lg'
+      className='transition-all bg-card pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-[10px] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_var(--color-border)]'
     >
       {episode.imageUrl && (
-        <div className='relative w-full h-48 bg-gray-200 dark:bg-gray-700'>
+        <div className='relative w-full h-48 bg-muted border-b-2 border-border'>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={episode.imageUrl}
@@ -33,10 +33,10 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
           {isStarted && (
             <div className='absolute top-2 right-2'>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                className={`px-2 py-1 rounded-[6px] text-[11px] font-bold uppercase tracking-wide border-2 border-border shadow-[2px_2px_0_0_var(--color-border)] ${
                   episode.status === 'completed'
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'bg-primary text-primary-foreground'
                 }`}
               >
                 {episode.status === 'completed' ? 'Completado' : 'En progreso'}
@@ -46,26 +46,26 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
         </div>
       )}
       <CardHeader className='pt-3'>
-        <CardTitle className='text-xl text-gray-900 dark:text-white line-clamp-1'>
+        <CardTitle className='text-xl text-foreground line-clamp-1'>
           {episode.title}
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-4 grow flex flex-col'>
-        <p className='text-sm text-gray-700 dark:text-gray-300 leading-relaxed'>
+        <p className='text-sm text-muted-foreground leading-relaxed font-medium'>
           {episode.summaryText}
         </p>
 
         {isStarted && (
           <div className='space-y-2'>
             <div className='flex justify-between text-xs'>
-              <span className='text-gray-600 dark:text-gray-400'>Progreso</span>
-              <span className='font-medium text-gray-900 dark:text-white'>
+              <span className='text-muted-foreground font-semibold uppercase'>Progreso</span>
+              <span className='font-bold text-foreground'>
                 {progressPercent}%
               </span>
             </div>
-            <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
+            <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
               <div
-                className='bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all'
+                className='bg-primary h-full transition-all'
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -75,7 +75,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
         <div className='mt-auto pt-4'>
           {episode.status === 'started' && (
             <Link href={`/stories/chat/${episode.progressId}`}>
-              <Button className='w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'>
+              <Button className='w-full'>
                 Continuar
               </Button>
             </Link>
@@ -84,7 +84,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
             <InitializeChatButton episodeId={episode.id} />
           )}
           {episode.status === 'completed' && (
-            <div className='w-full text-center py-2 px-4 rounded-lg bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 font-medium'>
+            <div className='w-full text-center py-2 px-4 rounded-[6px] bg-accent text-accent-foreground font-bold uppercase tracking-wide border-2 border-border shadow-[3px_3px_0_0_var(--color-border)]'>
               ✓ Completado
             </div>
           )}
