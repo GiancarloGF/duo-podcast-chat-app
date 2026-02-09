@@ -26,8 +26,8 @@ export function LoginScreen() {
   };
 
   return (
-    <main className='min-h-screen bg-[#f3f4f3] p-4 md:p-8'>
-      <div className='mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center justify-center rounded-3xl border border-black/5 bg-white p-4 shadow-[0_20px_70px_-35px_rgba(0,0,0,0.4)] md:min-h-[calc(100vh-4rem)] md:p-8'>
+    <main className='min-h-screen bg-white md:bg-[#f3f4f3] md:p-8'>
+      <div className='mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center bg-white p-6 md:min-h-[calc(100vh-4rem)] md:rounded-3xl md:border md:border-black/5 md:p-8 md:shadow-[0_20px_70px_-35px_rgba(0,0,0,0.4)]'>
         <section className='grid w-full items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)] lg:gap-12'>
           <div className='mx-auto w-full max-w-md space-y-6 px-1 md:space-y-8'>
             <div>
