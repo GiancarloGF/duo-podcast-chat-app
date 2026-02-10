@@ -3,48 +3,55 @@
 import { z } from 'zod';
 import { GeminiPracticeExerciseService } from '@/features/phrasal-verbs/infrastructure/services/GeminiPracticeExerciseService';
 import {
+  practiceExerciseTypeSchema,
   practiceExerciseRequestSchema,
   type PracticeExercise,
+  type PracticeExerciseType,
   type PracticeExercisePhrasalVerbInput,
 } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
 
 const generateExerciseService = new GeminiPracticeExerciseService();
 const AI_GENERATION_TIMEOUT_MS = 25000;
 
-const generateReadAndMarkMeaningInputSchema = z.object({
+const generatePracticeExerciseInputSchema = z.object({
+  exerciseType: practiceExerciseTypeSchema,
   phrasalVerbs: practiceExerciseRequestSchema.shape.phrasalVerbs,
 });
 
-export interface GenerateReadAndMarkMeaningExerciseResult {
+export interface GeneratePracticeExerciseResult {
   success: boolean;
   exercise?: PracticeExercise;
   error?: string;
   details?: string;
 }
 
-export async function generateReadAndMarkMeaningExerciseAction(
+export async function generatePracticeExerciseAction(
+  exerciseType: PracticeExerciseType,
   phrasalVerbs: PracticeExercisePhrasalVerbInput[]
-): Promise<GenerateReadAndMarkMeaningExerciseResult> {
+): Promise<GeneratePracticeExerciseResult> {
   try {
-    console.info('[generateReadAndMarkMeaningExerciseAction] start', {
+    console.info('[generatePracticeExerciseAction] start', {
+      exerciseType,
       pvCount: phrasalVerbs.length,
       pvIds: phrasalVerbs.map((pv) => pv.id),
     });
 
     if (!process.env.GEMINI_API_KEY) {
-      console.error('[generateReadAndMarkMeaningExerciseAction] Missing GEMINI_API_KEY');
+      console.error('[generatePracticeExerciseAction] Missing GEMINI_API_KEY');
       return {
         success: false,
         error: 'Missing GEMINI_API_KEY on server environment.',
       };
     }
 
-    const parsedInput = generateReadAndMarkMeaningInputSchema.parse({
+    const parsedInput = generatePracticeExerciseInputSchema.parse({
+      exerciseType,
       phrasalVerbs,
     });
 
     const exercise = await Promise.race([
-      generateExerciseService.generateReadAndMarkMeaningExercise(
+      generateExerciseService.generateExercise(
+        parsedInput.exerciseType,
         parsedInput.phrasalVerbs
       ),
       new Promise<never>((_, reject) => {
@@ -54,7 +61,8 @@ export async function generateReadAndMarkMeaningExerciseAction(
       }),
     ]);
 
-    console.info('[generateReadAndMarkMeaningExerciseAction] success', {
+    console.info('[generatePracticeExerciseAction] success', {
+      requestedType: exerciseType,
       itemCount: exercise.items.length,
       exerciseType: exercise.exerciseType,
     });
@@ -65,8 +73,9 @@ export async function generateReadAndMarkMeaningExerciseAction(
     };
   } catch (error) {
     console.error(
-      '[generateReadAndMarkMeaningExerciseAction] Failed to generate exercise',
+      '[generatePracticeExerciseAction] Failed to generate exercise',
       {
+        exerciseType,
         pvCount: phrasalVerbs.length,
         error,
       }

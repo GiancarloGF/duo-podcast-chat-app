@@ -1,7 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
+import {
+  DndContext,
+  type DragEndEvent,
+  useDraggable,
+  useDroppable,
+} from '@dnd-kit/core';
 import { CircleCheckBig, CircleX, Flag, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
@@ -14,10 +20,14 @@ import {
   type PracticeSessionFilters,
 } from '@/features/phrasal-verbs/infrastructure/storage/practiceSessionStorage';
 import {
+  type FillInGapsDragDropExercise,
+  type MarkSentencesCorrectExercise,
   type PracticeExercise,
   type PracticeExercisePhrasalVerbInput,
+  type PracticeExerciseType,
+  type ReadAndMarkMeaningExercise,
 } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
-import { generateReadAndMarkMeaningExerciseAction } from '@/features/phrasal-verbs/presentation/actions';
+import { generatePracticeExerciseAction } from '@/features/phrasal-verbs/presentation/actions';
 import { Button } from '@/shared/presentation/components/ui/button';
 import { Spinner } from '@/shared/presentation/components/ui/spinner';
 import { cn } from '@/shared/presentation/utils';
@@ -32,6 +42,17 @@ type ExerciseSourcePhrasalVerb = Pick<
   PhrasalVerb,
   'id' | 'phrasalVerb' | 'meaning' | 'definition' | 'example'
 >;
+
+const EXERCISE_ROTATION: PracticeExerciseType[] = [
+  'read_and_mark_meaning',
+  'mark_sentences_correct',
+  'fill_in_gaps_drag_drop',
+];
+
+interface WordToken {
+  id: string;
+  text: string;
+}
 
 function shuffleArray<T>(entries: T[]): T[] {
   const next = [...entries];
@@ -82,6 +103,7 @@ function createEmptySession(filters: PracticeSessionFilters): ActivePracticeSess
     currentExercise: null,
     answersByPvId: {},
     isValidated: false,
+    generatedExercisesCount: 0,
     totalQuestions: 0,
     totalCorrect: 0,
     incorrectByPvId: {},
@@ -157,16 +179,77 @@ function sanitizeExercise(
   selectedPvIds: string[]
 ): PracticeExercise {
   const allowedPvIds = new Set(selectedPvIds);
-  const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
 
-  if (sanitizedItems.length === 0) {
-    throw new Error('The generated exercise did not include valid items.');
+  if (isReadAndMarkMeaningExercise(exercise)) {
+    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+
+    if (sanitizedItems.length === 0) {
+      throw new Error('The generated exercise did not include valid items.');
+    }
+
+    return {
+      ...exercise,
+      items: sanitizedItems,
+    };
   }
 
-  return {
-    ...exercise,
-    items: sanitizedItems,
-  };
+  if (isMarkSentencesCorrectExercise(exercise)) {
+    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+
+    if (sanitizedItems.length === 0) {
+      throw new Error('The generated exercise did not include valid items.');
+    }
+
+    return {
+      ...exercise,
+      items: sanitizedItems,
+    };
+  }
+
+  if (isFillInGapsDragDropExercise(exercise)) {
+    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+
+    if (sanitizedItems.length === 0) {
+      throw new Error('The generated exercise did not include valid items.');
+    }
+
+    const allowedPvIdSet = new Set(sanitizedItems.map((item) => item.pvId));
+    const sanitizedWordBank = exercise.wordBank.filter((word) =>
+      sanitizedItems.some(
+        (item) => item.correctWord.trim().toLowerCase() === word.trim().toLowerCase()
+      )
+    );
+
+    if (sanitizedWordBank.length !== allowedPvIdSet.size) {
+      throw new Error('The generated fill-in-gaps exercise has inconsistent word bank.');
+    }
+
+    return {
+      ...exercise,
+      items: sanitizedItems,
+      wordBank: sanitizedWordBank,
+    };
+  }
+
+  throw new Error('Unsupported exercise type.');
+}
+
+function isReadAndMarkMeaningExercise(
+  exercise: PracticeExercise
+): exercise is ReadAndMarkMeaningExercise {
+  return exercise.exerciseType === 'read_and_mark_meaning';
+}
+
+function isMarkSentencesCorrectExercise(
+  exercise: PracticeExercise
+): exercise is MarkSentencesCorrectExercise {
+  return exercise.exerciseType === 'mark_sentences_correct';
+}
+
+function isFillInGapsDragDropExercise(
+  exercise: PracticeExercise
+): exercise is FillInGapsDragDropExercise {
+  return exercise.exerciseType === 'fill_in_gaps_drag_drop';
 }
 
 function getOptionStateClass(
@@ -204,8 +287,16 @@ function markdownToPlainText(markdown: string): string {
   return markdown.replace(/\*\*/g, '').trim();
 }
 
+function normalizeWord(word: string): string {
+  return word.trim().toLowerCase();
+}
+
 function hasValidSessionShape(session: ActivePracticeSession): boolean {
   if (!session.filters || !Array.isArray(session.filters.categories)) {
+    return false;
+  }
+
+  if (typeof session.generatedExercisesCount !== 'number') {
     return false;
   }
 
@@ -213,8 +304,104 @@ function hasValidSessionShape(session: ActivePracticeSession): boolean {
     return true;
   }
 
-  return session.currentExercise.items.every(
-    (item) => typeof item.sentenceMarkdown === 'string' && item.sentenceMarkdown.length > 0
+  if (isReadAndMarkMeaningExercise(session.currentExercise)) {
+    return session.currentExercise.items.every(
+      (item) =>
+        typeof item.sentenceMarkdown === 'string' &&
+        item.sentenceMarkdown.length > 0 &&
+        item.meanings.length === 3
+    );
+  }
+
+  if (isMarkSentencesCorrectExercise(session.currentExercise)) {
+    return session.currentExercise.items.every(
+      (item) =>
+        typeof item.firstSentenceMarkdown === 'string' &&
+        item.firstSentenceMarkdown.length > 0 &&
+        typeof item.secondSentenceMarkdown === 'string' &&
+        item.secondSentenceMarkdown.length > 0
+    );
+  }
+
+  if (isFillInGapsDragDropExercise(session.currentExercise)) {
+    return (
+      session.currentExercise.items.every(
+        (item) =>
+          typeof item.sentencePrefix === 'string' &&
+          item.sentencePrefix.length > 0 &&
+          typeof item.sentenceSuffix === 'string' &&
+          item.sentenceSuffix.length > 0 &&
+          typeof item.correctWord === 'string' &&
+          item.correctWord.length > 0
+      ) && session.currentExercise.wordBank.length === session.currentExercise.items.length
+    );
+  }
+
+  return false;
+}
+
+interface DraggableWordTokenProps {
+  id: string;
+  text: string;
+  disabled: boolean;
+  isSelected: boolean;
+  onTap: () => void;
+}
+
+function DraggableWordToken({
+  id,
+  text,
+  disabled,
+  isSelected,
+  onTap,
+}: DraggableWordTokenProps): JSX.Element {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id,
+    disabled,
+  });
+
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined;
+
+  return (
+    <button
+      type='button'
+      ref={setNodeRef}
+      style={style}
+      onClick={(event) => {
+        event.stopPropagation();
+        onTap();
+      }}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        'inline-flex rounded-[6px] border-2 border-border bg-card px-3 py-1 text-sm font-black text-foreground',
+        isSelected && 'border-primary bg-primary/10 text-primary',
+        disabled && 'cursor-not-allowed opacity-70'
+      )}
+    >
+      {text}
+    </button>
+  );
+}
+
+interface DroppableWordSlotProps {
+  id: string;
+  className?: string;
+  children: ReactNode;
+}
+
+function DroppableWordSlot({ id, className, children }: DroppableWordSlotProps): JSX.Element {
+  const { isOver, setNodeRef } = useDroppable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(className, isOver && 'ring-2 ring-primary/70 ring-offset-2')}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -230,6 +417,7 @@ export function PracticeSessionRunner({
   const [session, setSession] = useState<ActivePracticeSession | null>(null);
   const [isGeneratingExercise, setIsGeneratingExercise] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
+  const [selectedWordForTap, setSelectedWordForTap] = useState<string | null>(null);
   const initializedSessionKeyRef = useRef<string | null>(null);
   const generationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -258,10 +446,11 @@ export function PracticeSessionRunner({
   }
 
   async function callActionWithTimeout(
+    exerciseType: PracticeExerciseType,
     payload: PracticeExercisePhrasalVerbInput[]
-  ): Promise<Awaited<ReturnType<typeof generateReadAndMarkMeaningExerciseAction>>> {
+  ): Promise<Awaited<ReturnType<typeof generatePracticeExerciseAction>>> {
     return Promise.race([
-      generateReadAndMarkMeaningExerciseAction(payload),
+      generatePracticeExerciseAction(exerciseType, payload),
       new Promise<never>((_, reject) => {
         setTimeout(() => {
           reject(new Error('Timed out waiting for exercise generation action response.'));
@@ -374,11 +563,17 @@ export function PracticeSessionRunner({
         throw new Error('No phrasal verbs are available for this exercise.');
       }
 
+      const exerciseType =
+        EXERCISE_ROTATION[
+          baseSession.generatedExercisesCount % EXERCISE_ROTATION.length
+        ];
+
       const selectedPvIds = pickedPhrasalVerbs.map((pv) => pv.id);
       const inputPayload = toExerciseInput(pickedPhrasalVerbs);
-      const response = await callActionWithTimeout(inputPayload);
+      const response = await callActionWithTimeout(exerciseType, inputPayload);
 
       console.info('[PracticeSessionRunner] createNextExercise:actionResponse', {
+        requestedExerciseType: exerciseType,
         success: response.success,
         hasExercise: Boolean(response.exercise),
         error: response.error,
@@ -404,6 +599,7 @@ export function PracticeSessionRunner({
         answersByPvId: {},
         isValidated: false,
         isFinished: false,
+        generatedExercisesCount: baseSession.generatedExercisesCount + 1,
         updatedAtIso: nowIso,
       };
     },
@@ -535,7 +731,7 @@ export function PracticeSessionRunner({
     }
   }
 
-  function handleSelectAnswer(pvId: string, meaningIndex: number): void {
+  function handleSelectAnswer(pvId: string, selectedValue: number | string): void {
     setUiError(null);
 
     setSession((previous) => {
@@ -547,7 +743,7 @@ export function PracticeSessionRunner({
         ...previous,
         answersByPvId: {
           ...previous.answersByPvId,
-          [pvId]: meaningIndex,
+          [pvId]: selectedValue,
         },
         updatedAtIso: new Date().toISOString(),
       };
@@ -575,22 +771,68 @@ export function PracticeSessionRunner({
     let correctCount = 0;
     const nextIncorrectByPvId = { ...session.incorrectByPvId };
 
-    session.currentExercise.items.forEach((item) => {
-      const selectedMeaningIndex = session.answersByPvId[item.pvId];
-      if (selectedMeaningIndex === item.correctMeaningIndex) {
-        correctCount += 1;
-        return;
-      }
+    if (isReadAndMarkMeaningExercise(session.currentExercise)) {
+      session.currentExercise.items.forEach((item) => {
+        const selectedMeaningIndex = session.answersByPvId[item.pvId];
+        if (selectedMeaningIndex === item.correctMeaningIndex) {
+          correctCount += 1;
+          return;
+        }
 
-      const currentRecord = nextIncorrectByPvId[item.pvId];
-      nextIncorrectByPvId[item.pvId] = {
-        pvId: item.pvId,
-        phrasalVerb: item.phrasalVerb,
-        wrongCount: (currentRecord?.wrongCount ?? 0) + 1,
-        lastSentence: markdownToPlainText(item.sentenceMarkdown),
-        correctMeaning: item.meanings[item.correctMeaningIndex],
-      };
-    });
+        const currentRecord = nextIncorrectByPvId[item.pvId];
+        nextIncorrectByPvId[item.pvId] = {
+          pvId: item.pvId,
+          phrasalVerb: item.phrasalVerb,
+          wrongCount: (currentRecord?.wrongCount ?? 0) + 1,
+          lastSentence: markdownToPlainText(item.sentenceMarkdown),
+          correctAnswer: item.meanings[item.correctMeaningIndex],
+        };
+      });
+    } else if (isMarkSentencesCorrectExercise(session.currentExercise)) {
+      session.currentExercise.items.forEach((item) => {
+        const selectedSentenceIndex = session.answersByPvId[item.pvId] as number;
+        if (selectedSentenceIndex === item.correctSentenceIndex) {
+          correctCount += 1;
+          return;
+        }
+
+        const currentRecord = nextIncorrectByPvId[item.pvId];
+        const correctSentence =
+          item.correctSentenceIndex === 0
+            ? item.firstSentenceMarkdown
+            : item.secondSentenceMarkdown;
+
+        nextIncorrectByPvId[item.pvId] = {
+          pvId: item.pvId,
+          phrasalVerb: item.phrasalVerb,
+          wrongCount: (currentRecord?.wrongCount ?? 0) + 1,
+          lastSentence: markdownToPlainText(correctSentence),
+          correctAnswer: markdownToPlainText(correctSentence),
+        };
+      });
+    } else {
+      session.currentExercise.items.forEach((item) => {
+        const selectedWord = session.answersByPvId[item.pvId];
+        const isCorrect =
+          typeof selectedWord === 'string' &&
+          normalizeWord(selectedWord) === normalizeWord(item.correctWord);
+
+        if (isCorrect) {
+          correctCount += 1;
+          return;
+        }
+
+        const currentRecord = nextIncorrectByPvId[item.pvId];
+        const sentenceWithAnswer = `${item.sentencePrefix} ${item.correctWord} ${item.sentenceSuffix}`;
+        nextIncorrectByPvId[item.pvId] = {
+          pvId: item.pvId,
+          phrasalVerb: item.phrasalVerb,
+          wrongCount: (currentRecord?.wrongCount ?? 0) + 1,
+          lastSentence: sentenceWithAnswer,
+          correctAnswer: item.correctWord,
+        };
+      });
+    }
 
     setSession({
       ...session,
@@ -672,6 +914,11 @@ export function PracticeSessionRunner({
   }
 
   const currentExercise = session?.currentExercise;
+
+  useEffect(() => {
+    setSelectedWordForTap(null);
+  }, [currentExercise?.exerciseType, currentExercise?.items.length]);
+
   const totalAccuracy =
     session && session.totalQuestions > 0
       ? Math.round((session.totalCorrect / session.totalQuestions) * 100)
@@ -686,6 +933,153 @@ export function PracticeSessionRunner({
         : [],
     [session]
   );
+
+  const fillExercise =
+    currentExercise && isFillInGapsDragDropExercise(currentExercise)
+      ? currentExercise
+      : null;
+
+  const assignedWordsByPvId = useMemo(() => {
+    if (!session || !fillExercise) {
+      return {} as Record<string, string>;
+    }
+
+    const entries = Object.entries(session.answersByPvId).filter(([, value]) =>
+      typeof value === 'string'
+    );
+
+    return Object.fromEntries(entries) as Record<string, string>;
+  }, [fillExercise, session]);
+
+  const availableFillWords = useMemo(() => {
+    if (!fillExercise) {
+      return [] as WordToken[];
+    }
+
+    const assignedSet = new Set(Object.values(assignedWordsByPvId));
+    return fillExercise.wordBank
+      .filter((word) => !assignedSet.has(word))
+      .map((word) => ({ id: word, text: word }));
+  }, [assignedWordsByPvId, fillExercise]);
+
+  const assignWordToBlank = useCallback((word: string, targetPvId: string): void => {
+    setSession((previous) => {
+      if (!previous || previous.isValidated || !previous.currentExercise) {
+        return previous;
+      }
+
+      if (!isFillInGapsDragDropExercise(previous.currentExercise)) {
+        return previous;
+      }
+
+      const answers = { ...previous.answersByPvId } as Record<string, string | number>;
+      const sourceEntry = Object.entries(answers).find(([, value]) => value === word);
+      const sourcePvId = sourceEntry?.[0];
+      const targetCurrent = answers[targetPvId];
+
+      answers[targetPvId] = word;
+
+      if (sourcePvId && sourcePvId !== targetPvId) {
+        if (typeof targetCurrent === 'string') {
+          answers[sourcePvId] = targetCurrent;
+        } else {
+          delete answers[sourcePvId];
+        }
+      }
+
+      return {
+        ...previous,
+        answersByPvId: answers,
+        updatedAtIso: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  const removeAssignedWord = useCallback((word: string): void => {
+    setSession((previous) => {
+      if (!previous || previous.isValidated || !previous.currentExercise) {
+        return previous;
+      }
+
+      if (!isFillInGapsDragDropExercise(previous.currentExercise)) {
+        return previous;
+      }
+
+      const answers = { ...previous.answersByPvId } as Record<string, string | number>;
+      const sourceEntry = Object.entries(answers).find(([, value]) => value === word);
+
+      if (!sourceEntry) {
+        return previous;
+      }
+
+      delete answers[sourceEntry[0]];
+
+      return {
+        ...previous,
+        answersByPvId: answers,
+        updatedAtIso: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  function handleFillDragEnd(event: DragEndEvent): void {
+    if (!session || session.isValidated || !fillExercise) {
+      return;
+    }
+
+    const activeId = String(event.active.id);
+    const overId = event.over ? String(event.over.id) : null;
+
+    if (!activeId.startsWith('word:')) {
+      return;
+    }
+
+    const word = activeId.replace('word:', '');
+
+    if (!overId) {
+      return;
+    }
+
+    if (overId === 'word-bank') {
+      removeAssignedWord(word);
+      return;
+    }
+
+    if (overId.startsWith('blank:')) {
+      const pvId = overId.replace('blank:', '');
+      assignWordToBlank(word, pvId);
+    }
+  }
+
+  function handleWordChipTap(word: string): void {
+    if (!fillExercise || !session || session.isValidated) {
+      return;
+    }
+
+    if (selectedWordForTap === word) {
+      setSelectedWordForTap(null);
+      return;
+    }
+
+    setSelectedWordForTap(word);
+  }
+
+  function handleBlankTap(pvId: string): void {
+    if (!fillExercise || !session || session.isValidated) {
+      return;
+    }
+
+    if (selectedWordForTap) {
+      assignWordToBlank(selectedWordForTap, pvId);
+      setSelectedWordForTap(null);
+      return;
+    }
+
+    const assignedWord = assignedWordsByPvId[pvId];
+    if (assignedWord) {
+      removeAssignedWord(assignedWord);
+    }
+  }
 
   if (categories.length === 0) {
     return (
@@ -779,7 +1173,7 @@ export function PracticeSessionRunner({
                     Last sentence: {entry.lastSentence}
                   </p>
                   <p className='text-sm font-semibold text-foreground'>
-                    Correct meaning: {entry.correctMeaning}
+                    Correct answer: {entry.correctAnswer}
                   </p>
                 </li>
               ))}
@@ -846,84 +1240,267 @@ export function PracticeSessionRunner({
             <p className='font-medium text-muted-foreground'>{currentExercise.instructions}</p>
           </div>
 
-          <ul className='space-y-4'>
-            {currentExercise.items.map((item, itemIndex) => {
-              const selectedIndex = session.answersByPvId[item.pvId];
-              const isCorrect = selectedIndex === item.correctMeaningIndex;
+          {isReadAndMarkMeaningExercise(currentExercise) ? (
+            <ul className='space-y-4'>
+              {currentExercise.items.map((item, itemIndex) => {
+                const selectedIndex = session.answersByPvId[item.pvId] as number | undefined;
+                const isCorrect = selectedIndex === item.correctMeaningIndex;
 
-              return (
-                <li
-                  key={`${item.pvId}-${itemIndex}`}
-                  className='rounded-[8px] border-2 border-border bg-card p-4'
-                >
-                  <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
-                    {itemIndex + 1}. {item.phrasalVerb}
-                  </p>
-                  <div className='mb-3 text-base font-semibold text-foreground'>
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => <p>{children}</p>,
-                        strong: ({ children }) => (
-                          <strong className='rounded-[4px] bg-primary/15 px-1 text-primary'>
-                            {children}
-                          </strong>
-                        ),
-                      }}
-                    >
-                      {item.sentenceMarkdown}
-                    </ReactMarkdown>
-                  </div>
-
-                  <div className='space-y-2'>
-                    {item.meanings.map((meaning, meaningIndex) => {
-                      const optionStateClass = getOptionStateClass(
-                        session.isValidated,
-                        selectedIndex,
-                        meaningIndex,
-                        item.correctMeaningIndex
-                      );
-
-                      return (
-                        <button
-                          key={`${item.pvId}-${meaningIndex}`}
-                          type='button'
-                          onClick={() => handleSelectAnswer(item.pvId, meaningIndex)}
-                          disabled={session.isValidated || isGeneratingExercise}
-                          className={cn(
-                            'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm font-semibold transition-colors',
-                            optionStateClass
-                          )}
-                        >
-                          {meaning}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {session.isValidated && (
-                    <div className='mt-3'>
-                      {isCorrect ? (
-                        <p className='inline-flex items-center gap-2 text-sm font-black text-emerald-800'>
-                          <CircleCheckBig className='h-4 w-4' />
-                          Correct
-                        </p>
-                      ) : (
-                        <div>
-                          <p className='inline-flex items-center gap-2 text-sm font-black text-red-800'>
-                            <CircleX className='h-4 w-4' />
-                            Incorrect
-                          </p>
-                          <p className='text-sm font-medium text-foreground'>
-                            Correct meaning: {item.meanings[item.correctMeaningIndex]}
-                          </p>
-                        </div>
-                      )}
+                return (
+                  <li
+                    key={`${item.pvId}-${itemIndex}`}
+                    className='rounded-[8px] border-2 border-border bg-card p-4'
+                  >
+                    <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
+                      Pair {itemIndex + 1}
+                    </p>
+                    <div className='mb-3 text-base font-semibold text-foreground'>
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p>{children}</p>,
+                          strong: ({ children }) => (
+                            <strong className='rounded-[4px] bg-primary/15 px-1 text-primary'>
+                              {children}
+                            </strong>
+                          ),
+                        }}
+                      >
+                        {item.sentenceMarkdown}
+                      </ReactMarkdown>
                     </div>
+
+                    <div className='space-y-2'>
+                      {item.meanings.map((meaning: string, meaningIndex: number) => {
+                        const optionStateClass = getOptionStateClass(
+                          session.isValidated,
+                          selectedIndex,
+                          meaningIndex,
+                          item.correctMeaningIndex
+                        );
+
+                        return (
+                          <button
+                            key={`${item.pvId}-${meaningIndex}`}
+                            type='button'
+                            onClick={() => handleSelectAnswer(item.pvId, meaningIndex)}
+                            disabled={session.isValidated || isGeneratingExercise}
+                            className={cn(
+                              'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm font-semibold transition-colors',
+                              optionStateClass
+                            )}
+                          >
+                            {meaning}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {session.isValidated && (
+                      <div className='mt-3'>
+                        {isCorrect ? (
+                          <p className='inline-flex items-center gap-2 text-sm font-black text-emerald-800'>
+                            <CircleCheckBig className='h-4 w-4' />
+                            Correct
+                          </p>
+                        ) : (
+                          <div>
+                            <p className='inline-flex items-center gap-2 text-sm font-black text-red-800'>
+                              <CircleX className='h-4 w-4' />
+                              Incorrect
+                            </p>
+                            <p className='text-sm font-medium text-foreground'>
+                              Correct answer: {item.meanings[item.correctMeaningIndex]}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : isMarkSentencesCorrectExercise(currentExercise) ? (
+            <ul className='space-y-4'>
+              {currentExercise.items.map((item, itemIndex) => {
+                const selectedIndex = session.answersByPvId[item.pvId] as number | undefined;
+                const isCorrect = selectedIndex === item.correctSentenceIndex;
+                const sentenceOptions = [item.firstSentenceMarkdown, item.secondSentenceMarkdown];
+
+                return (
+                  <li
+                    key={`${item.pvId}-${itemIndex}`}
+                    className='rounded-[8px] border-2 border-border bg-card p-4'
+                  >
+                    <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
+                      Pair {itemIndex + 1}
+                    </p>
+
+                    <div className='space-y-2'>
+                      {sentenceOptions.map((sentenceMarkdown, sentenceIndex) => {
+                        const optionStateClass = getOptionStateClass(
+                          session.isValidated,
+                          selectedIndex,
+                          sentenceIndex,
+                          item.correctSentenceIndex
+                        );
+
+                        return (
+                          <button
+                            key={`${item.pvId}-sentence-${sentenceIndex}`}
+                            type='button'
+                            onClick={() => handleSelectAnswer(item.pvId, sentenceIndex)}
+                            disabled={session.isValidated || isGeneratingExercise}
+                            className={cn(
+                              'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm font-semibold transition-colors',
+                              optionStateClass
+                            )}
+                          >
+                            <ReactMarkdown
+                              components={{
+                                p: ({ children }) => <p>{children}</p>,
+                                strong: ({ children }) => (
+                                  <strong className='rounded-[4px] bg-primary/15 px-1 text-primary'>
+                                    {children}
+                                  </strong>
+                                ),
+                              }}
+                            >
+                              {sentenceMarkdown}
+                            </ReactMarkdown>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {session.isValidated && (
+                      <div className='mt-3'>
+                        {isCorrect ? (
+                          <p className='inline-flex items-center gap-2 text-sm font-black text-emerald-800'>
+                            <CircleCheckBig className='h-4 w-4' />
+                            Correct
+                          </p>
+                        ) : (
+                          <div>
+                            <p className='inline-flex items-center gap-2 text-sm font-black text-red-800'>
+                              <CircleX className='h-4 w-4' />
+                              Incorrect
+                            </p>
+                            <p className='text-sm font-medium text-foreground'>
+                              Correct answer:{' '}
+                              {item.correctSentenceIndex === 0
+                                ? markdownToPlainText(item.firstSentenceMarkdown)
+                                : markdownToPlainText(item.secondSentenceMarkdown)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <DndContext onDragEnd={handleFillDragEnd}>
+              <ul className='space-y-4'>
+                {currentExercise.items.map((item, itemIndex) => {
+                  const assignedWord = assignedWordsByPvId[item.pvId] ?? null;
+                  const isCorrect =
+                    session.isValidated &&
+                    assignedWord !== null &&
+                    normalizeWord(assignedWord) === normalizeWord(item.correctWord);
+
+                  const blankStateClass = getOptionStateClass(
+                    session.isValidated,
+                    assignedWord ? 1 : undefined,
+                    assignedWord ? 1 : 0,
+                    isCorrect ? 1 : 0
+                  );
+
+                  return (
+                    <li
+                      key={`${item.pvId}-${itemIndex}`}
+                      className='rounded-[8px] border-2 border-border bg-card p-4'
+                    >
+                      <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
+                        Gap {itemIndex + 1}
+                      </p>
+
+                      <div
+                        role='button'
+                        tabIndex={session.isValidated ? -1 : 0}
+                        aria-disabled={session.isValidated}
+                        onClick={() => {
+                          if (!session.isValidated) {
+                            handleBlankTap(item.pvId);
+                          }
+                        }}
+                        onKeyDown={(event) => {
+                          if (session.isValidated) {
+                            return;
+                          }
+
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            handleBlankTap(item.pvId);
+                          }
+                        }}
+                        className='w-full text-left'
+                      >
+                        <DroppableWordSlot
+                          id={`blank:${item.pvId}`}
+                          className={cn('mb-2 rounded-[6px] border-2 px-3 py-2', blankStateClass)}
+                        >
+                          <span>{item.sentencePrefix} </span>
+                          {assignedWord ? (
+                            <DraggableWordToken
+                              id={`word:${assignedWord}`}
+                              text={assignedWord}
+                              disabled={session.isValidated}
+                              isSelected={selectedWordForTap === assignedWord}
+                              onTap={() => handleWordChipTap(assignedWord)}
+                            />
+                          ) : (
+                            <span className='mx-1 inline-block min-w-24 border-b-2 border-dashed border-primary align-middle' />
+                          )}
+                          <span> {item.sentenceSuffix}</span>
+                        </DroppableWordSlot>
+                      </div>
+
+                      {session.isValidated && !isCorrect && (
+                        <p className='text-sm font-medium text-foreground'>
+                          Correct answer: {item.correctWord}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className='mt-4 rounded-[8px] border-2 border-border bg-muted p-3'>
+                <p className='mb-2 text-xs font-black uppercase text-muted-foreground'>
+                  Words panel
+                </p>
+                <DroppableWordSlot id='word-bank' className='flex flex-wrap gap-2'>
+                  {availableFillWords.length === 0 ? (
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      All words are placed.
+                    </p>
+                  ) : (
+                    availableFillWords.map((token) => (
+                      <DraggableWordToken
+                        key={token.id}
+                        id={`word:${token.id}`}
+                        text={token.text}
+                        disabled={session.isValidated}
+                        isSelected={selectedWordForTap === token.text}
+                        onTap={() => handleWordChipTap(token.text)}
+                      />
+                    ))
                   )}
-                </li>
-              );
-            })}
-          </ul>
+                </DroppableWordSlot>
+              </div>
+            </DndContext>
+          )}
 
           <div className='mt-6 flex flex-wrap items-center justify-between gap-3'>
             <div className='text-sm font-semibold text-muted-foreground'>

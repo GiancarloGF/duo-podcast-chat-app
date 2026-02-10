@@ -13,7 +13,7 @@ export interface IncorrectPvRecord {
   phrasalVerb: string;
   wrongCount: number;
   lastSentence: string;
-  correctMeaning: string;
+  correctAnswer: string;
 }
 
 export interface ActivePracticeSession {
@@ -22,8 +22,9 @@ export interface ActivePracticeSession {
   usedPvIds: string[];
   recentPvIds: string[];
   currentExercise: PracticeExercise | null;
-  answersByPvId: Record<string, number>;
+  answersByPvId: Record<string, string | number>;
   isValidated: boolean;
+  generatedExercisesCount: number;
   totalQuestions: number;
   totalCorrect: number;
   incorrectByPvId: Record<string, IncorrectPvRecord>;
