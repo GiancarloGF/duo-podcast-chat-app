@@ -2,7 +2,7 @@
 
 import type { ChatMessage } from '@/features/stories/domain/types';
 import { cn } from '@/shared/presentation/utils';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Languages, Sparkles } from 'lucide-react';
@@ -13,6 +13,7 @@ interface MessageBubbleProps {
   message: ChatMessage;
   showFeedbackButton?: boolean;
   onFeedbackClick?: (messageId: string) => void;
+  children?: ReactNode;
 }
 
 // Token type for text tokenization
@@ -217,6 +218,7 @@ export function MessageBubble({
   message,
   showFeedbackButton = false,
   onFeedbackClick,
+  children,
 }: MessageBubbleProps) {
   const [isTranslated, setIsTranslated] = useState(false);
   const [selectedWord, setSelectedWord] = useState<{
@@ -257,8 +259,7 @@ export function MessageBubble({
 
   const bubbleClasses = cn(
     'break-words relative group/bubble', // Added group/bubble for hover effects if needed
-    // Full width on mobile, fit content on desktop
-    'w-full md:w-fit md:max-w-md',
+    'w-full',
     isUserMessage
       ? 'bg-secondary text-secondary-foreground rounded-[10px] border-2 border-border px-5 py-3 shadow-[4px_4px_0_0_var(--color-border)]' // User: Pill
       : isProtagonistMessage
@@ -302,9 +303,8 @@ export function MessageBubble({
       <div
         className={cn(
           'flex flex-col gap-1',
-          isUserMessage ? 'items-end md:items-end' : 'items-start',
-          // Full width on mobile
-          'w-full md:w-auto',
+          isUserMessage ? 'items-end' : 'items-start',
+          'w-full',
         )}
       >
         {/* Sender Name - Show for all except User to identify Protagonists */}
@@ -342,7 +342,7 @@ export function MessageBubble({
           )}
 
           {/* Render Markdown Content */}
-            <div className='text-[15px] leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
+          <div className='text-base leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
             {isProtagonistMessage && !isTranslated ? (
               <ClickableTextRenderer
                 text={
@@ -368,6 +368,10 @@ export function MessageBubble({
               </ReactMarkdown>
             )}
           </div>
+
+          {children ? (
+            <div className='mt-3 border-t-2 border-border/20 pt-3'>{children}</div>
+          ) : null}
 
           {/* Key Points Display - NOW INSIDE BUBBLE */}
           {message?.message?.keyPoints &&
@@ -413,7 +417,7 @@ export function MessageBubble({
           {message.isValidating && (
             <div className='mt-3 flex items-center gap-2 text-sm font-bold text-primary animate-pulse'>
               <Sparkles className='w-4 h-4' />
-              <span>Validando feedback...</span>
+              <span>Validando traduccion...</span>
             </div>
           )}
 

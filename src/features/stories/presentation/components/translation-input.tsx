@@ -4,20 +4,18 @@ import type React from 'react';
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/shared/presentation/components/ui/button';
-import { Send, SkipForward, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle } from 'lucide-react';
 import { TranslationValidationService } from '@/features/stories/infrastructure/services/TranslationValidationService';
 import { cn } from '@/shared/presentation/utils';
 
 interface TranslationInputProps {
   onSubmit: (translation: string) => void;
-  onSkip: () => void;
   isLoading: boolean;
   disabled?: boolean;
 }
 
 export function TranslationInput({
   onSubmit,
-  onSkip,
   isLoading,
   disabled = false,
 }: TranslationInputProps) {
@@ -115,7 +113,7 @@ export function TranslationInput({
   };
 
   return (
-    <div ref={containerRef} className='w-full max-w-4xl mx-auto px-4 pb-4'>
+    <div ref={containerRef} className='w-full pt-3'>
       {/* Validation Errors Popup - Show above input if any */}
       {validationErrors.length > 0 && (
         <div className='mb-2 p-2 bg-[#ffe8e8] text-red-700 text-xs rounded-[8px] border-2 border-red-700 shadow-[3px_3px_0_0_#7f1d1d] flex items-center gap-2 animate-in slide-in-from-bottom-2 font-semibold'>
@@ -124,7 +122,7 @@ export function TranslationInput({
         </div>
       )}
 
-      <div className='relative flex items-end gap-2 bg-card rounded-[10px] p-2 pr-2 border-2 border-border shadow-[5px_5px_0_0_var(--color-border)] transition-colors'>
+      <div className='relative flex items-end gap-2 bg-card rounded-[8px] p-2 pr-2 border-2 border-border transition-colors'>
         {/* Text Input */}
         <textarea
           ref={inputRef}
@@ -139,31 +137,19 @@ export function TranslationInput({
 
         {/* Action Buttons */}
         <div className='flex items-center gap-1 pb-1'>
-          {/* Skip Button (Replaces Mic) */}
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-9 w-9 text-muted-foreground hover:text-foreground rounded-[6px] border border-border bg-secondary/40'
-            onClick={onSkip}
-            disabled={isLoading || disabled}
-            aria-label='Skip'
-          >
-            <SkipForward className='h-5 w-5' />
-          </Button>
-
-          {/* Send Button */}
           <Button
             onClick={handleSubmit}
             disabled={!translation.trim() || isLoading || disabled}
-            size='icon'
+            size='sm'
             className={cn(
-              'h-9 w-9 rounded-full transition-all duration-200',
+              'h-9 min-w-24 px-3 transition-all duration-200',
               translation.trim()
                 ? 'bg-primary hover:brightness-95 text-primary-foreground border-2 border-border shadow-[3px_3px_0_0_var(--color-border)] rounded-[6px]'
                 : 'bg-muted text-muted-foreground border-2 border-border rounded-[6px] cursor-not-allowed'
             )}
           >
-            <Send className='h-4 w-4 ml-0.5' />
+            <Send className='h-4 w-4' />
+            Enviar
           </Button>
         </div>
       </div>

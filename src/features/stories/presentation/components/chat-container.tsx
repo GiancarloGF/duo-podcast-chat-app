@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBubble } from './message-bubble';
-import { TypingIndicator } from './typing-indicator';
 import { FeedbackModal } from './feedback-modal';
 
 interface ChatContainerProps {
@@ -37,10 +36,9 @@ export function ChatContainer({
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<TranslationFeedback | null>(null);
-  const [pendingTranslation, setPendingTranslation] = useState<{
-    content: string;
-    episodeMessageId: string;
-  } | null>(null);
+  const [validatingMessageId, setValidatingMessageId] = useState<string | null>(
+    null
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +67,7 @@ export function ChatContainer({
 
     for (let i = 0; i < limit; i++) {
       const episodeMessage = initialEpisode.messages[i];
+      const interaction = interactionsMap.get(episodeMessage.id);
 
       messages.push({
         id: episodeMessage.id,
@@ -77,44 +76,14 @@ export function ChatContainer({
         message: episodeMessage,
         content: episodeMessage.content,
         isUserMessage: false,
+        translationFeedback: interaction?.translationFeedback,
+        isValidating:
+          validatingMessageId === episodeMessage.id && !interaction,
         timestamp: Date.now(),
       });
-
-      const interaction = interactionsMap.get(episodeMessage.id);
-      if (interaction) {
-        messages.push({
-          id: `user-${episodeMessage.id}`,
-          episodeMessageId: episodeMessage.id,
-          sender: 'Tú',
-          content: interaction.userInput,
-          isUserMessage: true,
-          translationFeedback: interaction.translationFeedback,
-          timestamp: interaction.timestamp
-            ? new Date(interaction.timestamp).getTime()
-            : Date.now(),
-        });
-      } else if (
-        pendingTranslation &&
-        pendingTranslation.episodeMessageId === episodeMessage.id
-      ) {
-        messages.push({
-          id: `pending-${episodeMessage.id}`,
-          episodeMessageId: episodeMessage.id,
-          sender: 'Tú',
-          content: pendingTranslation.content,
-          isUserMessage: true,
-          isValidating: true,
-          timestamp: Date.now(),
-        });
-      }
     }
     return messages;
-  }, [
-    initialEpisode.messages,
-    userProgress,
-    currentMessageIndex,
-    pendingTranslation,
-  ]);
+  }, [initialEpisode.messages, userProgress, currentMessageIndex, validatingMessageId]);
 
   const currentEpisodeMessage = useMemo(() => {
     if (currentMessageIndex >= initialEpisode.messages.length) return null;
@@ -135,10 +104,7 @@ export function ChatContainer({
       if (!canInteract || !currentEpisodeMessage) return;
 
       setIsProcessing(true);
-      setPendingTranslation({
-        content: translation,
-        episodeMessageId: currentEpisodeMessage.id,
-      });
+      setValidatingMessageId(currentEpisodeMessage.id);
       setAiError(null);
 
       try {
@@ -184,7 +150,7 @@ export function ChatContainer({
         setAiError('Error de conexión. Intenta de nuevo.');
       } finally {
         setIsProcessing(false);
-        setPendingTranslation(null);
+        setValidatingMessageId(null);
       }
     },
     [
@@ -195,32 +161,6 @@ export function ChatContainer({
       userProgress.currentMessageIndex,
     ]
   );
-
-  const handleSkip = useCallback(async () => {
-    if (isProcessing) return;
-
-    try {
-      const nextIndex = (userProgress.currentMessageIndex || 0) + 1;
-      const nextStatus =
-        nextIndex >= initialEpisode.messages.length ? 'completed' : 'started';
-
-      setUserProgress((prev) => ({
-        ...prev,
-        currentMessageIndex: nextIndex,
-        status: nextStatus,
-        lastActiveAt: new Date(),
-      }));
-
-      await updateProgress(initialEpisode.id, nextIndex, nextStatus);
-    } catch (error) {
-      console.error('Error skipping:', error);
-    }
-  }, [
-    userProgress.currentMessageIndex,
-    initialEpisode.messages.length,
-    initialEpisode.id,
-    isProcessing,
-  ]);
 
   const handleNext = useCallback(async () => {
     if (isProcessing) return;
@@ -411,40 +351,35 @@ export function ChatContainer({
                   msg.translationFeedback &&
                   setSelectedFeedback(msg.translationFeedback)
                 }
-              />
+              >
+                {needsTranslation &&
+                !msg.isValidating &&
+                currentEpisodeMessage?.id === msg.episodeMessageId ? (
+                  <TranslationInput
+                    onSubmit={handleTranslation}
+                    isLoading={isProcessing}
+                    disabled={isProcessing || !canInteract}
+                  />
+                ) : null}
+              </MessageBubble>
             </div>
           ))}
-
-          {isProcessing && !pendingTranslation && (
-            <div className='flex justify-end py-2 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-              <TypingIndicator />
-            </div>
-          )}
 
           <div ref={scrollRef} />
         </div>
       </div>
 
-      <footer className='fixed md:sticky bottom-0 left-0 right-0 bg-card border-t-2 border-border p-4 pb-safe md:pb-4 z-50'>
+      <footer className='fixed md:sticky bottom-0 left-0 right-0 bg-card border-t-2 border-border p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] md:pb-6 z-50'>
         <div className='max-w-4xl mx-auto'>
-          {needsTranslation ? (
-            <TranslationInput
-              onSubmit={handleTranslation}
-              onSkip={handleSkip}
-              isLoading={isProcessing}
+          <div className='flex justify-center'>
+            <Button
+              onClick={handleNext}
               disabled={isProcessing || !canInteract}
-            />
-          ) : (
-            <div className='flex justify-center'>
-              <Button
-                onClick={handleNext}
-                disabled={isProcessing || !canInteract}
-                className='min-w-36'
-              >
-                Siguiente
-              </Button>
-            </div>
-          )}
+              className='min-w-36'
+            >
+              Continuar
+            </Button>
+          </div>
         </div>
       </footer>
 
