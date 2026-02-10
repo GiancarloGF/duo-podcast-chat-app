@@ -64,7 +64,7 @@ export function PracticeCategorySelector() {
 
   const [selectedSuperGroupId, setSelectedSuperGroupId] = useState<string | null>(null);
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null);
+  const [selectedCategoryKeys, setSelectedCategoryKeys] = useState<string[]>([]);
 
   const selectedSuperGroup = useMemo(
     () =>
@@ -100,8 +100,8 @@ export function PracticeCategorySelector() {
 
   const selectedCategory = useMemo(
     () =>
-      categoryOptions.find((category) => category.key === selectedCategoryKey) ?? null,
-    [categoryOptions, selectedCategoryKey]
+      categoryOptions.filter((category) => selectedCategoryKeys.includes(category.key)),
+    [categoryOptions, selectedCategoryKeys]
   );
 
   const currentLevel: SelectorLevel = useMemo(() => {
@@ -119,42 +119,49 @@ export function PracticeCategorySelector() {
   function resetToAll(): void {
     setSelectedSuperGroupId(null);
     setSelectedGroupKey(null);
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
   }
 
   function handleSelectSuperGroup(superGroupId: string): void {
     setSelectedSuperGroupId(superGroupId);
     setSelectedGroupKey(null);
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
   }
 
   function handleSelectGroup(groupKey: string): void {
     setSelectedGroupKey(groupKey);
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
   }
 
   function handleSelectCategory(categoryKey: string): void {
-    setSelectedCategoryKey(categoryKey);
+    setSelectedCategoryKeys((previous) =>
+      previous.includes(categoryKey)
+        ? previous.filter((key) => key !== categoryKey)
+        : [...previous, categoryKey]
+    );
   }
 
   function goToSuperGroupLevel(): void {
     setSelectedGroupKey(null);
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
   }
 
   function goToGroupLevel(): void {
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
   }
 
   function startPractice(): void {
-    if (!selectedSuperGroup || !selectedGroup || !selectedCategory) {
+    if (!selectedSuperGroup || !selectedGroup || selectedCategory.length === 0) {
       return;
     }
 
     const params = new URLSearchParams({
       superGroup: selectedSuperGroup.title,
       group: selectedGroup.label,
-      category: selectedCategory.label,
+    });
+
+    selectedCategory.forEach((category) => {
+      params.append('category', category.label);
     });
 
     router.push(`/phrasal-verbs/practice/session?${params.toString()}`);
@@ -255,26 +262,31 @@ export function PracticeCategorySelector() {
         {currentLevel === 'category' && (
           <div className='space-y-5'>
             <div>
-              <p className='mb-3 text-xs font-bold uppercase text-muted-foreground'>
-                Selecciona una categoria
-              </p>
-              <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
-                {categoryOptions.map((category) => (
-                  <SelectorCard
+                <p className='mb-3 text-xs font-bold uppercase text-muted-foreground'>
+                  Selecciona una o varias categorias
+                </p>
+                {selectedCategory.length > 0 && (
+                  <p className='mb-2 text-xs font-semibold text-muted-foreground'>
+                    Categorias seleccionadas: {selectedCategory.length}
+                  </p>
+                )}
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
+                  {categoryOptions.map((category) => (
+                    <SelectorCard
                     key={category.key}
                     label={category.label}
                     subtitle='Categoria'
-                    badgeText='Categoria'
-                    badgeColor={selectedSuperGroup?.color}
-                    backgroundColor={selectedSuperGroup?.lightColor}
-                    isActive={selectedCategoryKey === category.key}
-                    onClick={() => handleSelectCategory(category.key)}
-                  />
-                ))}
+                      badgeText='Categoria'
+                      badgeColor={selectedSuperGroup?.color}
+                      backgroundColor={selectedSuperGroup?.lightColor}
+                      isActive={selectedCategoryKeys.includes(category.key)}
+                      onClick={() => handleSelectCategory(category.key)}
+                    />
+                  ))}
               </div>
             </div>
 
-            <Button onClick={startPractice} disabled={!selectedCategory}>
+            <Button onClick={startPractice} disabled={selectedCategory.length === 0}>
               Practicar
             </Button>
           </div>

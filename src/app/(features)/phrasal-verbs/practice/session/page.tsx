@@ -6,13 +6,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
-import { PracticeSessionPreview } from '@/features/phrasal-verbs/presentation/components/PracticeSessionPreview';
+import { PracticeSessionRunner } from '@/features/phrasal-verbs/presentation/components/PracticeSessionRunner';
 
 interface SessionPageProps {
   searchParams: Promise<{
     superGroup?: string;
     group?: string;
-    category?: string;
+    category?: string | string[];
   }>;
 }
 
@@ -20,6 +20,17 @@ export default async function PhrasalVerbsPracticeSessionPage({
   searchParams,
 }: SessionPageProps) {
   const params = await searchParams;
+  const categories = Array.from(
+    new Set(
+      (typeof params.category === 'string'
+        ? [params.category]
+        : Array.isArray(params.category)
+          ? params.category
+          : [])
+        .map((category) => category.trim())
+        .filter(Boolean)
+    )
+  );
 
   return (
     <main className='min-h-screen p-4'>
@@ -45,18 +56,17 @@ export default async function PhrasalVerbsPracticeSessionPage({
         </Breadcrumb>
 
         <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-          <h1 className='mb-2 text-4xl font-black text-foreground'>
-            Vista previa de sesion
-          </h1>
+          <h1 className='mb-2 text-4xl font-black text-foreground'>Practice session</h1>
           <p className='text-lg font-medium text-muted-foreground'>
-            Esta lista es temporal. Luego aqui viviran los ejercicios interactivos.
+            Complete each exercise, validate your answers, and continue with a
+            new set of phrasal verbs.
           </p>
         </section>
 
-        <PracticeSessionPreview
+        <PracticeSessionRunner
           superGroup={params.superGroup ?? null}
           group={params.group ?? null}
-          category={params.category ?? null}
+          categories={categories}
         />
       </div>
     </main>

@@ -6,6 +6,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import { Bungee, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
+import { Toaster } from '@/shared/presentation/components/ui/sonner';
+import { ThemeProvider } from '@/shared/presentation/layouts/theme-provider';
 
 // Initialize fonts
 const spaceGrotesk = Space_Grotesk({
@@ -62,7 +64,15 @@ export default async function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${bungee.variable} font-sans antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='system'
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
         {/* <Analytics /> */}
       </body>
     </html>

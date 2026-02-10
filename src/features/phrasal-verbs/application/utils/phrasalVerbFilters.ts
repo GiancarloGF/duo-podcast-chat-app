@@ -95,8 +95,15 @@ export function filterPhrasalVerbs(
   phrasalVerbs: PhrasalVerb[],
   selectedSuperGroupTitle: string | null,
   selectedGroupTitle: string | null,
-  selectedCategoryLabel: string | null
+  selectedCategoryLabel: string | string[] | null
 ): PhrasalVerb[] {
+  const normalizedCategories =
+    typeof selectedCategoryLabel === 'string'
+      ? [normalizeText(selectedCategoryLabel)]
+      : Array.isArray(selectedCategoryLabel)
+        ? selectedCategoryLabel.map((category) => normalizeText(category))
+        : [];
+
   return phrasalVerbs.filter((phrasalVerb) => {
     if (
       selectedSuperGroupTitle &&
@@ -113,8 +120,8 @@ export function filterPhrasalVerbs(
     }
 
     if (
-      selectedCategoryLabel &&
-      normalizeText(phrasalVerb.category) !== normalizeText(selectedCategoryLabel)
+      normalizedCategories.length > 0 &&
+      !normalizedCategories.includes(normalizeText(phrasalVerb.category))
     ) {
       return false;
     }
