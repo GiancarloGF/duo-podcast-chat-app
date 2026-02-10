@@ -12,6 +12,14 @@ export class StaticFeatureRepository implements FeatureRepository {
       isEnabled: true,
     },
     {
+      id: 'phrasal-verbs',
+      title: 'Phrasal Verbs Practice',
+      description:
+        'Domina phrasal verbs con filtros por supergrupos, grupos y categorias.',
+      route: '/phrasal-verbs',
+      isEnabled: true,
+    },
+    {
       id: 'coming-soon',
       title: 'More Features Coming Soon',
       description: 'Stay tuned for more ways to practice English.',

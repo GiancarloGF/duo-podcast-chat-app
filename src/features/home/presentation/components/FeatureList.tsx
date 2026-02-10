@@ -22,6 +22,10 @@ const featureVisuals: Record<
     iconBgClass: 'bg-[#c8f2cf]',
     cardHoverClass: 'hover:bg-[#c8f2cf]',
   },
+  'phrasal-verbs': {
+    iconBgClass: 'bg-[#ffe8a6]',
+    cardHoverClass: 'hover:bg-[#ffe8a6]',
+  },
   'coming-soon': {
     iconBgClass: 'bg-[#ffe8a6]',
     cardHoverClass: 'hover:bg-[#ffe8a6]',
