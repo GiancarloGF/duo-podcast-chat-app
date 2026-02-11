@@ -1,4 +1,7 @@
-import type { PracticeExercise } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
+import type {
+  PracticeExercise,
+  PracticeExerciseType,
+} from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
 
 const ACTIVE_PRACTICE_SESSION_KEY = 'phrasal_verbs_active_practice_session_v1';
 
@@ -21,6 +24,8 @@ export interface ActivePracticeSession {
   filters: PracticeSessionFilters;
   usedPvIds: string[];
   recentPvIds: string[];
+  exerciseOrder: PracticeExerciseType[];
+  currentExerciseIndex: number;
   currentExercise: PracticeExercise | null;
   answersByPvId: Record<string, string | number>;
   isValidated: boolean;

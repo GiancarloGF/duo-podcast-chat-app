@@ -100,6 +100,8 @@ function createEmptySession(filters: PracticeSessionFilters): ActivePracticeSess
     filters,
     usedPvIds: [],
     recentPvIds: [],
+    exerciseOrder: getRandomExerciseOrder(),
+    currentExerciseIndex: 0,
     currentExercise: null,
     answersByPvId: {},
     isValidated: false,
@@ -172,6 +174,10 @@ function pickPhrasalVerbsForExercise(
   }
 
   return picked;
+}
+
+function getRandomExerciseOrder(): PracticeExerciseType[] {
+  return shuffleArray(EXERCISE_ROTATION);
 }
 
 function sanitizeExercise(
@@ -291,6 +297,18 @@ function normalizeWord(word: string): string {
   return word.trim().toLowerCase();
 }
 
+function getExerciseTypeLabel(exerciseType: PracticeExerciseType): string {
+  if (exerciseType === 'read_and_mark_meaning') {
+    return 'Mark meaning';
+  }
+
+  if (exerciseType === 'mark_sentences_correct') {
+    return 'Mark sentence';
+  }
+
+  return 'Fill gaps';
+}
+
 function hasValidSessionShape(session: ActivePracticeSession): boolean {
   if (!session.filters || !Array.isArray(session.filters.categories)) {
     return false;
@@ -300,8 +318,24 @@ function hasValidSessionShape(session: ActivePracticeSession): boolean {
     return false;
   }
 
+  if (!Array.isArray(session.exerciseOrder)) {
+    return false;
+  }
+
+  if (typeof session.currentExerciseIndex !== 'number') {
+    return false;
+  }
+
+  if (session.exerciseOrder.length !== EXERCISE_ROTATION.length) {
+    return false;
+  }
+
+  if (new Set(session.exerciseOrder).size !== EXERCISE_ROTATION.length) {
+    return false;
+  }
+
   if (!session.currentExercise) {
-    return true;
+    return session.isFinished || session.generatedExercisesCount === 0;
   }
 
   if (isReadAndMarkMeaningExercise(session.currentExercise)) {
@@ -542,7 +576,14 @@ export function PracticeSessionRunner({
 
   const createNextExercise = useCallback(
     async (baseSession: ActivePracticeSession): Promise<ActivePracticeSession> => {
+      const exerciseType = baseSession.exerciseOrder[baseSession.currentExerciseIndex];
+      if (!exerciseType) {
+        throw new Error('No exercise type available for current session step.');
+      }
+
       console.info('[PracticeSessionRunner] createNextExercise:start', {
+        exerciseType,
+        currentExerciseIndex: baseSession.currentExerciseIndex,
         usedCount: baseSession.usedPvIds.length,
         recentCount: baseSession.recentPvIds.length,
         sourcePool: sourcePhrasalVerbs.length,
@@ -554,41 +595,24 @@ export function PracticeSessionRunner({
         baseSession.recentPvIds
       );
 
-      console.info('[PracticeSessionRunner] createNextExercise:picked', {
-        pickedCount: pickedPhrasalVerbs.length,
-        pickedPvIds: pickedPhrasalVerbs.map((pv) => pv.id),
-      });
-
       if (pickedPhrasalVerbs.length === 0) {
         throw new Error('No phrasal verbs are available for this exercise.');
       }
 
-      const exerciseType =
-        EXERCISE_ROTATION[
-          baseSession.generatedExercisesCount % EXERCISE_ROTATION.length
-        ];
-
       const selectedPvIds = pickedPhrasalVerbs.map((pv) => pv.id);
-      const inputPayload = toExerciseInput(pickedPhrasalVerbs);
-      const response = await callActionWithTimeout(exerciseType, inputPayload);
-
-      console.info('[PracticeSessionRunner] createNextExercise:actionResponse', {
-        requestedExerciseType: exerciseType,
-        success: response.success,
-        hasExercise: Boolean(response.exercise),
-        error: response.error,
-        details: response.details,
-      });
+      const response = await callActionWithTimeout(
+        exerciseType,
+        toExerciseInput(pickedPhrasalVerbs)
+      );
 
       if (!response.success || !response.exercise) {
-        throw new Error(response.details ?? response.error ?? 'Could not generate exercise.');
+        throw new Error(
+          response.details ?? response.error ?? 'Could not generate exercise.'
+        );
       }
 
       const sanitizedExercise = sanitizeExercise(response.exercise, selectedPvIds);
-      console.info('[PracticeSessionRunner] createNextExercise:sanitized', {
-        items: sanitizedExercise.items.length,
-        pvIds: sanitizedExercise.items.map((item) => item.pvId),
-      });
+
       const nowIso = new Date().toISOString();
 
       return {
@@ -599,7 +623,10 @@ export function PracticeSessionRunner({
         answersByPvId: {},
         isValidated: false,
         isFinished: false,
-        generatedExercisesCount: baseSession.generatedExercisesCount + 1,
+        generatedExercisesCount: Math.max(
+          baseSession.generatedExercisesCount,
+          baseSession.currentExerciseIndex + 1
+        ),
         updatedAtIso: nowIso,
       };
     },
@@ -640,7 +667,10 @@ export function PracticeSessionRunner({
         setSession(baseSession);
       }
 
-      if (baseSession.isFinished || baseSession.currentExercise) {
+      if (
+        baseSession.isFinished ||
+        (baseSession.currentExercise && baseSession.generatedExercisesCount > 0)
+      ) {
         console.info('[PracticeSessionRunner] Using restored session state', {
           isFinished: baseSession.isFinished,
           hasCurrentExercise: Boolean(baseSession.currentExercise),
@@ -711,18 +741,30 @@ export function PracticeSessionRunner({
     }
 
     setUiError(null);
+
+    const nextIndex = session.currentExerciseIndex + 1;
+    if (nextIndex >= session.exerciseOrder.length) {
+      handleFinishSession();
+      return;
+    }
+
     setIsGeneratingExercise(true);
     startGenerationWatchdog('handleContinue');
 
     try {
-      const nextSession = await createNextExercise(session);
+      const nextSession = await createNextExercise({
+        ...session,
+        currentExerciseIndex: nextIndex,
+        currentExercise: null,
+        answersByPvId: {},
+        isValidated: false,
+      });
       setSession(nextSession);
     } catch (error) {
       const message = getErrorMessage(
         error,
         'Could not generate the next exercise. Please try again.'
       );
-      console.error('Failed to continue practice session', error);
       setUiError(message);
       toast.error(message);
     } finally {
@@ -854,6 +896,7 @@ export function PracticeSessionRunner({
       return {
         ...previous,
         isFinished: true,
+        currentExerciseIndex: previous.exerciseOrder.length,
         currentExercise: null,
         answersByPvId: {},
         isValidated: false,
@@ -897,9 +940,19 @@ export function PracticeSessionRunner({
     startGenerationWatchdog('handleRetryGenerateExercise');
 
     try {
-      const nextSession = await createNextExercise(session);
+      const retrySession =
+        session.currentExercise || session.currentExerciseIndex >= session.exerciseOrder.length
+          ? session
+          : {
+              ...session,
+              currentExercise: null,
+              answersByPvId: {},
+              isValidated: false,
+            };
+
+      const nextSession = await createNextExercise(retrySession);
       setSession(nextSession);
-      toast.success('Exercise generated successfully.');
+      toast.success('Session exercises generated successfully.');
     } catch (error) {
       const message = getErrorMessage(
         error,
@@ -914,6 +967,10 @@ export function PracticeSessionRunner({
   }
 
   const currentExercise = session?.currentExercise;
+  const sessionOrder =
+    session && session.exerciseOrder.length === EXERCISE_ROTATION.length
+      ? session.exerciseOrder
+      : EXERCISE_ROTATION;
 
   useEffect(() => {
     setSelectedWordForTap(null);
@@ -1195,6 +1252,10 @@ export function PracticeSessionRunner({
           <p className='text-sm font-semibold text-muted-foreground'>
             Phrasal verbs in pool: {sourcePhrasalVerbs.length}
           </p>
+          <p className='text-sm font-semibold text-muted-foreground'>
+            Exercise: {Math.min((session.currentExerciseIndex ?? 0) + 1, sessionOrder.length)}/
+            {sessionOrder.length}
+          </p>
         </div>
 
         <Button
@@ -1232,6 +1293,27 @@ export function PracticeSessionRunner({
         </div>
       ) : (
         <>
+          <div className='mb-4 flex flex-wrap items-center gap-2'>
+            {sessionOrder.map((exerciseType, index) => {
+              const isCurrent = index === session.currentExerciseIndex;
+              const isCompleted = index < session.currentExerciseIndex;
+
+              return (
+                <span
+                  key={`${exerciseType}-${index}`}
+                  className={cn(
+                    'rounded-full border-2 px-3 py-1 text-xs font-black uppercase',
+                    isCurrent && 'border-primary bg-primary/15 text-primary',
+                    isCompleted && 'border-emerald-700 bg-emerald-100 text-emerald-900',
+                    !isCurrent && !isCompleted && 'border-border bg-card text-muted-foreground'
+                  )}
+                >
+                  {index + 1}. {getExerciseTypeLabel(exerciseType)}
+                </span>
+              );
+            })}
+          </div>
+
           <div className='mb-5 rounded-[8px] border-2 border-border bg-muted p-4'>
             <p className='text-xs font-black uppercase text-muted-foreground'>
               {currentExercise.exerciseType.replaceAll('_', ' ')}
@@ -1513,14 +1595,9 @@ export function PracticeSessionRunner({
               </Button>
             ) : (
               <Button onClick={() => void handleContinue()} disabled={isGeneratingExercise}>
-                {isGeneratingExercise ? (
-                  <>
-                    <Spinner className='h-4 w-4' />
-                    Generating...
-                  </>
-                ) : (
-                  'Continue'
-                )}
+                {session.currentExerciseIndex >= session.exerciseOrder.length - 1
+                  ? 'Finish session'
+                  : 'Continue'}
               </Button>
             )}
           </div>
