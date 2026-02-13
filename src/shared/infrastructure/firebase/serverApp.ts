@@ -29,15 +29,16 @@ export async function getAuthenticatedAppForUser(): Promise<{
 
     return { firebaseServerApp, currentUser: auth.currentUser };
   } catch (error) {
-    console.error('Error initializing server app', error);
-    // Return a dummy app or null structure if needed, or rethrow
-    // Depending on strictness, we might want to return { firebaseServerApp: ..., currentUser: null } even on error
-    // But initializeServerApp shouldn't fail if config is correct.
-    // However, explicit structure return is safer.
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'digest' in error &&
+      error.digest === 'DYNAMIC_SERVER_USAGE'
+    ) {
+      throw error;
+    }
 
-    // For now, rethrow or return null user
-    // We need to return a valid FirebaseServerApp though to avoid crashes if used later?
-    // Actually if initializeServerApp fails we are in trouble.
+    console.error('Error initializing server app', error);
     throw error;
   }
 }
