@@ -8,6 +8,7 @@ export async function ensurePhrasalVerbCatalogHydrated(
   repository: PhrasalVerbCatalogRepository,
   options?: {
     onProgress?: (progress: CatalogHydrationProgress) => void;
+    forceRefresh?: boolean;
   }
 ): Promise<CatalogHydrationResult> {
   return repository.ensureCatalogHydrated(options);

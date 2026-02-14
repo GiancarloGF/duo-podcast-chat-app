@@ -9,6 +9,7 @@ import type {
 export interface PhrasalVerbCatalogRepository {
   ensureCatalogHydrated(options?: {
     onProgress?: (progress: CatalogHydrationProgress) => void;
+    forceRefresh?: boolean;
   }): Promise<CatalogHydrationResult>;
   queryCatalog(params: PhrasalVerbCatalogQuery): Promise<PhrasalVerbCatalogQueryResult>;
   getCatalogStatus(): Promise<PhrasalVerbCatalogStatus>;

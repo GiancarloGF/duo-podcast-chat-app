@@ -112,8 +112,10 @@ export class LocalFirstPhrasalVerbCatalogRepository
 
   async ensureCatalogHydrated(options?: {
     onProgress?: (progress: CatalogHydrationProgress) => void;
+    forceRefresh?: boolean;
   }): Promise<CatalogHydrationResult> {
     const onProgress = options?.onProgress;
+    const forceRefresh = options?.forceRefresh ?? false;
 
     onProgress?.({
       phase: 'checking',
@@ -122,8 +124,32 @@ export class LocalFirstPhrasalVerbCatalogRepository
       message: 'Revisando catalogo local...',
     });
 
-    const initialStatus = await this.getCatalogStatus();
+    let initialStatus = await this.getCatalogStatus();
+    console.info('[PhrasalVerbCatalog] hydration check', {
+      localCount: initialStatus.localCount,
+      isHydrated: initialStatus.isHydrated,
+      schemaVersion: initialStatus.schemaVersion,
+      hydratedAtIso: initialStatus.hydratedAtIso,
+    });
+
+    if (forceRefresh) {
+      console.info('[PhrasalVerbCatalog] force refresh requested, clearing IndexedDB');
+      await phrasalVerbCatalogDb.transaction(
+        'rw',
+        phrasalVerbCatalogDb.phrasalVerbs,
+        phrasalVerbCatalogDb.catalogMeta,
+        async () => {
+          await phrasalVerbCatalogDb.phrasalVerbs.clear();
+          await phrasalVerbCatalogDb.catalogMeta.delete(PHRASAL_VERB_CATALOG_META_KEY);
+        }
+      );
+      initialStatus = await this.getCatalogStatus();
+    }
+
     if (initialStatus.isHydrated) {
+      console.info(
+        '[PhrasalVerbCatalog] cache hit: using IndexedDB, skipping Firebase fetch'
+      );
       onProgress?.({
         phase: 'ready',
         completed: initialStatus.localCount,
@@ -138,6 +164,9 @@ export class LocalFirstPhrasalVerbCatalogRepository
     }
 
     try {
+      console.info(
+        '[PhrasalVerbCatalog] cache miss: requesting full catalog from Firebase'
+      );
       onProgress?.({
         phase: 'downloading',
         completed: 0,
@@ -146,6 +175,9 @@ export class LocalFirstPhrasalVerbCatalogRepository
       });
 
       const remoteEntries = await this.remoteRepository.getAllPhrasalVerbs();
+      console.info('[PhrasalVerbCatalog] Firebase response received', {
+        remoteCount: remoteEntries.length,
+      });
       const mappedRows = remoteEntries.map(mapPhrasalVerbToRow);
 
       onProgress?.({
@@ -187,6 +219,10 @@ export class LocalFirstPhrasalVerbCatalogRepository
       );
 
       const nextStatus = await this.getCatalogStatus();
+      console.info('[PhrasalVerbCatalog] IndexedDB hydration completed', {
+        localCount: nextStatus.localCount,
+        hydratedAtIso: nextStatus.hydratedAtIso,
+      });
 
       onProgress?.({
         phase: 'ready',

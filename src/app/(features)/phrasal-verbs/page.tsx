@@ -26,9 +26,9 @@ export default async function PhrasalVerbsPage() {
   return (
     <>
       <Header initialUser={serializableUser} />
-      <main className='min-h-screen p-4'>
-        <div className='mx-auto max-w-6xl py-12'>
-          <Breadcrumb className='mb-6'>
+      <main className='min-h-screen'>
+        <div className='mx-auto max-w-6xl py-8'>
+          <Breadcrumb className='mb-4'>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href='/'>Inicio</BreadcrumbLink>
@@ -40,13 +40,13 @@ export default async function PhrasalVerbsPage() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-            <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
+          <section className='mb-5 rounded-[10px] border-2 border-border bg-card p-4 shadow-[8px_8px_0_0_var(--color-border)]'>
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
               <div>
-                <h1 className='mb-2 text-4xl font-black text-foreground'>
+                <h1 className='mb-1 text-3xl font-black text-foreground'>
                   Phrasal Verbs Practice
                 </h1>
-                <p className='text-lg font-medium text-muted-foreground'>
+                <p className='text-base font-medium text-muted-foreground'>
                   Entrena tu ingles con phrasal verbs reales y ejemplos nativos.
                 </p>
               </div>

@@ -41,6 +41,7 @@ export interface UsePhrasalVerbCatalogResult {
   isQuerying: boolean;
   reloadQuery: () => void;
   retryHydration: () => void;
+  refreshCatalogFromFirebase: () => void;
 }
 
 function toHydrationState(
@@ -87,6 +88,7 @@ export function usePhrasalVerbCatalog(
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(params.searchTerm);
   const [queryRevision, setQueryRevision] = useState(0);
   const [hydrationRevision, setHydrationRevision] = useState(0);
+  const forceRefreshRef = useRef(false);
   const normalizedCategories = useMemo(
     () =>
       Array.from(
@@ -99,6 +101,15 @@ export function usePhrasalVerbCatalog(
     [params.categories]
   );
   const categorySignature = normalizedCategories.join('||');
+
+  useEffect(() => {
+    console.info('[usePhrasalVerbCatalog] hydration state', {
+      phase: hydration.phase,
+      completed: hydration.completed,
+      total: hydration.total,
+      error: hydration.error,
+    });
+  }, [hydration.completed, hydration.error, hydration.phase, hydration.total]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -118,6 +129,11 @@ export function usePhrasalVerbCatalog(
     setHydrationRevision((current) => current + 1);
   }, []);
 
+  const refreshCatalogFromFirebase = useCallback(() => {
+    forceRefreshRef.current = true;
+    setHydrationRevision((current) => current + 1);
+  }, []);
+
   useEffect(() => {
     let isCancelled = false;
     const repository = repositoryRef.current;
@@ -128,6 +144,9 @@ export function usePhrasalVerbCatalog(
     const activeRepository: PhrasalVerbCatalogRepository = repository;
 
     async function hydrateCatalog(): Promise<void> {
+      const forceRefresh = forceRefreshRef.current;
+      forceRefreshRef.current = false;
+
       setIsHydrationComplete(false);
       setHydration({
         phase: 'checking',
@@ -138,15 +157,19 @@ export function usePhrasalVerbCatalog(
       });
 
       try {
-        const hydrationResult = await ensurePhrasalVerbCatalogHydrated(activeRepository, {
-          onProgress: (progress) => {
-            if (isCancelled) {
-              return;
-            }
+        const hydrationResult = await ensurePhrasalVerbCatalogHydrated(
+          activeRepository,
+          {
+            forceRefresh,
+            onProgress: (progress) => {
+              if (isCancelled) {
+                return;
+              }
 
-            setHydration(toHydrationState(progress));
+              setHydration(toHydrationState(progress));
+            },
           },
-        });
+        );
 
         if (isCancelled) {
           return;
@@ -304,5 +327,6 @@ export function usePhrasalVerbCatalog(
     isQuerying,
     reloadQuery,
     retryHydration,
+    refreshCatalogFromFirebase,
   };
 }

@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Filter, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, MoreHorizontal, Search } from 'lucide-react';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
-import { PHRASAL_VERB_GROUPS } from '@/features/phrasal-verbs/infrastructure/data/phrasalVerbGroups';
+import {
+  getSuperGroupColorsByTitle,
+  PHRASAL_VERB_GROUPS,
+} from '@/features/phrasal-verbs/infrastructure/data/phrasalVerbGroups';
 import {
   cleanLabel,
   getCategoryOptions,
@@ -26,6 +29,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/presentation/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/presentation/components/ui/dropdown-menu';
 
 const PAGE_SIZE = 10;
 
@@ -145,6 +154,7 @@ export function PhrasalVerbsExplorer() {
     isQuerying,
     reloadQuery,
     retryHydration,
+    refreshCatalogFromFirebase,
   } = usePhrasalVerbCatalog({
     superGroup: selectedSuperGroup?.title ?? null,
     group: selectedGroupTitle ?? null,
@@ -218,20 +228,42 @@ export function PhrasalVerbsExplorer() {
   const animatedListKey = `${currentLevel}-${selectedSuperGroupId ?? 'all'}-${selectedGroupKey ?? 'all'}`;
 
   return (
-    <div className='space-y-8'>
-      <section className='rounded-[10px] border-2 border-border bg-card p-4 shadow-[6px_6px_0_0_var(--color-border)]'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <Badge variant={getHydrationBadgeVariant(hydration.phase)}>
-            {hydration.phase}
-          </Badge>
-          {isQuerying && (
-            <Badge variant='outline' className='gap-1'>
-              <Spinner className='h-3 w-3' />
-              Consultando local...
+    <div className='space-y-5'>
+      <section className='rounded-[10px] border-2 border-border bg-card p-3 shadow-[6px_6px_0_0_var(--color-border)]'>
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <Badge variant={getHydrationBadgeVariant(hydration.phase)}>
+              {hydration.phase}
             </Badge>
-          )}
+            {isQuerying && (
+              <Badge variant='outline' className='gap-1'>
+                <Spinner className='h-3 w-3' />
+                Consultando local...
+              </Badge>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-auto w-auto p-0 shadow-none'
+                aria-label='Abrir menu de acciones'
+              >
+                <MoreHorizontal className='h-6 w-6' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem
+                onClick={refreshCatalogFromFirebase}
+                disabled={isHydrating}
+              >
+                Actualizar datos
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <p className='mt-2 text-sm font-semibold'>{hydration.message}</p>
+        <p className='mt-1 text-sm font-semibold'>{hydration.message}</p>
         {hydration.phase === 'persisting' && hydration.total > 0 && (
           <p className='text-xs font-medium text-muted-foreground'>
             Progreso: {hydration.completed}/{hydration.total}
@@ -256,7 +288,7 @@ export function PhrasalVerbsExplorer() {
       <Collapsible
         open={isFiltersOpen}
         onOpenChange={setIsFiltersOpen}
-        className='rounded-[10px] border-2 border-border bg-card p-5 shadow-[8px_8px_0_0_var(--color-border)]'
+        className='rounded-[10px] border-2 border-border bg-card p-4 shadow-[8px_8px_0_0_var(--color-border)]'
       >
         <div className='flex items-center justify-between gap-3'>
           <div className='flex items-center gap-2'>
@@ -270,7 +302,7 @@ export function PhrasalVerbsExplorer() {
           </CollapsibleTrigger>
         </div>
 
-        <CollapsibleContent className='data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 mt-5 space-y-4'>
+        <CollapsibleContent className='data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 mt-3 space-y-3'>
           <div className='flex flex-wrap items-center gap-2 rounded-[8px] border-2 border-border bg-muted p-3'>
             <button
               type='button'
@@ -377,7 +409,7 @@ export function PhrasalVerbsExplorer() {
         </CollapsibleContent>
       </Collapsible>
 
-      <section className='space-y-4'>
+      <section className='space-y-3'>
         <div className='relative'>
           <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
           <Input
@@ -438,29 +470,63 @@ export function PhrasalVerbsExplorer() {
         ) : (
           <>
             <div className='grid grid-cols-1 gap-3 lg:grid-cols-2'>
-              {visiblePhrasalVerbs.map((phrasalVerb) => (
-                <button
-                  type='button'
-                  key={phrasalVerb.id}
-                  onClick={() => setSelectedPhrasalVerb(phrasalVerb)}
-                  className='group relative overflow-hidden rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)] transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_var(--color-border)]'
-                >
-                  <span className='sr-only'>{phrasalVerb.phrasalVerb}</span>
-                  <div className='relative aspect-[21/10] w-full bg-muted'>
-                    {phrasalVerb.imageUrl ? (
-                      <img
-                        src={phrasalVerb.imageUrl}
-                        alt={phrasalVerb.phrasalVerb}
-                        className='h-full w-full bg-card object-contain p-1 transition-transform duration-300 group-hover:scale-105'
-                      />
-                    ) : (
-                      <div className='flex h-full items-center justify-center text-xs font-black uppercase text-muted-foreground'>
-                        Sin imagen
+              {visiblePhrasalVerbs.map((phrasalVerb) => {
+                const superGroupColors = getSuperGroupColorsByTitle(phrasalVerb.superGroup);
+
+                return (
+                  <button
+                    type='button'
+                    key={phrasalVerb.id}
+                    onClick={() => setSelectedPhrasalVerb(phrasalVerb)}
+                    className='group relative overflow-hidden rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[5px_5px_0_0_var(--color-border)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] focus-visible:shadow-[5px_5px_0_0_var(--color-border)]'
+                    style={{ backgroundColor: superGroupColors?.lightColor ?? undefined }}
+                  >
+                    <span className='sr-only'>{phrasalVerb.phrasalVerb}</span>
+
+                    <div className='pointer-events-none absolute left-2 right-2 top-2 z-30 flex flex-nowrap items-center gap-2 overflow-x-auto overflow-y-visible pb-1'>
+                      <Badge
+                        className='shrink-0 border-2 border-border text-[10px] font-black uppercase tracking-wide text-white'
+                        style={{ backgroundColor: superGroupColors?.color ?? undefined }}
+                      >
+                        {phrasalVerb.superGroup}
+                      </Badge>
+                      <Badge className='shrink-0 border-2 border-border bg-background/95 text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100'>
+                        {phrasalVerb.group}
+                      </Badge>
+                      <Badge className='shrink-0 border-2 border-border bg-background/95 text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100'>
+                        {phrasalVerb.category}
+                      </Badge>
+                    </div>
+
+                    <div className='absolute inset-0 z-20 bg-black/15 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100' />
+
+                    <div className='pointer-events-none absolute inset-0 z-30 flex flex-col justify-end p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100'>
+                      <div className='flex flex-wrap gap-2'>
+                        <Badge className='border-2 border-border bg-background/95 text-foreground'>
+                          {phrasalVerb.transitivity}
+                        </Badge>
+                        <Badge className='border-2 border-border bg-background/95 text-foreground'>
+                          {phrasalVerb.separability}
+                        </Badge>
                       </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+                    </div>
+
+                    <div className='relative aspect-[21/10] w-full bg-transparent'>
+                      {phrasalVerb.imageUrl ? (
+                        <img
+                          src={phrasalVerb.imageUrl}
+                          alt={phrasalVerb.phrasalVerb}
+                          className='h-full w-full object-contain p-1'
+                        />
+                      ) : (
+                        <div className='flex h-full items-center justify-center text-xs font-black uppercase text-muted-foreground'>
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {shouldPaginate && totalPages > 1 && (

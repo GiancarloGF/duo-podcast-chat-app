@@ -30,8 +30,12 @@ function toDate(value: unknown): Date | null {
 
 export class FirestorePhrasalVerbRepository implements PhrasalVerbRepository {
   async getAllPhrasalVerbs(): Promise<PhrasalVerb[]> {
+    console.info('[FirestorePhrasalVerbRepository] Fetching phrasal_verbs collection');
     const firestore = getClientFirestore();
     const snapshot = await getDocs(collection(firestore, 'phrasal_verbs'));
+    console.info('[FirestorePhrasalVerbRepository] Fetch success', {
+      docsCount: snapshot.docs.length,
+    });
 
     return snapshot.docs.map((document) => {
       const data = document.data();
