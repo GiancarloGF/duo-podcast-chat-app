@@ -60,8 +60,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='es'>
+    <html lang='es' suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${bungee.variable} font-sans antialiased`}
       >
         <ThemeProvider

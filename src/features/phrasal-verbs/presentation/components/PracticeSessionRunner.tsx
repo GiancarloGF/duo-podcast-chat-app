@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { JSX, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   DndContext,
   type DragEndEvent,
@@ -12,8 +13,6 @@ import { CircleCheckBig, CircleX, Flag, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
-import { filterPhrasalVerbs } from '@/features/phrasal-verbs/application/utils/phrasalVerbFilters';
-import { FirestorePhrasalVerbRepository } from '@/features/phrasal-verbs/infrastructure/repositories/FirestorePhrasalVerbRepository';
 import {
   practiceSessionStorage,
   type ActivePracticeSession,
@@ -28,6 +27,7 @@ import {
   type ReadAndMarkMeaningExercise,
 } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
 import { generatePracticeExerciseAction } from '@/features/phrasal-verbs/presentation/actions';
+import { usePhrasalVerbCatalog } from '@/features/phrasal-verbs/presentation/hooks/usePhrasalVerbCatalog';
 import { Button } from '@/shared/presentation/components/ui/button';
 import { Spinner } from '@/shared/presentation/components/ui/spinner';
 import { cn } from '@/shared/presentation/utils';
@@ -444,9 +444,29 @@ export function PracticeSessionRunner({
   group,
   categories,
 }: PracticeSessionRunnerProps): JSX.Element {
-  const [phrasalVerbs, setPhrasalVerbs] = useState<PhrasalVerb[]>([]);
-  const [isLoadingPhrasalVerbs, setIsLoadingPhrasalVerbs] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const router = useRouter();
+  const {
+    hydration,
+    status: catalogStatus,
+    items: categoryPhrasalVerbs,
+    retryHydration,
+    reloadQuery,
+  } = usePhrasalVerbCatalog({
+    superGroup,
+    group,
+    categories,
+    searchTerm: '',
+    page: 1,
+    pageSize: 2000,
+    paginate: false,
+  });
+  const isCatalogHydrating =
+    hydration.phase === 'checking' ||
+    hydration.phase === 'downloading' ||
+    hydration.phase === 'persisting';
+  const hasLocalCatalogData = (catalogStatus?.localCount ?? 0) > 0;
+  const isCatalogMissingAndBlocked =
+    hydration.phase === 'error' && !hasLocalCatalogData && categoryPhrasalVerbs.length === 0;
 
   const [session, setSession] = useState<ActivePracticeSession | null>(null);
   const [isGeneratingExercise, setIsGeneratingExercise] = useState(false);
@@ -494,47 +514,10 @@ export function PracticeSessionRunner({
   }
 
   useEffect(() => {
-    const repository = new FirestorePhrasalVerbRepository();
-
-    async function loadData(): Promise<void> {
-      try {
-        console.info('[PracticeSessionRunner] Loading phrasal verbs from Firestore');
-        setIsLoadingPhrasalVerbs(true);
-        setLoadError(null);
-        const entries = await repository.getAllPhrasalVerbs();
-        console.info('[PracticeSessionRunner] Firestore load success', {
-          total: entries.length,
-          superGroup,
-          group,
-          categories,
-        });
-        setPhrasalVerbs(entries);
-      } catch (error) {
-        const message = getErrorMessage(
-          error,
-          'Could not load phrasal verbs for this category.'
-        );
-        console.error('Error loading practice session data', error);
-        setLoadError(message);
-        toast.error(message);
-      } finally {
-        setIsLoadingPhrasalVerbs(false);
-      }
-    }
-
-    void loadData();
-  }, []);
-
-  useEffect(() => {
     return () => {
       clearGenerationWatchdog();
     };
   }, []);
-
-  const categoryPhrasalVerbs = useMemo(
-    () => filterPhrasalVerbs(phrasalVerbs, superGroup, group, categories),
-    [phrasalVerbs, superGroup, group, categories]
-  );
 
   const sourcePhrasalVerbs = useMemo<ExerciseSourcePhrasalVerb[]>(
     () =>
@@ -634,7 +617,12 @@ export function PracticeSessionRunner({
   );
 
   useEffect(() => {
-    if (categories.length === 0 || isLoadingPhrasalVerbs || loadError || sourcePhrasalVerbs.length === 0) {
+    if (
+      categories.length === 0 ||
+      isCatalogHydrating ||
+      isCatalogMissingAndBlocked ||
+      sourcePhrasalVerbs.length === 0
+    ) {
       return;
     }
 
@@ -718,8 +706,8 @@ export function PracticeSessionRunner({
     categories,
     createNextExercise,
     filters,
-    isLoadingPhrasalVerbs,
-    loadError,
+    isCatalogHydrating,
+    isCatalogMissingAndBlocked,
     sessionKey,
     sourcePhrasalVerbs.length,
   ]);
@@ -1146,19 +1134,38 @@ export function PracticeSessionRunner({
     );
   }
 
-  if (isLoadingPhrasalVerbs) {
+  if (isCatalogHydrating) {
     return (
       <div className='flex items-center justify-center rounded-[10px] border-2 border-border bg-card p-12 shadow-[6px_6px_0_0_var(--color-border)]'>
         <Spinner className='mr-2 h-5 w-5' />
-        <p className='font-semibold'>Loading practice session...</p>
+        <p className='font-semibold'>{hydration.message}</p>
       </div>
     );
   }
 
-  if (loadError) {
+  if (isCatalogMissingAndBlocked) {
     return (
       <div className='rounded-[10px] border-2 border-border bg-destructive/10 p-6 shadow-[6px_6px_0_0_var(--color-border)]'>
-        <p className='font-bold text-destructive'>{loadError}</p>
+        <p className='font-bold text-destructive'>
+          No se pudo cargar el catalogo local para esta sesion.
+        </p>
+        <p className='mt-2 text-sm font-semibold text-destructive'>
+          {hydration.error ?? hydration.message}
+        </p>
+        <div className='mt-4 flex flex-wrap gap-2'>
+          <Button
+            variant='outline'
+            onClick={() => {
+              retryHydration();
+              reloadQuery();
+            }}
+          >
+            Reintentar
+          </Button>
+          <Button variant='outline' onClick={() => router.push('/')}>
+            Ir a inicio
+          </Button>
+        </div>
       </div>
     );
   }

@@ -294,3 +294,49 @@ export const PHRASAL_VERB_GROUPS: PhrasalVerbSuperGroup[] = [
     ],
   },
 ];
+
+export const GROUPS_COLORS_MAP: Record<
+  string,
+  { color: string; lightColor: string }
+> = PHRASAL_VERB_GROUPS.reduce(
+  (acc, group) => {
+    acc[group.id] = { color: group.color, lightColor: group.lightColor };
+    return acc;
+  },
+  {} as Record<string, { color: string; lightColor: string }>,
+);
+
+export function normalizeSuperGroupKey(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+const GROUPS_COLORS_BY_TITLE_MAP: Record<string, { color: string; lightColor: string }> =
+  PHRASAL_VERB_GROUPS.reduce(
+    (acc, group) => {
+      acc[normalizeSuperGroupKey(group.title)] = {
+        color: group.color,
+        lightColor: group.lightColor,
+      };
+      return acc;
+    },
+    {} as Record<string, { color: string; lightColor: string }>
+  );
+
+export function getSuperGroupColorsByTitle(
+  superGroupTitle: string
+): { color: string; lightColor: string } | null {
+  const normalizedKey = normalizeSuperGroupKey(superGroupTitle);
+
+  if (!normalizedKey) {
+    return null;
+  }
+
+  return GROUPS_COLORS_MAP[normalizedKey] ?? GROUPS_COLORS_BY_TITLE_MAP[normalizedKey] ?? null;
+}

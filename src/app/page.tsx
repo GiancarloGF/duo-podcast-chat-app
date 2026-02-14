@@ -18,7 +18,7 @@ export default async function Home() {
   return (
     <>
       <Header initialUser={serializableUser} />
-      <main className='min-h-screen p-4 sm:p-8'>
+      <main className='min-h-screen'>
         <div className='max-w-6xl mx-auto py-8 sm:py-12'>
 
           <FeatureList features={features} />
