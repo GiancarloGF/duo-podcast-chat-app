@@ -4,14 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Filter, Search } from 'lucide-react';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import { PHRASAL_VERB_GROUPS } from '@/features/phrasal-verbs/infrastructure/data/phrasalVerbGroups';
-import { FirestorePhrasalVerbRepository } from '@/features/phrasal-verbs/infrastructure/repositories/FirestorePhrasalVerbRepository';
 import {
   cleanLabel,
-  filterPhrasalVerbs,
   getCategoryOptions,
   getGroupOptions,
-  normalizeText,
 } from '@/features/phrasal-verbs/application/utils/phrasalVerbFilters';
+import { usePhrasalVerbCatalog } from '@/features/phrasal-verbs/presentation/hooks/usePhrasalVerbCatalog';
 import { Button } from '@/shared/presentation/components/ui/button';
 import { Badge } from '@/shared/presentation/components/ui/badge';
 import { Spinner } from '@/shared/presentation/components/ui/spinner';
@@ -32,6 +30,18 @@ import {
 const PAGE_SIZE = 10;
 
 type NavigatorLevel = 'super-group' | 'group' | 'category';
+
+function getHydrationBadgeVariant(phase: string): 'default' | 'destructive' | 'outline' {
+  if (phase === 'error') {
+    return 'destructive';
+  }
+
+  if (phase === 'ready') {
+    return 'default';
+  }
+
+  return 'outline';
+}
 
 function SelectionTag({
   label,
@@ -59,9 +69,6 @@ function SelectionTag({
 }
 
 export function PhrasalVerbsExplorer() {
-  const [phrasalVerbs, setPhrasalVerbs] = useState<PhrasalVerb[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [selectedSuperGroupId, setSelectedSuperGroupId] = useState<string | null>(null);
@@ -71,34 +78,6 @@ export function PhrasalVerbsExplorer() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    const repository = new FirestorePhrasalVerbRepository();
-
-    async function loadPhrasalVerbs() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const entries = await repository.getAllPhrasalVerbs();
-        const sortedEntries = [...entries].sort((a, b) => {
-          if (a.createdAt && b.createdAt) {
-            return b.createdAt.getTime() - a.createdAt.getTime();
-          }
-
-          return a.phrasalVerb.localeCompare(b.phrasalVerb);
-        }
-        );
-        setPhrasalVerbs(sortedEntries);
-      } catch (loadError) {
-        console.error('Error al cargar phrasal verbs', loadError);
-        setError('No se pudieron cargar los phrasal verbs. Intenta recargar.');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    void loadPhrasalVerbs();
-  }, []);
 
   const selectedSuperGroup = useMemo(
     () =>
@@ -157,61 +136,40 @@ export function PhrasalVerbsExplorer() {
     return 'category';
   }, [selectedSuperGroupId, selectedGroupKey]);
 
-  const filteredPhrasalVerbs = useMemo(
-    () =>
-      filterPhrasalVerbs(
-        phrasalVerbs,
-        selectedSuperGroup?.title ?? null,
-        selectedGroupTitle ?? null,
-        selectedCategoryLabel
-      ),
-    [
-      phrasalVerbs,
-      selectedSuperGroup?.title,
-      selectedGroupTitle,
-      selectedCategoryLabel,
-    ]
-  );
-
-  const searchedPhrasalVerbs = useMemo(() => {
-    const normalizedSearchTerm = normalizeText(searchTerm);
-    if (!normalizedSearchTerm) {
-      return filteredPhrasalVerbs;
-    }
-
-    return filteredPhrasalVerbs.filter((phrasalVerb) => {
-      const searchableText = [
-        phrasalVerb.phrasalVerb,
-        phrasalVerb.verb,
-        phrasalVerb.meaning,
-        phrasalVerb.definition,
-      ]
-        .map((value) => normalizeText(value))
-        .join(' ');
-
-      return searchableText.includes(normalizedSearchTerm);
-    });
-  }, [filteredPhrasalVerbs, searchTerm]);
-
   const shouldPaginate = selectedCategoryKey !== null ? selectedCategoryKey === 'all' : true;
-  const totalPages = shouldPaginate
-    ? Math.max(1, Math.ceil(searchedPhrasalVerbs.length / PAGE_SIZE))
-    : 1;
+  const {
+    hydration,
+    status,
+    items: visiblePhrasalVerbs,
+    total,
+    isQuerying,
+    reloadQuery,
+    retryHydration,
+  } = usePhrasalVerbCatalog({
+    superGroup: selectedSuperGroup?.title ?? null,
+    group: selectedGroupTitle ?? null,
+    categories: selectedCategoryLabel ? [selectedCategoryLabel] : [],
+    searchTerm,
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+    paginate: shouldPaginate,
+  });
+
+  const isHydrating =
+    hydration.phase === 'checking' ||
+    hydration.phase === 'downloading' ||
+    hydration.phase === 'persisting';
+  const totalPages = shouldPaginate ? Math.max(1, Math.ceil(total / PAGE_SIZE)) : 1;
+  const hasCatalogData = (status?.localCount ?? 0) > 0;
+  const isFirstLoadOfflineError =
+    hydration.phase === 'error' && !hasCatalogData && total === 0;
+  const isInitialLoading = isHydrating && total === 0;
 
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
-
-  const visiblePhrasalVerbs = useMemo(() => {
-    if (!shouldPaginate) {
-      return searchedPhrasalVerbs;
-    }
-
-    const offset = (currentPage - 1) * PAGE_SIZE;
-    return searchedPhrasalVerbs.slice(offset, offset + PAGE_SIZE);
-  }, [searchedPhrasalVerbs, shouldPaginate, currentPage]);
 
   function handleSelectSuperGroup(value: string) {
     setSelectedSuperGroupId(value);
@@ -261,6 +219,40 @@ export function PhrasalVerbsExplorer() {
 
   return (
     <div className='space-y-8'>
+      <section className='rounded-[10px] border-2 border-border bg-card p-4 shadow-[6px_6px_0_0_var(--color-border)]'>
+        <div className='flex flex-wrap items-center gap-2'>
+          <Badge variant={getHydrationBadgeVariant(hydration.phase)}>
+            {hydration.phase}
+          </Badge>
+          {isQuerying && (
+            <Badge variant='outline' className='gap-1'>
+              <Spinner className='h-3 w-3' />
+              Consultando local...
+            </Badge>
+          )}
+        </div>
+        <p className='mt-2 text-sm font-semibold'>{hydration.message}</p>
+        {hydration.phase === 'persisting' && hydration.total > 0 && (
+          <p className='text-xs font-medium text-muted-foreground'>
+            Progreso: {hydration.completed}/{hydration.total}
+          </p>
+        )}
+        {hydration.phase === 'error' && (
+          <div className='mt-3 flex flex-wrap gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => {
+                retryHydration();
+                reloadQuery();
+              }}
+            >
+              Reintentar
+            </Button>
+          </div>
+        )}
+      </section>
+
       <Collapsible
         open={isFiltersOpen}
         onOpenChange={setIsFiltersOpen}
@@ -398,7 +390,7 @@ export function PhrasalVerbsExplorer() {
 
         <div className='flex flex-wrap items-center gap-2'>
           <Badge variant='outline' className='gap-1'>
-            {searchedPhrasalVerbs.length} resultados
+            {total} resultados
           </Badge>
           {selectedSuperGroup && (
             <Badge className='bg-secondary text-secondary-foreground'>
@@ -415,16 +407,31 @@ export function PhrasalVerbsExplorer() {
           )}
         </div>
 
-        {isLoading ? (
+        {isInitialLoading ? (
           <div className='flex items-center justify-center rounded-[10px] border-2 border-border bg-card p-12 shadow-[6px_6px_0_0_var(--color-border)]'>
             <Spinner className='mr-2 h-5 w-5' />
-            <p className='font-semibold'>Cargando phrasal verbs...</p>
+            <p className='font-semibold'>Preparando catalogo local...</p>
           </div>
-        ) : error ? (
+        ) : isFirstLoadOfflineError ? (
           <div className='rounded-[10px] border-2 border-border bg-destructive/10 p-6 shadow-[6px_6px_0_0_var(--color-border)]'>
-            <p className='font-bold text-destructive'>{error}</p>
+            <p className='font-bold text-destructive'>
+              Necesitas conexion a internet para descargar el catalogo inicial.
+            </p>
+            <p className='mt-2 text-sm font-semibold text-destructive'>
+              Cuando se descargue una vez, podras usar esta pantalla tambien sin conexion.
+            </p>
+            <Button
+              className='mt-4'
+              variant='outline'
+              onClick={() => {
+                retryHydration();
+                reloadQuery();
+              }}
+            >
+              Reintentar descarga
+            </Button>
           </div>
-        ) : searchedPhrasalVerbs.length === 0 ? (
+        ) : total === 0 ? (
           <div className='rounded-[10px] border-2 border-border bg-card p-8 text-center shadow-[6px_6px_0_0_var(--color-border)]'>
             <p className='font-bold'>No hay phrasal verbs para esta busqueda.</p>
           </div>
