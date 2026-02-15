@@ -8,37 +8,36 @@ import {
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
 
-export default function PhrasalVerbsPracticePage() {
+export default async function PhrasalVerbsPracticePage() {
   return (
-    <main className='min-h-screen p-4'>
-      <div className='mx-auto max-w-6xl py-12'>
-        <Breadcrumb className='mb-6'>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href='/'>Inicio</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href='/phrasal-verbs'>Phrasal verbs</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Practica</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className='py-4'>
+      <Breadcrumb className='mb-6'>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href='/'>Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href='/phrasal-verbs'>Phrasal verbs</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Practice</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-          <h1 className='mb-2 text-4xl font-black text-foreground'>
-            Sesion de practica
-          </h1>
-          <p className='text-lg font-medium text-muted-foreground'>
-            Selecciona supergrupo, grupo y categoria para iniciar tu practica.
-          </p>
-        </section>
+      <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+        <h1 className='mb-2 text-xl sm:text-4xl font-black text-foreground'>
+          Practice session
+        </h1>
+        <p className='text-sm sm:text-lg font-medium text-muted-foreground'>
+          Select a supergroup, group and category to start your practice
+          session.
+        </p>
+      </section>
 
-        <PracticeCategorySelector />
-      </div>
-    </main>
+      <PracticeCategorySelector />
+    </div>
   );
 }

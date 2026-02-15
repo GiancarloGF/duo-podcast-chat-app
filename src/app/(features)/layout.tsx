@@ -1,10 +1,12 @@
-import { getHomeFeaturesAction } from '@/features/home/presentation/actions';
-import { FeatureList } from '@/features/home/presentation/components/FeatureList';
+import type React from 'react';
 import { getAuthenticatedAppForUser } from '@/shared/infrastructure/firebase/serverApp';
 import { Header } from '@/shared/presentation/components/Header';
 
-export default async function Home() {
-  const features = await getHomeFeaturesAction();
+export default async function AppLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const { currentUser } = await getAuthenticatedAppForUser();
   const serializableUser = currentUser
     ? {
@@ -18,11 +20,8 @@ export default async function Home() {
   return (
     <>
       <Header initialUser={serializableUser} />
-      <main className='min-h-screen'>
-        <div className='max-w-6xl mx-auto py-8 sm:py-12'>
-
-          <FeatureList features={features} />
-        </div>
+      <main className='min-h-screen px-3 sm:px-6'>
+        <div className='mx-auto w-full max-w-6xl py-4 sm:py-6'>{children}</div>
       </main>
     </>
   );
