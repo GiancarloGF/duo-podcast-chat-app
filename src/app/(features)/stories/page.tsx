@@ -87,7 +87,7 @@ export default async function StoriesPage() {
   });
 
   return (
-    <div className='py-6 sm:py-10'>
+    <div className=''>
       <Breadcrumb className='mb-6'>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -100,11 +100,11 @@ export default async function StoriesPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className='mb-12 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-        <h1 className='text-4xl font-black text-foreground mb-2'>
+      <div className='mb-12 rounded-[10px] border-2 border-border bg-card p-4 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+        <h1 className='text-lg sm:text-4xl font-black text-foreground mb-2'>
           English stories
         </h1>
-        <p className='text-lg text-muted-foreground font-medium'>
+        <p className='text-sm sm:text-lg text-muted-foreground font-medium'>
           Dive into engaging stories, track your progress, and enjoy learning
         </p>
       </div>
@@ -113,7 +113,7 @@ export default async function StoriesPage() {
         {inProgressEpisodes.length > 0 && (
           <div>
             <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-2xl font-black text-foreground'>
+              <h2 className='text-lg sm:text-2xl font-black text-foreground'>
                 In progress
               </h2>
               <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-primary text-primary-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>

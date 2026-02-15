@@ -33,7 +33,7 @@ export default async function PhrasalVerbsPracticeSessionPage({
   );
 
   return (
-    <div className='py-12'>
+    <div className='py-2 sm:py-6'>
       <Breadcrumb className='mb-6'>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -55,8 +55,8 @@ export default async function PhrasalVerbsPracticeSessionPage({
       </Breadcrumb>
 
       <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-        <h1 className='mb-2 text-4xl font-black text-foreground'>Practice session</h1>
-        <p className='text-lg font-medium text-muted-foreground'>
+        <h1 className='mb-2 text-lx sm:text-4xl font-black text-foreground'>Practice session</h1>
+        <p className='text-sm sm:text-lg font-medium text-muted-foreground'>
           Complete each exercise, validate your answers, and continue with a
           new set of phrasal verbs.
         </p>

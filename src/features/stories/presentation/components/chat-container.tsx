@@ -284,45 +284,44 @@ export function ChatContainer({
   return (
     <div className='min-h-screen flex flex-col'>
       <header className='bg-card border-b-2 border-border p-4 sticky top-0 z-40'>
-        <div className='max-w-4xl mx-auto flex items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 sm:gap-4 flex-1 min-w-0'>
+        <div className='max-w-4xl mx-auto space-y-3'>
+          <div className='flex items-start gap-2 sm:gap-4 min-w-0'>
             <Link href='/stories'>
               <Button variant='outline' size='sm' className='gap-2 shrink-0'>
                 <ChevronLeft className='w-4 h-4' aria-hidden='true' />
                 <span className='hidden sm:inline'>Atrás</span>
               </Button>
             </Link>
-            <div className='min-w-0 flex-1'>
-              <h1 className='font-black text-foreground truncate'>
-                {initialEpisode.title || 'Episodio'}
-              </h1>
-              <p className='text-xs text-muted-foreground font-semibold uppercase'>
-                Mensaje {currentMessageIndex + 1} de{' '}
-                {initialEpisode.messages.length}
-              </p>
-            </div>
+            <h1 className='font-black text-foreground leading-tight line-clamp-2 min-w-0 flex-1'>
+              {initialEpisode.title || 'Episodio'}
+            </h1>
           </div>
 
-          <div className='flex items-center gap-3 shrink-0'>
-            <span className='text-xs font-bold text-foreground min-w-[2.5rem] text-right'>
-              {Math.round(
-                ((currentMessageIndex + 1) / initialEpisode.messages.length) *
-                  100
-              )}
-              %
-            </span>
-            <div className='w-24 sm:w-32'>
-              <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
-                <div
-                  className='bg-primary h-full transition-all'
-                  style={{
-                    width: `${
-                      ((currentMessageIndex + 1) /
-                        initialEpisode.messages.length) *
-                      100
-                    }%`,
-                  }}
-                />
+          <div className='flex items-center justify-between gap-3'>
+            <p className='text-xs text-muted-foreground font-semibold uppercase shrink-0'>
+              Mensaje {currentMessageIndex + 1} de {initialEpisode.messages.length}
+            </p>
+            <div className='flex items-center gap-3 min-w-0'>
+              <span className='text-xs font-bold text-foreground min-w-[2.5rem] text-right'>
+                {Math.round(
+                  ((currentMessageIndex + 1) / initialEpisode.messages.length) *
+                    100
+                )}
+                %
+              </span>
+              <div className='w-24 sm:w-32'>
+                <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
+                  <div
+                    className='bg-primary h-full transition-all'
+                    style={{
+                      width: `${
+                        ((currentMessageIndex + 1) /
+                          initialEpisode.messages.length) *
+                        100
+                      }%`,
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -340,7 +339,7 @@ export function ChatContainer({
         </div>
       )}
 
-      <div className='flex-1 overflow-y-auto p-4 space-y-4 pb-safe md:pb-4'>
+      <div className='flex-1 overflow-y-auto p-0 sm:p-4 space-y-4 pb-safe md:pb-4'>
         <div className='max-w-4xl mx-auto w-full pb-20 md:pb-20'>
           {displayedMessages.map((msg) => (
             <div key={msg.id} className='mb-4'>

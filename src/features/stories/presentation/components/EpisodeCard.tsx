@@ -45,8 +45,8 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
           )}
         </div>
       )}
-      <CardHeader className='pt-3'>
-        <CardTitle className='text-xl text-foreground line-clamp-1'>
+      <CardHeader className='pt-1 sm:pt-3'>
+        <CardTitle className='text-base sm:text-xl text-foreground'>
           {episode.title}
         </CardTitle>
       </CardHeader>

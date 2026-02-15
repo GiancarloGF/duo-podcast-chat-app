@@ -1,156 +1,158 @@
 # Relatos en Ingles - Agent Playbook
 
 ## Purpose and Scope
-- This is a Next.js 16 + React 19 app for English practice through stories and phrasal verbs.
-- Main data backends: MongoDB (stories/progress), Firebase Auth, Firestore (`phrasal_verbs`), Gemini for feedback.
-- Use `pnpm` only. Do not use `npm` or `yarn`.
-- Prefer Spanish copy in UI unless the surrounding screen is already English-first.
+- Stack: Next.js 16 + React 19 + TypeScript for English practice via stories and phrasal verbs.
+- Data/services: MongoDB, Firebase Auth, Firestore (`phrasal_verbs`), Gemini.
+- Package manager: use `pnpm` only.
+- UX language: prefer Spanish copy unless the surrounding screen is clearly English-first.
 
-## Rule Sources (Cursor/Copilot)
-- Primary rule source: this `AGENTS.md`.
-- Cursor rules:
-  - `.cursorrules`: not present.
-  - `.cursor/rules/`: not present.
-- Copilot rules:
-  - `.github/copilot-instructions.md`: not present.
-- If any of those files are added later, merge them here and follow the most specific rule.
+## Rule Sources (Cursor and Copilot)
+- Primary source: this `AGENTS.md` file.
+- Cursor rules audit:
+  - `.cursorrules`: not found.
+  - `.cursor/rules/`: not found.
+- Copilot rules audit:
+  - `.github/copilot-instructions.md`: not found.
+- If these files are added later, merge their rules here and prioritize the most specific scope.
 
-## Core Commands
-- Install deps: `pnpm install`
-- Dev server: `pnpm dev`
+## Command Reference
+- Install dependencies: `pnpm install`
+- Start dev server: `pnpm dev`
 - Production build: `pnpm build`
 - Start production server: `pnpm start`
-- Lint: `pnpm lint`
-- Lint autofix: `pnpm lint --fix`
-- Type-check (recommended, since build ignores TS errors): `pnpm exec tsc --noEmit`
+- Lint full repo: `pnpm lint`
+- Lint with autofix: `pnpm lint --fix`
+- Lint one file/folder: `pnpm lint -- src/features/stories/presentation/actions.ts`
+- Type-check (required because build ignores TS errors): `pnpm exec tsc --noEmit`
 
 ## Test Commands (Current State + Single-Test Guidance)
-- Current state:
+- Current state in this repo:
   - No `test` script in `package.json`.
-  - No test runner config is checked in.
-  - No `*.test.*` / `*.spec.*` files found.
-- If Vitest is added, recommended scripts:
-  - `"test": "vitest run"`
-  - `"test:watch": "vitest"`
-- Single-file test (Vitest): `pnpm vitest run path/to/file.test.ts`
-- Single test by name (Vitest): `pnpm vitest run path/to/file.test.ts -t "test name"`
-- If Playwright is added, single spec: `pnpm playwright test tests/e2e/example.spec.ts`
+  - No Jest/Vitest/Playwright config found.
+  - No `*.test.*` or `*.spec.*` files found.
+- If Vitest is added:
+  - All tests: `pnpm vitest run`
+  - Watch mode: `pnpm vitest`
+  - Single file: `pnpm vitest run path/to/file.test.ts`
+  - Single test by name: `pnpm vitest run path/to/file.test.ts -t "test name"`
+- If Playwright is added:
+  - Single spec: `pnpm playwright test tests/e2e/example.spec.ts`
+  - Single test by name: `pnpm playwright test tests/e2e/example.spec.ts -g "name"`
 
-## Architecture Overview
-- App router: `src/app`
-- Feature routes:
-  - `src/app/(features)/stories/page.tsx`
-  - `src/app/(features)/stories/chat/[userProgressId]/page.tsx`
-  - `src/app/(features)/phrasal-verbs/page.tsx`
-  - `src/app/(features)/phrasal-verbs/practice/page.tsx`
-  - `src/app/(features)/phrasal-verbs/practice/session/page.tsx`
+## Architecture Map
+- App Router root: `src/app`
+- Feature route groups:
+  - `src/app/(features)/stories/**`
+  - `src/app/(features)/phrasal-verbs/**`
 - API routes: `src/app/api/**/route.ts`
-- Feature modules follow layers: `domain`, `application`, `infrastructure`, `presentation`
-- Shared UI/utilities: `src/shared/**`
+- Layered feature modules: `domain`, `application`, `infrastructure`, `presentation`
+- Shared cross-feature code: `src/shared/**`
 
 ## Imports and Module Boundaries
-- Prefer aliases over deep relative paths:
-  - `@/*`, `@/features/*`, `@/shared/*`
-- Import order:
-  1) framework / third-party
-  2) internal alias imports
+- Prefer alias imports over deep relative paths.
+- Active aliases from `tsconfig.json`:
+  - `@/*`
+  - `@/features/*`
+  - `@/shared/*`
+- Use import ordering:
+  1) framework/third-party
+  2) alias imports
   3) same-folder relative imports
 - Use `import type` for type-only imports.
-- Avoid circular imports across layers.
-- Keep presentation logic out of infrastructure unless already established by local pattern.
+- Keep boundaries clean: avoid leaking presentation concerns into infrastructure.
+- Avoid circular dependencies across layers.
 
 ## Formatting and Styling Conventions
-- Follow existing file style; do not reformat unrelated lines.
-- Repo has mixed style:
-  - many feature/server files use semicolons
+- Follow existing file-local style; do not reformat unrelated code.
+- Semicolon style is mixed across the repo:
+  - many feature and server files use semicolons
   - many shadcn-style UI files omit semicolons
-- Match the file’s existing quote and semicolon style.
-- Keep className strings readable and stable; avoid class churn.
-- Use `cn` from `@/shared/presentation/utils` for conditional classes.
+- Match quote style and semicolon style already used in the file you edit.
+- Keep Tailwind class strings stable and intentional; avoid unnecessary class churn.
+- Use `cn` from `@/shared/presentation/utils` for conditional class composition.
+- Prefer minimal, purposeful comments only for non-obvious logic.
 
-## TypeScript Rules
-- `strict: true` is enabled; keep strict typing.
-- Explicitly type exported function return values.
-- Avoid `any`; use entities/DTOs/interfaces.
-- Convert Mongo `_id` to string before server-client boundary crossing.
-- Use schema parsing (e.g., `zod`) where already established.
-- Do not rely on `pnpm build` alone for type safety (`ignoreBuildErrors` is true).
+## TypeScript Expectations
+- `strict: true` is enabled and must be respected.
+- `allowJs: true` exists; prefer new code in TypeScript.
+- Explicit return types are preferred on exported functions.
+- Avoid `any`; use entities, interfaces, DTOs, and narrow unions.
+- Convert Mongo `_id` values to strings before crossing server-client boundaries.
+- Use schema validation (e.g., `zod`) where patterns already exist.
+- Do not treat `pnpm build` as a type gate (`ignoreBuildErrors` is enabled).
 
 ## Naming Conventions
-- Components: PascalCase (`EpisodeCard`, `PhrasalVerbsExplorer`)
-- Hooks: `useX` (`useUserSession`)
-- Use cases: verb-based PascalCase files (`GetStories.usecase.ts`)
-- Server actions: descriptive camelCase (`startChatByEpisode`)
-- Interfaces/types: PascalCase with domain clarity (`TranslationFeedback`)
-- Constants: `UPPER_SNAKE_CASE` only for true constants
+- Components: PascalCase (`EpisodeCard`).
+- Hooks: `useX` (`useUserSession`).
+- Use cases: verb-oriented PascalCase files (`GetStories.usecase.ts`).
+- Server actions: descriptive camelCase (`startChatByEpisode`).
+- Types/interfaces/entities: PascalCase with domain intent.
+- Constants: `UPPER_SNAKE_CASE` for true constants only.
+- Keep filenames aligned with existing feature patterns.
 
-## Next.js / React Practices
-- Add `'use client'` only where hooks/browser APIs are required.
+## Next.js and React Practices
+- Add `'use client'` only for hook/browser-dependent components.
 - Keep server components hook-free.
-- Server actions should live in feature `presentation/actions.ts` with `'use server'`.
-- Use `revalidatePath` for mutations affecting server-rendered data.
-- Keep optimistic updates paired with clear rollback/error states.
-- For query-parameter driven pages, prefer server page `searchParams` and pass to client components when possible.
+- Server actions belong in feature `presentation/actions.ts` and use `'use server'`.
+- Use `revalidatePath` when mutations impact cached server-rendered views.
+- Handle optimistic updates with explicit rollback/error behavior.
+- For query-driven screens, prefer parsing in server pages and passing typed props down.
 
 ## Data Access Rules
-- Mongo:
-  - Always call `await dbConnect()` before model access.
-  - Use model getters in `src/shared/infrastructure/database/mongo/models/*`.
-  - Avoid ad-hoc global `mongoose.model(...)` declarations.
-  - Convert string ids with `new mongoose.Types.ObjectId(...)` for `_id` queries.
+- MongoDB:
+  - Always call `await dbConnect()` before model operations.
+  - Use model getter helpers under `src/shared/infrastructure/database/mongo/models/*`.
+  - Avoid ad-hoc `mongoose.model(...)` declarations.
+  - Convert string ids with `new mongoose.Types.ObjectId(...)` (or `new Types.ObjectId(...)`) for `_id` queries.
 - Firestore:
-  - Phrasal verbs live in collection `phrasal_verbs`.
-  - Normalize user-facing taxonomy values (trim/case) before matching.
+  - Phrasal verbs collection name is `phrasal_verbs`.
+  - Normalize taxonomy/filter values (trim/case normalization) before matching.
 
 ## Error Handling and Logging
-- Validate required input early.
-- API responses:
-  - `400` for client/input errors
+- Validate required inputs early and return clear client errors.
+- API status conventions:
+  - `400` for invalid client input
   - `500` for unexpected/infrastructure errors
-- Keep JSON response shape consistent: `success`, `error`, optional `details`.
-- Include context in logs (`episodeId`, `userProgressId`, operation).
-- Use `console.warn` for recoverable paths, `console.error` for hard failures.
-- Never log secrets, tokens, or full provider payloads.
+- Prefer consistent JSON shape: `success`, `error`, optional `details`.
+- Include operational context in logs (`episodeId`, `userProgressId`, operation).
+- Use `console.warn` for recoverable issues and `console.error` for failures.
+- Never log credentials, tokens, or full third-party payloads.
 
 ## UX and Copy Guidelines
-- Spanish-first labels, helper text, and feedback messages.
+- Spanish-first labels, helper text, and feedback by default.
 - Keep terminology consistent (`Atras`, `Siguiente`, `Practicar`, `Categoria`).
-- Preserve app visual language (brutalist borders, hard shadows, strong hierarchy).
-- Ensure mobile-safe spacing and responsive layouts.
+- Preserve the current visual language (brutalist borders, hard shadows, strong hierarchy).
+- Ensure responsive behavior and mobile-safe spacing.
 
 ## Environment and Secrets
 - Expected env vars:
   - `MONGODB_URI`
   - `GEMINI_API_KEY`
-  - Firebase public vars (`NEXT_PUBLIC_FIREBASE_*`) for auth/firestore clients
-- Script examples with env:
+  - `NEXT_PUBLIC_FIREBASE_*`
+- Script patterns that require env loading:
   - `node --env-file=.env.local scripts/seed-episodes.mjs`
   - `node --env-file=.env.local scripts/cleanup-episodes.mjs`
   - `node --env-file=.env.local scripts/update-episode-titles.mjs`
+- Never commit `.env` files or secrets.
 
-## Operational Caveats
-- `next.config.mjs` has `typescript.ignoreBuildErrors: true`.
-- Build may pass while TypeScript still fails.
-- Run both `pnpm lint` and `pnpm exec tsc --noEmit` before merging significant changes.
+## Quality Gates Before Merge
+- Run lint: `pnpm lint`
+- Run type-check: `pnpm exec tsc --noEmit`
+- Build optionally for runtime smoke check: `pnpm build`
+- Note: build can pass while type-check fails in this repository.
 
 ## Manual QA Checklist
 - `/stories`: section counts and card grouping render correctly.
-- Story chat flow: start episode, submit translation, feedback displays.
-- Progress persistence: reload chat URL and verify continuity.
-- `/phrasal-verbs`: filters, search, pagination, modal behavior.
-- `/phrasal-verbs/practice`: supergroup -> group -> category selection flow + breadcrumb backtracking.
-- `/phrasal-verbs/practice/session`: receives selected category and lists matching PVs.
-
-## PR Delivery Checklist
-- Keep PRs scoped (feature work separate from broad refactors).
-- Include manual QA notes if no automated tests exist.
-- Update this file when adding/changing test tooling or single-test commands.
-- Do not commit secrets or `.env` files.
+- Story chat flow: start episode, submit translation, feedback UI appears.
+- Progress persistence: reload chat URL and confirm continuity.
+- `/phrasal-verbs`: filtering, search, pagination, modal behavior.
+- `/phrasal-verbs/practice`: supergroup -> group -> category flow and breadcrumb backtracking.
+- `/phrasal-verbs/practice/session`: selected category is received and matching verbs appear.
 
 ## Quick Agent Checklist
 - Use `pnpm` only.
-- Follow existing file-local formatting.
+- Preserve existing file-local formatting.
 - Prefer alias imports and `import type`.
-- Keep strict types and explicit returns.
+- Keep strict typing; prefer explicit exported returns.
 - Validate inputs and handle errors consistently.
-- Preserve Spanish-first UX unless context dictates otherwise.
+- Maintain Spanish-first UX unless the page is intentionally English-first.

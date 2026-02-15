@@ -310,7 +310,7 @@ export function MessageBubble({
         {/* Sender Name - Show for all except User to identify Protagonists */}
         {!isUserMessage && (
           <div
-            className='text-xs font-bold text-gray-700 dark:text-gray-300 ml-1'
+            className='text-xs font-bold text-black ml-1'
             id={`sender-${message.id}`}
           >
             {message.sender || 'Desconocido'}
@@ -342,7 +342,7 @@ export function MessageBubble({
           )}
 
           {/* Render Markdown Content */}
-          <div className='text-base leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic pr-6'>
+          <div className='text-base leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic sm:pr-6'>
             {isProtagonistMessage && !isTranslated ? (
               <ClickableTextRenderer
                 text={

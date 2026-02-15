@@ -20,8 +20,8 @@ export default async function AppLayout({
   return (
     <>
       <Header initialUser={serializableUser} />
-      <main className='min-h-screen px-3 sm:px-6'>
-        <div className='mx-auto w-full max-w-6xl py-4 sm:py-6'>{children}</div>
+      <main className='min-h-screen'>
+        <div className='mx-auto w-full max-w-6xl px-3 sm:px-6 py-4 sm:py-6'>{children}</div>
       </main>
     </>
   );

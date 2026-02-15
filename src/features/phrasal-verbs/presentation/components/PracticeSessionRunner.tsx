@@ -393,6 +393,7 @@ function DraggableWordToken({
     id,
     disabled,
   });
+  const touchTapHandledRef = useRef(false);
 
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
@@ -403,14 +404,28 @@ function DraggableWordToken({
       type='button'
       ref={setNodeRef}
       style={style}
+      onPointerUp={(event) => {
+        if (event.pointerType !== 'touch' && event.pointerType !== 'pen') {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        touchTapHandledRef.current = true;
+        onTap();
+      }}
       onClick={(event) => {
         event.stopPropagation();
+        if (touchTapHandledRef.current) {
+          touchTapHandledRef.current = false;
+          return;
+        }
         onTap();
       }}
       {...listeners}
       {...attributes}
       className={cn(
-        'inline-flex rounded-[6px] border-2 border-border bg-card px-3 py-1 text-sm font-black text-foreground',
+        'touch-manipulation select-none inline-flex rounded-[6px] border-2 border-border bg-card px-3 py-1 text-sm font-black text-foreground',
         isSelected && 'border-primary bg-primary/10 text-primary',
         disabled && 'cursor-not-allowed opacity-70'
       )}
@@ -1114,13 +1129,19 @@ export function PracticeSessionRunner({
       return;
     }
 
+    const assignedWord = assignedWordsByPvId[pvId];
+
     if (selectedWordForTap) {
+      if (assignedWord && assignedWord !== selectedWordForTap) {
+        toast.warning('This gap is occupied. Remove the current word first.');
+        return;
+      }
+
       assignWordToBlank(selectedWordForTap, pvId);
       setSelectedWordForTap(null);
       return;
     }
 
-    const assignedWord = assignedWordsByPvId[pvId];
     if (assignedWord) {
       removeAssignedWord(assignedWord);
     }
@@ -1192,10 +1213,10 @@ export function PracticeSessionRunner({
 
   if (session.isFinished) {
     return (
-      <section className='rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+      <section className='rounded-[10px] border-2 border-border bg-card p-3 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
         <div className='mb-6 flex flex-wrap items-start justify-between gap-4'>
           <div>
-            <h2 className='text-2xl font-black text-foreground'>Session completed</h2>
+            <h2 className='text-base sm:text-2xl font-black text-foreground'>Session completed</h2>
             <p className='font-medium text-muted-foreground'>
               Categories: <strong>{categories.join(', ')}</strong>
             </p>
@@ -1249,10 +1270,10 @@ export function PracticeSessionRunner({
   }
 
   return (
-    <section className='rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+    <section className='rounded-[10px] border-2 border-border bg-card p-3 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
       <div className='mb-5 flex flex-wrap items-start justify-between gap-4'>
         <div>
-          <h2 className='text-2xl font-black text-foreground'>Practice session</h2>
+          {/* <h2 className='text-2xl font-black text-foreground'>Practice session</h2> */}
           <p className='font-medium text-muted-foreground'>
             Categories: <strong>{categories.join(', ')}</strong>
           </p>
@@ -1325,8 +1346,8 @@ export function PracticeSessionRunner({
             <p className='text-xs font-black uppercase text-muted-foreground'>
               {currentExercise.exerciseType.replaceAll('_', ' ')}
             </p>
-            <h3 className='text-xl font-black text-foreground'>{currentExercise.title}</h3>
-            <p className='font-medium text-muted-foreground'>{currentExercise.instructions}</p>
+            <h3 className='text-base sm:text-lg font-black text-foreground'>{currentExercise.title}</h3>
+            <p className='text-sm sm:text-base font-medium text-muted-foreground'>{currentExercise.instructions}</p>
           </div>
 
           {isReadAndMarkMeaningExercise(currentExercise) ? (
@@ -1338,7 +1359,7 @@ export function PracticeSessionRunner({
                 return (
                   <li
                     key={`${item.pvId}-${itemIndex}`}
-                    className='rounded-[8px] border-2 border-border bg-card p-4'
+                    className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
                   >
                     <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
                       Pair {itemIndex + 1}
@@ -1418,7 +1439,7 @@ export function PracticeSessionRunner({
                 return (
                   <li
                     key={`${item.pvId}-${itemIndex}`}
-                    className='rounded-[8px] border-2 border-border bg-card p-4'
+                    className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
                   >
                     <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
                       Pair {itemIndex + 1}
@@ -1508,7 +1529,7 @@ export function PracticeSessionRunner({
                   return (
                     <li
                       key={`${item.pvId}-${itemIndex}`}
-                      className='rounded-[8px] border-2 border-border bg-card p-4'
+                      className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
                     >
                       <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
                         Gap {itemIndex + 1}
@@ -1568,6 +1589,9 @@ export function PracticeSessionRunner({
               <div className='mt-4 rounded-[8px] border-2 border-border bg-muted p-3'>
                 <p className='mb-2 text-xs font-black uppercase text-muted-foreground'>
                   Words panel
+                </p>
+                <p className='mb-3 text-sm font-medium text-muted-foreground'>
+                  Tap a word, then tap an empty gap to place it.
                 </p>
                 <DroppableWordSlot id='word-bank' className='flex flex-wrap gap-2'>
                   {availableFillWords.length === 0 ? (
