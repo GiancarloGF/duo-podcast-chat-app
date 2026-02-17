@@ -142,14 +142,14 @@ export function TranslationInput({
             disabled={!translation.trim() || isLoading || disabled}
             size='sm'
             className={cn(
-              'h-9 min-w-24 px-3 transition-all duration-200',
+              'h-9  px-1 sm:px-3 transition-all duration-200 min-w-min sm:min-w-24',
               translation.trim()
                 ? 'bg-primary hover:brightness-95 text-primary-foreground border-2 border-border shadow-[3px_3px_0_0_var(--color-border)] rounded-[6px]'
                 : 'bg-muted text-muted-foreground border-2 border-border rounded-[6px] cursor-not-allowed'
             )}
           >
             <Send className='h-4 w-4' />
-            Enviar
+            <span className='hidden sm:inline-block ml-2'>Enviar</span>
           </Button>
         </div>
       </div>
