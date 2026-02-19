@@ -342,7 +342,7 @@ export function MessageBubble({
           )}
 
           {/* Render Markdown Content */}
-          <div className='text-base leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic sm:pr-6'>
+          <div className='text-base sm:text-xl leading-relaxed [&>p]:m-0 [&>p+p]:mt-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>a]:underline [&>strong]:font-bold [&>em]:italic sm:pr-6'>
             {isProtagonistMessage && !isTranslated ? (
               <ClickableTextRenderer
                 text={
