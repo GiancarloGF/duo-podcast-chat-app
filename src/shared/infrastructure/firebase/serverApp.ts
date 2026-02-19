@@ -1,33 +1,45 @@
-import { initializeServerApp, FirebaseServerApp } from 'firebase/app';
-import { getAuth, User } from 'firebase/auth';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 import { cookies } from 'next/headers';
+import {
+  SESSION_COOKIE_NAME,
+  verifySessionCookie,
+} from '@/shared/infrastructure/auth/session';
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+export interface AuthenticatedUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
+function mapDecodedTokenToUser(decodedToken: DecodedIdToken): AuthenticatedUser {
+  return {
+    uid: decodedToken.uid,
+    email: decodedToken.email ?? null,
+    displayName: typeof decodedToken.name === 'string' ? decodedToken.name : null,
+    photoURL: typeof decodedToken.picture === 'string' ? decodedToken.picture : null,
+  };
+}
 
 export async function getAuthenticatedAppForUser(): Promise<{
-  firebaseServerApp: FirebaseServerApp;
-  currentUser: User | null;
+  currentUser: AuthenticatedUser | null;
 }> {
   try {
+    // Server-side source of truth for auth: secure HttpOnly session cookie.
     const cookieStore = await cookies();
-    const authIdToken = cookieStore.get('__session')?.value;
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-    const firebaseServerApp = initializeServerApp(
-      firebaseConfig,
-      authIdToken ? { authIdToken } : {},
-    );
+    if (!sessionCookie) {
+      return { currentUser: null };
+    }
 
-    const auth = getAuth(firebaseServerApp);
-    await auth.authStateReady();
-
-    return { firebaseServerApp, currentUser: auth.currentUser };
+    try {
+      const decodedToken = await verifySessionCookie(sessionCookie);
+      return { currentUser: mapDecodedTokenToUser(decodedToken) };
+    } catch (sessionError) {
+      console.warn('Invalid Firebase session cookie.', sessionError);
+      return { currentUser: null };
+    }
   } catch (error) {
     if (
       typeof error === 'object' &&

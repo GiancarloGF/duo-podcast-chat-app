@@ -1,6 +1,7 @@
 export interface EpisodeWithProgressDto {
   id: string;
   slug: string;
+  number: number;
   title: string;
   imageUrl: string;
   messageCount: number;

@@ -1,11 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { SESSION_COOKIE_NAME } from '@/shared/infrastructure/auth/session';
 
 const LOGIN_PATH = '/login';
 
 export function authRouteGuard(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get('__session')?.value;
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const isAuthenticated = Boolean(sessionCookie);
   const isLoginRoute = pathname === LOGIN_PATH || pathname.startsWith(`${LOGIN_PATH}/`);
 

@@ -48,6 +48,7 @@ export default async function StoriesPage() {
     return {
       id: epId,
       slug: ep.slug,
+      number: ep.number,
       title: ep.title,
       imageUrl: ep.imageUrl,
       messageCount: ep.messageCount,
@@ -68,26 +69,17 @@ export default async function StoriesPage() {
   );
   const availableEpisodes = enrichedEpisodes.filter((ep) => ep.status === 'new');
 
-  inProgressEpisodes.sort((a, b) => {
-    if (!a.lastActiveAt && !b.lastActiveAt) return 0;
-    if (!a.lastActiveAt) return 1;
-    if (!b.lastActiveAt) return -1;
-    return (
-      new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
-    );
-  });
+  const sortByEpisodeNumber = (
+    a: EpisodeWithProgressDto,
+    b: EpisodeWithProgressDto
+  ) => a.number - b.number;
 
-  completedEpisodes.sort((a, b) => {
-    if (!a.lastActiveAt && !b.lastActiveAt) return 0;
-    if (!a.lastActiveAt) return 1;
-    if (!b.lastActiveAt) return -1;
-    return (
-      new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
-    );
-  });
+  inProgressEpisodes.sort(sortByEpisodeNumber);
+  availableEpisodes.sort(sortByEpisodeNumber);
+  completedEpisodes.sort(sortByEpisodeNumber);
 
   return (
-    <div className=''>
+    <div className='py-4 sm:py-8'>
       <Breadcrumb className='mb-6'>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -128,24 +120,6 @@ export default async function StoriesPage() {
           </div>
         )}
 
-        {completedEpisodes.length > 0 && (
-          <div>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-2xl font-black text-foreground'>
-                Completed
-              </h2>
-              <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-accent text-accent-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
-                {completedEpisodes.length}
-              </span>
-            </div>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {completedEpisodes.map((episode) => (
-                <EpisodeCard episode={episode} key={episode.id} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {availableEpisodes.length > 0 && (
           <div>
             <div className='flex items-center gap-3 mb-6'>
@@ -158,6 +132,24 @@ export default async function StoriesPage() {
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {availableEpisodes.map((episode) => (
+                <EpisodeCard episode={episode} key={episode.id} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {completedEpisodes.length > 0 && (
+          <div>
+            <div className='flex items-center gap-3 mb-6'>
+              <h2 className='text-2xl font-black text-foreground'>
+                Completed
+              </h2>
+              <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-accent text-accent-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
+                {completedEpisodes.length}
+              </span>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {completedEpisodes.map((episode) => (
                 <EpisodeCard episode={episode} key={episode.id} />
               ))}
             </div>

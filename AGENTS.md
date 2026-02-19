@@ -98,6 +98,85 @@
 - Handle optimistic updates with explicit rollback/error behavior.
 - For query-driven screens, prefer parsing in server pages and passing typed props down.
 
+## Authentication Architecture (Firebase)
+- Current auth model uses Firebase Auth + Firebase Admin session cookies (HttpOnly) for long-lived web sessions.
+- Session cookie name: `__session`.
+- Session duration is configured in `src/shared/infrastructure/auth/session.ts` using `SESSION_MAX_AGE_SECONDS` (currently 7 days).
+
+### Current Flow (Admin Session Cookie)
+- Client login starts in `src/shared/infrastructure/firebase/auth.ts`:
+  - `signInWithGoogle()` opens Google popup via Firebase client SDK.
+  - Reads `idToken` from `credential.user.getIdToken()`.
+  - Sends token to `POST /api/auth/session-login`.
+- Session creation happens server-side in `src/app/api/auth/session-login/route.ts`:
+  - Validates request payload.
+  - Calls `createSessionCookieFromIdToken(...)` from `src/shared/infrastructure/auth/session.ts`.
+  - Sets `__session` as `HttpOnly`, `SameSite=Strict`, `Secure` in production.
+- Server-side auth resolution happens in `src/shared/infrastructure/firebase/serverApp.ts`:
+  - Reads `__session` from request cookies.
+  - Verifies with Firebase Admin (`verifySessionCookie`).
+  - Maps decoded claims into a serializable `currentUser` shape used by pages/layouts.
+- Client UI state sync remains in `src/features/auth/presentation/hooks/useUserSession.ts`:
+  - Uses `onIdTokenChanged` for reactive UI updates.
+  - No longer writes/deletes auth cookie on the client.
+- Logout flow in `src/app/api/auth/session-logout/route.ts` + `src/shared/infrastructure/firebase/auth.ts`:
+  - Backend clears cookie.
+  - Attempts refresh-token revocation for stronger logout semantics.
+  - Client signs out from Firebase SDK.
+
+### Current Flow Diagram
+```mermaid
+flowchart TD
+  A[Client: signInWithGoogle] --> B[Firebase Auth Popup]
+  B --> C[ID Token]
+  C --> D[POST /api/auth/session-login]
+  D --> E[Admin SDK createSessionCookie]
+  E --> F[Set-Cookie __session HttpOnly]
+  F --> G[SSR Request or Server Action]
+  G --> H[getAuthenticatedAppForUser]
+  H --> I[verifySessionCookie]
+  I --> J[Serializable currentUser]
+
+  K[Client: signOut] --> L[POST /api/auth/session-logout]
+  L --> M[revokeRefreshTokens best-effort]
+  M --> N[Expire __session]
+  N --> O[Client firebaseSignOut]
+```
+
+### Current Flow Purpose (Step by Step)
+- `A -> B`: Starts user authentication with Google through Firebase client SDK.
+- `B -> C`: Receives an ID token that proves the user identity for backend exchange.
+- `C -> D`: Sends the ID token to the backend so session creation happens server-side.
+- `D -> E`: Exchanges short-lived ID token for a signed web session cookie.
+- `E -> F`: Stores session in an HttpOnly cookie to prevent JavaScript access.
+- `F -> G -> H -> I`: Resolves authenticated user on server requests by verifying cookie signature and expiration.
+- `I -> J`: Maps verified claims to a safe serializable user shape for layouts and UI.
+- `K -> L`: Initiates explicit logout on backend endpoint.
+- `L -> M`: Revokes refresh tokens as best effort to strengthen logout across contexts.
+- `M -> N`: Expires the session cookie to cut server-authenticated access immediately.
+- `N -> O`: Clears Firebase client-side auth state in the browser.
+
+### Current Model Properties
+- Cookie auth is server-issued and `HttpOnly`.
+- Session TTL is controlled in `SESSION_MAX_AGE_SECONDS`.
+- Server trust is based on `verifySessionCookie` (Admin SDK).
+- Logout clears cookie and revokes refresh tokens as best effort.
+
+### Auth Environment Variables
+- Public Firebase web config:
+  - `NEXT_PUBLIC_FIREBASE_API_KEY`
+  - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+  - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+  - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+  - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+  - `NEXT_PUBLIC_FIREBASE_APP_ID`
+- Firebase Admin SDK credentials (server-only):
+  - `FIREBASE_PROJECT_ID`
+  - `FIREBASE_CLIENT_EMAIL`
+  - `FIREBASE_PRIVATE_KEY` (store with escaped `\n`; code normalizes it)
+- Source for Admin credentials:
+  - Firebase Console -> Project settings -> Service accounts -> Generate new private key.
+
 ## Data Access Rules
 - MongoDB:
   - Always call `await dbConnect()` before model operations.
@@ -129,6 +208,9 @@
   - `MONGODB_URI`
   - `GEMINI_API_KEY`
   - `NEXT_PUBLIC_FIREBASE_*`
+  - `FIREBASE_PROJECT_ID`
+  - `FIREBASE_CLIENT_EMAIL`
+  - `FIREBASE_PRIVATE_KEY`
 - Script patterns that require env loading:
   - `node --env-file=.env.local scripts/seed-episodes.mjs`
   - `node --env-file=.env.local scripts/cleanup-episodes.mjs`

@@ -16,6 +16,7 @@ interface EpisodeCardProps {
 export function EpisodeCard({ episode }: EpisodeCardProps) {
   const isStarted = episode.status !== 'new';
   const progressPercent = episode.percentCompleted;
+  const episodeTitle = `${episode.number}. ${episode.title}`;
 
   return (
     <Card
@@ -27,7 +28,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={episode.imageUrl}
-            alt={episode.title}
+            alt={episodeTitle}
             className='w-full h-full object-cover transition-transform hover:scale-105 duration-500'
           />
           {isStarted && (
@@ -47,7 +48,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
       )}
       <CardHeader className='pt-1 sm:pt-3'>
         <CardTitle className='text-base sm:text-xl text-foreground'>
-          {episode.title}
+          {episodeTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-4 grow flex flex-col'>
