@@ -131,7 +131,7 @@ export function TranslationInput({
           onKeyDown={handleKeyDown}
           placeholder='Escribe tu traduccion...'
           disabled={isLoading || disabled}
-          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-foreground placeholder-muted-foreground text-[15px] leading-relaxed overflow-hidden font-medium'
+          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-foreground placeholder-muted-foreground text-base sm:text-xl leading-relaxed overflow-hidden font-medium'
           rows={1}
         />
 
