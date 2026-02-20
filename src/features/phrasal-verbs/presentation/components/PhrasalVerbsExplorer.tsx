@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
-  Filter,
   MoreHorizontal,
   Search,
 } from 'lucide-react';
@@ -86,15 +86,14 @@ function SelectionTag({
 }
 
 export function PhrasalVerbsExplorer() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
 
   const [selectedSuperGroupId, setSelectedSuperGroupId] = useState<
     string | null
   >(null);
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(
-    null,
-  );
+  const [selectedCategoryKeys, setSelectedCategoryKeys] = useState<string[]>([]);
   const [selectedPhrasalVerb, setSelectedPhrasalVerb] =
     useState<PhrasalVerb | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -141,13 +140,12 @@ export function PhrasalVerbsExplorer() {
     [groupOptions, selectedGroupKey],
   );
 
-  const selectedCategoryLabel = useMemo(
+  const selectedCategoryLabels = useMemo(
     () =>
-      selectedCategoryKey && selectedCategoryKey !== 'all'
-        ? (categoryOptions.find((item) => item.key === selectedCategoryKey)
-            ?.label ?? null)
-        : null,
-    [categoryOptions, selectedCategoryKey],
+      categoryOptions
+        .filter((item) => selectedCategoryKeys.includes(item.key))
+        .map((item) => item.label),
+    [categoryOptions, selectedCategoryKeys],
   );
 
   const currentLevel: NavigatorLevel = useMemo(() => {
@@ -162,8 +160,7 @@ export function PhrasalVerbsExplorer() {
     return 'category';
   }, [selectedSuperGroupId, selectedGroupKey]);
 
-  const shouldPaginate =
-    selectedCategoryKey !== null ? selectedCategoryKey === 'all' : true;
+  const shouldPaginate = selectedCategoryKeys.length === 0;
   const {
     hydration,
     status,
@@ -176,7 +173,7 @@ export function PhrasalVerbsExplorer() {
   } = usePhrasalVerbCatalog({
     superGroup: selectedSuperGroup?.title ?? null,
     group: selectedGroupTitle ?? null,
-    categories: selectedCategoryLabel ? [selectedCategoryLabel] : [],
+    categories: selectedCategoryLabels,
     searchTerm,
     page: currentPage,
     pageSize: PAGE_SIZE,
@@ -204,25 +201,60 @@ export function PhrasalVerbsExplorer() {
   function handleSelectSuperGroup(value: string) {
     setSelectedSuperGroupId(value);
     setSelectedGroupKey('all');
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
     setCurrentPage(1);
   }
 
   function handleSelectGroup(value: string) {
     setSelectedGroupKey(value);
-    setSelectedCategoryKey(value === 'all' ? null : 'all');
+    setSelectedCategoryKeys([]);
     setCurrentPage(1);
   }
 
   function handleSelectCategory(value: string) {
-    setSelectedCategoryKey(value);
+    setSelectedCategoryKeys((previous) =>
+      previous.includes(value)
+        ? previous.filter((key) => key !== value)
+        : [...previous, value],
+    );
     setCurrentPage(1);
+  }
+
+  function handleSelectAllCategories() {
+    setSelectedCategoryKeys([]);
+    setCurrentPage(1);
+  }
+
+  function startPracticeSession() {
+    if (!selectedSuperGroup || !selectedGroupTitle) {
+      return;
+    }
+
+    const categoriesForPractice =
+      selectedCategoryLabels.length > 0
+        ? selectedCategoryLabels
+        : categoryOptions.map((category) => category.label);
+
+    if (categoriesForPractice.length === 0) {
+      return;
+    }
+
+    const params = new URLSearchParams({
+      superGroup: selectedSuperGroup.title,
+      group: selectedGroupTitle,
+    });
+
+    categoriesForPractice.forEach((category) => {
+      params.append('category', category);
+    });
+
+    router.push(`/phrasal-verbs/practice/session?${params.toString()}`);
   }
 
   function resetFilters() {
     setSelectedSuperGroupId(null);
     setSelectedGroupKey(null);
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
     setCurrentPage(1);
   }
 
@@ -232,7 +264,7 @@ export function PhrasalVerbsExplorer() {
     }
 
     setSelectedGroupKey('all');
-    setSelectedCategoryKey(null);
+    setSelectedCategoryKeys([]);
     setCurrentPage(1);
   }
 
@@ -241,7 +273,7 @@ export function PhrasalVerbsExplorer() {
       return;
     }
 
-    setSelectedCategoryKey('all');
+    setSelectedCategoryKeys([]);
     setCurrentPage(1);
   }
 
@@ -421,14 +453,14 @@ export function PhrasalVerbsExplorer() {
                 <div className='flex flex-wrap gap-2'>
                   <SelectionTag
                     label='Todas'
-                    isActive={selectedCategoryKey === 'all'}
-                    onClick={() => handleSelectCategory('all')}
+                    isActive={selectedCategoryKeys.length === 0}
+                    onClick={handleSelectAllCategories}
                   />
                   {categoryOptions.map((category) => (
                     <SelectionTag
                       key={category.key}
                       label={cleanLabel(category.label)}
-                      isActive={selectedCategoryKey === category.key}
+                      isActive={selectedCategoryKeys.includes(category.key)}
                       onClick={() => handleSelectCategory(category.key)}
                     />
                   ))}
@@ -454,7 +486,21 @@ export function PhrasalVerbsExplorer() {
               {selectedGroupTitle}
             </Badge>
           )}
-          {selectedCategoryLabel && <Badge>{selectedCategoryLabel}</Badge>}
+          {currentLevel === 'category' && selectedCategoryLabels.length === 0 && (
+            <Badge>Todas las categorias</Badge>
+          )}
+          {selectedCategoryLabels.map((categoryLabel) => (
+            <Badge key={categoryLabel}>{categoryLabel}</Badge>
+          ))}
+          {currentLevel === 'category' && (
+            <Button
+              className='ml-auto'
+              onClick={startPracticeSession}
+              disabled={categoryOptions.length === 0}
+            >
+              Practice this
+            </Button>
+          )}
         </div>
 
         {isInitialLoading ? (
