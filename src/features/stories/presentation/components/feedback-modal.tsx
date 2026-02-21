@@ -24,10 +24,10 @@ export function FeedbackModal({
       <div className='bg-card rounded-[10px] max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border-2 border-border shadow-[10px_10px_0_0_var(--color-border)]'>
         <div className='flex items-center justify-between px-6 py-4 border-b-2 border-border bg-card sticky top-0 z-10'>
           <div>
-            <h2 className='text-lg font-black text-foreground'>
+            <h2 className='text-base sm:text-lg font-black text-foreground'>
               Análisis de Traducción
             </h2>
-            <p className='text-xs text-muted-foreground mt-0.5 font-semibold uppercase'>
+            <p className='text-sm sm:text-base text-muted-foreground mt-0.5 font-semibold uppercase'>
               Detalles y sugerencias de mejora
             </p>
           </div>
@@ -41,7 +41,7 @@ export function FeedbackModal({
 
         <div className='overflow-y-auto p-6 space-y-8'>
           <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-              <div className='col-span-1 md:col-span-3 flex flex-col items-center justify-center bg-muted rounded-[8px] p-4 border-2 border-border shadow-[4px_4px_0_0_var(--color-border)]'>
+            <div className='col-span-1 md:col-span-3 flex flex-col items-center justify-center bg-muted rounded-xl p-4 border-2 border-border shadow-[4px_4px_0_0_var(--color-border)]'>
               <div
                 className='w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mb-2'
                 style={{
@@ -52,25 +52,25 @@ export function FeedbackModal({
                   {feedback.score}
                 </div>
               </div>
-                <span className='text-xs font-bold text-muted-foreground uppercase tracking-wide'>
-                  Puntuación
-                </span>
-              </div>
+              <span className='text-sm sm:text-base font-bold text-muted-foreground uppercase tracking-wide'>
+                Puntuación
+              </span>
+            </div>
 
             <div className='col-span-1 md:col-span-9 space-y-4'>
               <div>
-                <label className='text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                <label className='text-sm sm:text-base font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
                   Tu Traducción
                 </label>
-                <div className='p-3.5 bg-muted rounded-[8px] text-foreground text-[15px] border-2 border-border'>
+                <div className='p-3.5 bg-muted rounded-xl text-foreground text-base sm:text-lg border-2 border-border'>
                   {feedback.userTranslation}
                 </div>
               </div>
               <div>
-                <label className='text-xs font-bold text-primary uppercase tracking-wider mb-1.5 block'>
+                <label className='text-sm sm:text-base font-bold text-primary uppercase tracking-wider mb-1.5 block'>
                   Mejor Opción
                 </label>
-                <div className='p-3.5 bg-[#e7e7ff] rounded-[8px] text-foreground text-[15px] border-2 border-border'>
+                <div className='p-3.5 bg-[#e7e7ff] rounded-xl text-foreground text-base sm:text-lg border-2 border-border'>
                   {feedback.officialTranslation}
                 </div>
               </div>
@@ -80,31 +80,31 @@ export function FeedbackModal({
           <div className='h-0.5 bg-border' />
 
           <div className='space-y-4'>
-            <h3 className='text-base font-black text-foreground flex items-center gap-2'>
+            <h3 className='text-base sm:text-lg font-black text-foreground flex items-center gap-2'>
               Análisis General
             </h3>
-            <div className='text-sm text-muted-foreground leading-relaxed bg-card font-medium'>
+            <div className='text-base sm:text-lg text-muted-foreground bg-card'>
               {feedback.analysis}
             </div>
           </div>
 
           {feedback.detailedAnalysis && (
             <div className='space-y-4'>
-                <h3 className='text-base font-black text-foreground'>
-                  Detalles Técnicos
-                </h3>
-                <div className='flex flex-col gap-4'>
-                  {feedback.detailedAnalysis.grammar && (
-                    <div className='p-4 rounded-[8px] bg-muted border-2 border-border'>
-                      <div className='text-xs font-bold text-muted-foreground uppercase mb-2'>
-                        Gramática
-                      </div>
-                      <div className='text-sm text-foreground'>
+              <h3 className='text-base sm:text-lg font-black text-foreground'>
+                Detalles Técnicos
+              </h3>
+              <div className='flex flex-col gap-4'>
+                {feedback.detailedAnalysis.grammar && (
+                  <div className='p-4 rounded-xl bg-muted border-2 border-border'>
+                    <div className='text-sm sm:text-base font-bold text-muted-foreground uppercase mb-2'>
+                      Gramática
+                    </div>
+                    <div className='text-base sm:text-lg text-foreground'>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
                           p: ({ children }) => (
-                            <p className='!m-0'>{children}</p>
+                            <p className='m-0!'>{children}</p>
                           ),
                         }}
                       >
@@ -113,17 +113,17 @@ export function FeedbackModal({
                     </div>
                   </div>
                 )}
-                  {feedback.detailedAnalysis.vocabulary && (
-                    <div className='p-4 rounded-[8px] bg-muted border-2 border-border'>
-                      <div className='text-xs font-bold text-muted-foreground uppercase mb-2'>
-                        Vocabulario
-                      </div>
-                      <div className='text-sm text-foreground'>
+                {feedback.detailedAnalysis.vocabulary && (
+                  <div className='p-4 rounded-xl bg-muted border-2 border-border'>
+                    <div className='text-sm sm:text-base font-bold text-muted-foreground uppercase mb-2'>
+                      Vocabulario
+                    </div>
+                    <div className='text-base sm:text-lg text-foreground'>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
                           p: ({ children }) => (
-                            <p className='!m-0'>{children}</p>
+                            <p className='m-0!'>{children}</p>
                           ),
                         }}
                       >
@@ -132,17 +132,17 @@ export function FeedbackModal({
                     </div>
                   </div>
                 )}
-                  {feedback.detailedAnalysis.construction && (
-                    <div className='p-4 rounded-[8px] bg-muted border-2 border-border'>
-                      <div className='text-xs font-bold text-muted-foreground uppercase mb-2'>
-                        Estructura
-                      </div>
-                      <div className='text-sm text-foreground'>
+                {feedback.detailedAnalysis.construction && (
+                  <div className='p-4 rounded-xl bg-muted border-2 border-border'>
+                    <div className='text-sm sm:text-base font-bold text-muted-foreground uppercase mb-2'>
+                      Estructura
+                    </div>
+                    <div className='text-base sm:text-lg text-foreground'>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
                           p: ({ children }) => (
-                            <p className='!m-0'>{children}</p>
+                            <p className='m-0!'>{children}</p>
                           ),
                         }}
                       >
@@ -158,14 +158,14 @@ export function FeedbackModal({
           {(feedback.suggestions?.length > 0 ||
             feedback.phrasalVerbs?.suggestions?.length > 0) && (
             <div className='space-y-4'>
-                <h3 className='text-base font-black text-foreground'>
-                  Sugerencias
-                </h3>
-                <div className='space-y-3'>
+              <h3 className='text-sm sm:text-base font-black text-foreground'>
+                Sugerencias
+              </h3>
+              <div className='space-y-3'>
                 {feedback.suggestions?.map((suggestion, idx) => (
                   <div
                     key={`sugg-${idx}`}
-                    className='flex gap-3 text-sm text-foreground items-start'
+                    className='flex gap-3 text-base sm:text-lg text-foreground items-start'
                   >
                     <div className='w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0' />
                     <ReactMarkdown
@@ -183,7 +183,7 @@ export function FeedbackModal({
                 {feedback.phrasalVerbs?.suggestions?.map((suggestion, idx) => (
                   <div
                     key={`phrasal-${idx}`}
-                    className='flex gap-3 text-sm text-foreground items-start'
+                    className='flex gap-3 text-base sm:text-lg text-foreground items-start'
                   >
                     <div className='w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0' />
                     <ReactMarkdown
@@ -204,11 +204,8 @@ export function FeedbackModal({
         </div>
 
         <div className='p-4 px-6 border-t-2 border-border bg-muted'>
-          <Button
-            onClick={onClose}
-            className='w-full py-6'
-          >
-            Entendido
+          <Button onClick={onClose} className='w-full py-6 sm:text-lg'>
+            !Lo tengo!
           </Button>
         </div>
       </div>

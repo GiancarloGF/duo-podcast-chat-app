@@ -8,6 +8,8 @@ import {
   MoreHorizontal,
   Search,
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import {
   getSuperGroupColorsByTitle,
@@ -93,7 +95,9 @@ export function PhrasalVerbsExplorer() {
     string | null
   >(null);
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
-  const [selectedCategoryKeys, setSelectedCategoryKeys] = useState<string[]>([]);
+  const [selectedCategoryKeys, setSelectedCategoryKeys] = useState<string[]>(
+    [],
+  );
   const [selectedPhrasalVerb, setSelectedPhrasalVerb] =
     useState<PhrasalVerb | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -486,9 +490,10 @@ export function PhrasalVerbsExplorer() {
               {selectedGroupTitle}
             </Badge>
           )}
-          {currentLevel === 'category' && selectedCategoryLabels.length === 0 && (
-            <Badge>Todas las categorias</Badge>
-          )}
+          {currentLevel === 'category' &&
+            selectedCategoryLabels.length === 0 && (
+              <Badge>Todas las categorías</Badge>
+            )}
           {selectedCategoryLabels.map((categoryLabel) => (
             <Badge key={categoryLabel}>{categoryLabel}</Badge>
           ))}
@@ -543,7 +548,7 @@ export function PhrasalVerbsExplorer() {
                     type='button'
                     key={phrasalVerb.id}
                     onClick={() => setSelectedPhrasalVerb(phrasalVerb)}
-                    className='group relative overflow-hidden rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[5px_5px_0_0_var(--color-border)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] focus-visible:shadow-[5px_5px_0_0_var(--color-border)]'
+                    className='group relative overflow-hidden rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)] transition-transform hover:translate-x-px hover:translate-y-px hover:shadow-[5px_5px_0_0_var(--color-border)] focus-visible:translate-x-px focus-visible:translate-y-px focus-visible:shadow-[5px_5px_0_0_var(--color-border)]'
                     style={{
                       backgroundColor:
                         superGroupColors?.lightColor ?? undefined,
@@ -647,7 +652,7 @@ export function PhrasalVerbsExplorer() {
                 <DialogTitle className='text-3xl font-black uppercase'>
                   {selectedPhrasalVerb.phrasalVerb}
                 </DialogTitle>
-                <DialogDescription className='font-semibold'>
+                <DialogDescription className='text-lg sm:text-xl font-semibold'>
                   {selectedPhrasalVerb.meaning}
                 </DialogDescription>
               </DialogHeader>
@@ -667,46 +672,89 @@ export function PhrasalVerbsExplorer() {
               </div> */}
 
               <div className='space-y-3'>
-                <p className='text-sm leading-relaxed'>
+                <p className='text-base sm:text-lg leading-relaxed'>
                   <strong>Definition:</strong> {selectedPhrasalVerb.definition}
                 </p>
-                <p className='text-sm leading-relaxed'>
+                <p className='text-base sm:text-lg leading-relaxed'>
                   <strong>Common usage:</strong>{' '}
                   {selectedPhrasalVerb.commonUsage}
                 </p>
-                <p className='rounded-[6px] border-2 border-border bg-muted p-3 text-sm italic'>
-                  {selectedPhrasalVerb.example}
-                </p>
+                <div className='rounded-[6px] border-2 border-border bg-muted p-3 text-lg sm:text-xl italic'>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => (
+                        <p className='leading-relaxed not-first:mt-2'>
+                          {children}
+                        </p>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className='mt-2 list-disc space-y-1 pl-5'>
+                          {children}
+                        </ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className='mt-2 list-decimal space-y-1 pl-5'>
+                          {children}
+                        </ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className='leading-relaxed'>{children}</li>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className='font-black text-purple-500'>
+                          {children}
+                        </strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className='italic'>{children}</em>
+                      ),
+                    }}
+                  >
+                    {selectedPhrasalVerb.example}
+                  </ReactMarkdown>
+                </div>
               </div>
 
-              <div className='flex flex-wrap gap-2'>
-                <Badge variant='secondary'>
-                  {selectedPhrasalVerb.superGroup}
-                </Badge>
-                <Badge variant='secondary'>{selectedPhrasalVerb.group}</Badge>
-                <Badge variant='outline'>{selectedPhrasalVerb.category}</Badge>
-                <Badge variant='outline'>
-                  Verb: {selectedPhrasalVerb.verb}
-                </Badge>
-                <Badge variant='outline'>
-                  Particles: {selectedPhrasalVerb.particles.join(' ')}
-                </Badge>
-                <Badge variant='outline'>
-                  {selectedPhrasalVerb.transitivity}
-                </Badge>
-                <Badge variant='outline'>
-                  {selectedPhrasalVerb.separability}
-                </Badge>
+              <div className='space-y-2'>
+                <div className='flex flex-wrap items-center gap-2'>
+                  <Badge className='border-2 border-emerald-700 bg-emerald-100 text-emerald-900 sm:text-sm'>
+                    Verb: {selectedPhrasalVerb.verb}
+                  </Badge>
+                  <Badge className='border-2 border-emerald-700 bg-emerald-100 text-emerald-900 sm:text-sm'>
+                    Particles: {selectedPhrasalVerb.particles.join(' ')}
+                  </Badge>
+                </div>
+
+                <div className='flex flex-wrap items-center gap-2'>
+                  <Badge className='border-2 border-violet-700 bg-violet-100 text-violet-900 sm:text-sm'>
+                    {selectedPhrasalVerb.transitivity}
+                  </Badge>
+                  <Badge className='border-2 border-violet-700 bg-violet-100 text-violet-900 sm:text-sm'>
+                    {selectedPhrasalVerb.separability}
+                  </Badge>
+                </div>
+                <div className='flex flex-wrap items-center gap-2'>
+                  <Badge variant='secondary' className='sm:text-sm font-black uppercase tracking-wide'>
+                    {selectedPhrasalVerb.superGroup}
+                  </Badge>
+                  <Badge variant='secondary' className='sm:text-sm font-black uppercase tracking-wide'>
+                    {selectedPhrasalVerb.group}
+                  </Badge>
+                  <Badge variant='outline' className='sm:text-sm font-black uppercase tracking-wide'>
+                    {selectedPhrasalVerb.category}
+                  </Badge>
+                </div>
               </div>
 
               {selectedPhrasalVerb.synonyms.length > 0 && (
                 <div>
-                  <p className='mb-2 text-xs font-black uppercase tracking-wide text-muted-foreground'>
+                  <p className='mb-2 sm:text-base font-black uppercase tracking-wide text-muted-foreground'>
                     Synonyms
                   </p>
                   <div className='flex flex-wrap gap-2'>
                     {selectedPhrasalVerb.synonyms.map((synonym) => (
-                      <Badge key={synonym} variant='outline'>
+                      <Badge key={synonym} variant='outline' className='sm:text-sm font-medium'>
                         {synonym}
                       </Badge>
                     ))}
@@ -716,14 +764,14 @@ export function PhrasalVerbsExplorer() {
 
               {selectedPhrasalVerb.nativeNotes.length > 0 && (
                 <div>
-                  <p className='mb-2 text-xs font-black uppercase tracking-wide text-muted-foreground'>
+                  <p className='mb-2 sm:text-base font-black uppercase tracking-wide text-muted-foreground'>
                     Native notes
                   </p>
                   <ul className='space-y-2'>
                     {selectedPhrasalVerb.nativeNotes.map((note) => (
                       <li
                         key={note}
-                        className='rounded-[6px] border-2 border-border bg-muted px-3 py-2 text-sm'
+                        className='rounded-[6px] border-2 border-border bg-muted px-3 py-2 text-base sm:text-lg'
                       >
                         {note}
                       </li>

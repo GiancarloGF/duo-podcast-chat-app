@@ -66,7 +66,7 @@ function shuffleArray<T>(entries: T[]): T[] {
 }
 
 function toExerciseInput(
-  phrasalVerbs: ExerciseSourcePhrasalVerb[]
+  phrasalVerbs: ExerciseSourcePhrasalVerb[],
 ): PracticeExercisePhrasalVerbInput[] {
   return phrasalVerbs.map((pv) => ({
     id: pv.id,
@@ -77,7 +77,10 @@ function toExerciseInput(
   }));
 }
 
-function areSameFilters(a: PracticeSessionFilters, b: PracticeSessionFilters): boolean {
+function areSameFilters(
+  a: PracticeSessionFilters,
+  b: PracticeSessionFilters,
+): boolean {
   if (a.categories.length !== b.categories.length) {
     return false;
   }
@@ -92,7 +95,9 @@ function areSameFilters(a: PracticeSessionFilters, b: PracticeSessionFilters): b
   );
 }
 
-function createEmptySession(filters: PracticeSessionFilters): ActivePracticeSession {
+function createEmptySession(
+  filters: PracticeSessionFilters,
+): ActivePracticeSession {
   const nowIso = new Date().toISOString();
 
   return {
@@ -118,7 +123,7 @@ function createEmptySession(filters: PracticeSessionFilters): ActivePracticeSess
 function pickPhrasalVerbsForExercise(
   phrasalVerbs: ExerciseSourcePhrasalVerb[],
   usedPvIds: string[],
-  recentPvIds: string[]
+  recentPvIds: string[],
 ): ExerciseSourcePhrasalVerb[] {
   const targetCount = Math.min(5, phrasalVerbs.length);
   if (targetCount === 0) {
@@ -147,8 +152,8 @@ function pickPhrasalVerbsForExercise(
   if (picked.length < targetCount) {
     const nonRecent = shuffleArray(
       phrasalVerbs.filter(
-        (pv) => !pickedIds.has(pv.id) && !recentSet.has(pv.id)
-      )
+        (pv) => !pickedIds.has(pv.id) && !recentSet.has(pv.id),
+      ),
     );
 
     for (const pv of nonRecent) {
@@ -162,7 +167,9 @@ function pickPhrasalVerbsForExercise(
   }
 
   if (picked.length < targetCount) {
-    const remaining = shuffleArray(phrasalVerbs.filter((pv) => !pickedIds.has(pv.id)));
+    const remaining = shuffleArray(
+      phrasalVerbs.filter((pv) => !pickedIds.has(pv.id)),
+    );
     for (const pv of remaining) {
       if (picked.length >= targetCount) {
         break;
@@ -182,12 +189,14 @@ function getRandomExerciseOrder(): PracticeExerciseType[] {
 
 function sanitizeExercise(
   exercise: PracticeExercise,
-  selectedPvIds: string[]
+  selectedPvIds: string[],
 ): PracticeExercise {
   const allowedPvIds = new Set(selectedPvIds);
 
   if (isReadAndMarkMeaningExercise(exercise)) {
-    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+    const sanitizedItems = exercise.items.filter((item) =>
+      allowedPvIds.has(item.pvId),
+    );
 
     if (sanitizedItems.length === 0) {
       throw new Error('The generated exercise did not include valid items.');
@@ -200,7 +209,9 @@ function sanitizeExercise(
   }
 
   if (isMarkSentencesCorrectExercise(exercise)) {
-    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+    const sanitizedItems = exercise.items.filter((item) =>
+      allowedPvIds.has(item.pvId),
+    );
 
     if (sanitizedItems.length === 0) {
       throw new Error('The generated exercise did not include valid items.');
@@ -213,7 +224,9 @@ function sanitizeExercise(
   }
 
   if (isFillInGapsDragDropExercise(exercise)) {
-    const sanitizedItems = exercise.items.filter((item) => allowedPvIds.has(item.pvId));
+    const sanitizedItems = exercise.items.filter((item) =>
+      allowedPvIds.has(item.pvId),
+    );
 
     if (sanitizedItems.length === 0) {
       throw new Error('The generated exercise did not include valid items.');
@@ -222,12 +235,15 @@ function sanitizeExercise(
     const allowedPvIdSet = new Set(sanitizedItems.map((item) => item.pvId));
     const sanitizedWordBank = exercise.wordBank.filter((word) =>
       sanitizedItems.some(
-        (item) => item.correctWord.trim().toLowerCase() === word.trim().toLowerCase()
-      )
+        (item) =>
+          item.correctWord.trim().toLowerCase() === word.trim().toLowerCase(),
+      ),
     );
 
     if (sanitizedWordBank.length !== allowedPvIdSet.size) {
-      throw new Error('The generated fill-in-gaps exercise has inconsistent word bank.');
+      throw new Error(
+        'The generated fill-in-gaps exercise has inconsistent word bank.',
+      );
     }
 
     return {
@@ -241,19 +257,19 @@ function sanitizeExercise(
 }
 
 function isReadAndMarkMeaningExercise(
-  exercise: PracticeExercise
+  exercise: PracticeExercise,
 ): exercise is ReadAndMarkMeaningExercise {
   return exercise.exerciseType === 'read_and_mark_meaning';
 }
 
 function isMarkSentencesCorrectExercise(
-  exercise: PracticeExercise
+  exercise: PracticeExercise,
 ): exercise is MarkSentencesCorrectExercise {
   return exercise.exerciseType === 'mark_sentences_correct';
 }
 
 function isFillInGapsDragDropExercise(
-  exercise: PracticeExercise
+  exercise: PracticeExercise,
 ): exercise is FillInGapsDragDropExercise {
   return exercise.exerciseType === 'fill_in_gaps_drag_drop';
 }
@@ -262,7 +278,7 @@ function getOptionStateClass(
   isValidated: boolean,
   selectedIndex: number | undefined,
   optionIndex: number,
-  correctIndex: number
+  correctIndex: number,
 ): string {
   if (!isValidated) {
     return selectedIndex === optionIndex
@@ -343,7 +359,7 @@ function hasValidSessionShape(session: ActivePracticeSession): boolean {
       (item) =>
         typeof item.sentenceMarkdown === 'string' &&
         item.sentenceMarkdown.length > 0 &&
-        item.meanings.length === 3
+        item.meanings.length === 3,
     );
   }
 
@@ -353,7 +369,7 @@ function hasValidSessionShape(session: ActivePracticeSession): boolean {
         typeof item.firstSentenceMarkdown === 'string' &&
         item.firstSentenceMarkdown.length > 0 &&
         typeof item.secondSentenceMarkdown === 'string' &&
-        item.secondSentenceMarkdown.length > 0
+        item.secondSentenceMarkdown.length > 0,
     );
   }
 
@@ -366,8 +382,10 @@ function hasValidSessionShape(session: ActivePracticeSession): boolean {
           typeof item.sentenceSuffix === 'string' &&
           item.sentenceSuffix.length > 0 &&
           typeof item.correctWord === 'string' &&
-          item.correctWord.length > 0
-      ) && session.currentExercise.wordBank.length === session.currentExercise.items.length
+          item.correctWord.length > 0,
+      ) &&
+      session.currentExercise.wordBank.length ===
+        session.currentExercise.items.length
     );
   }
 
@@ -427,7 +445,7 @@ function DraggableWordToken({
       className={cn(
         'touch-manipulation select-none inline-flex rounded-[6px] border-2 border-border bg-card px-3 py-1 text-sm font-black text-foreground',
         isSelected && 'border-primary bg-primary/10 text-primary',
-        disabled && 'cursor-not-allowed opacity-70'
+        disabled && 'cursor-not-allowed opacity-70',
       )}
     >
       {text}
@@ -441,13 +459,20 @@ interface DroppableWordSlotProps {
   children: ReactNode;
 }
 
-function DroppableWordSlot({ id, className, children }: DroppableWordSlotProps): JSX.Element {
+function DroppableWordSlot({
+  id,
+  className,
+  children,
+}: DroppableWordSlotProps): JSX.Element {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   return (
     <div
       ref={setNodeRef}
-      className={cn(className, isOver && 'ring-2 ring-primary/70 ring-offset-2')}
+      className={cn(
+        className,
+        isOver && 'ring-2 ring-primary/70 ring-offset-2',
+      )}
     >
       {children}
     </div>
@@ -481,14 +506,20 @@ export function PracticeSessionRunner({
     hydration.phase === 'persisting';
   const hasLocalCatalogData = (catalogStatus?.localCount ?? 0) > 0;
   const isCatalogMissingAndBlocked =
-    hydration.phase === 'error' && !hasLocalCatalogData && categoryPhrasalVerbs.length === 0;
+    hydration.phase === 'error' &&
+    !hasLocalCatalogData &&
+    categoryPhrasalVerbs.length === 0;
 
   const [session, setSession] = useState<ActivePracticeSession | null>(null);
   const [isGeneratingExercise, setIsGeneratingExercise] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
-  const [selectedWordForTap, setSelectedWordForTap] = useState<string | null>(null);
+  const [selectedWordForTap, setSelectedWordForTap] = useState<string | null>(
+    null,
+  );
   const initializedSessionKeyRef = useRef<string | null>(null);
-  const generationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const generationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   function clearGenerationWatchdog(): void {
     if (!generationTimeoutRef.current) {
@@ -516,13 +547,17 @@ export function PracticeSessionRunner({
 
   async function callActionWithTimeout(
     exerciseType: PracticeExerciseType,
-    payload: PracticeExercisePhrasalVerbInput[]
+    payload: PracticeExercisePhrasalVerbInput[],
   ): Promise<Awaited<ReturnType<typeof generatePracticeExerciseAction>>> {
     return Promise.race([
       generatePracticeExerciseAction(exerciseType, payload),
       new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error('Timed out waiting for exercise generation action response.'));
+          reject(
+            new Error(
+              'Timed out waiting for exercise generation action response.',
+            ),
+          );
         }, 30000);
       }),
     ]);
@@ -543,7 +578,7 @@ export function PracticeSessionRunner({
         definition: pv.definition,
         example: pv.example,
       })),
-    [categoryPhrasalVerbs]
+    [categoryPhrasalVerbs],
   );
 
   const filters = useMemo<PracticeSessionFilters>(
@@ -552,13 +587,13 @@ export function PracticeSessionRunner({
       group,
       categories,
     }),
-    [superGroup, group, categories]
+    [superGroup, group, categories],
   );
 
   const sessionKey = useMemo(
     () =>
       `${superGroup ?? 'none'}::${group ?? 'none'}::${[...categories].sort().join('|')}`,
-    [superGroup, group, categories]
+    [superGroup, group, categories],
   );
 
   useEffect(() => {
@@ -573,8 +608,11 @@ export function PracticeSessionRunner({
   }, [isGeneratingExercise, session, sessionKey, uiError]);
 
   const createNextExercise = useCallback(
-    async (baseSession: ActivePracticeSession): Promise<ActivePracticeSession> => {
-      const exerciseType = baseSession.exerciseOrder[baseSession.currentExerciseIndex];
+    async (
+      baseSession: ActivePracticeSession,
+    ): Promise<ActivePracticeSession> => {
+      const exerciseType =
+        baseSession.exerciseOrder[baseSession.currentExerciseIndex];
       if (!exerciseType) {
         throw new Error('No exercise type available for current session step.');
       }
@@ -590,7 +628,7 @@ export function PracticeSessionRunner({
       const pickedPhrasalVerbs = pickPhrasalVerbsForExercise(
         sourcePhrasalVerbs,
         baseSession.usedPvIds,
-        baseSession.recentPvIds
+        baseSession.recentPvIds,
       );
 
       if (pickedPhrasalVerbs.length === 0) {
@@ -600,22 +638,27 @@ export function PracticeSessionRunner({
       const selectedPvIds = pickedPhrasalVerbs.map((pv) => pv.id);
       const response = await callActionWithTimeout(
         exerciseType,
-        toExerciseInput(pickedPhrasalVerbs)
+        toExerciseInput(pickedPhrasalVerbs),
       );
 
       if (!response.success || !response.exercise) {
         throw new Error(
-          response.details ?? response.error ?? 'Could not generate exercise.'
+          response.details ?? response.error ?? 'Could not generate exercise.',
         );
       }
 
-      const sanitizedExercise = sanitizeExercise(response.exercise, selectedPvIds);
+      const sanitizedExercise = sanitizeExercise(
+        response.exercise,
+        selectedPvIds,
+      );
 
       const nowIso = new Date().toISOString();
 
       return {
         ...baseSession,
-        usedPvIds: Array.from(new Set([...baseSession.usedPvIds, ...selectedPvIds])),
+        usedPvIds: Array.from(
+          new Set([...baseSession.usedPvIds, ...selectedPvIds]),
+        ),
         recentPvIds: selectedPvIds,
         currentExercise: sanitizedExercise,
         answersByPvId: {},
@@ -623,12 +666,12 @@ export function PracticeSessionRunner({
         isFinished: false,
         generatedExercisesCount: Math.max(
           baseSession.generatedExercisesCount,
-          baseSession.currentExerciseIndex + 1
+          baseSession.currentExerciseIndex + 1,
         ),
         updatedAtIso: nowIso,
       };
     },
-    [sourcePhrasalVerbs]
+    [sourcePhrasalVerbs],
   );
 
   useEffect(() => {
@@ -642,9 +685,12 @@ export function PracticeSessionRunner({
     }
 
     if (initializedSessionKeyRef.current === sessionKey) {
-      console.info('[PracticeSessionRunner] Initialization already completed for key', {
-        sessionKey,
-      });
+      console.info(
+        '[PracticeSessionRunner] Initialization already completed for key',
+        {
+          sessionKey,
+        },
+      );
       return;
     }
 
@@ -655,7 +701,9 @@ export function PracticeSessionRunner({
 
       const restoredSession = practiceSessionStorage.getActiveSession();
       if (restoredSession && !hasValidSessionShape(restoredSession)) {
-        console.warn('[PracticeSessionRunner] Discarding old session shape from localStorage');
+        console.warn(
+          '[PracticeSessionRunner] Discarding old session shape from localStorage',
+        );
         practiceSessionStorage.clearActiveSession();
       }
 
@@ -697,7 +745,7 @@ export function PracticeSessionRunner({
       } catch (error) {
         const message = getErrorMessage(
           error,
-          'Could not create the first exercise. Please try again.'
+          'Could not create the first exercise. Please try again.',
         );
         console.error('Failed to initialize practice session', error);
         if (!isCancelled) {
@@ -766,7 +814,7 @@ export function PracticeSessionRunner({
     } catch (error) {
       const message = getErrorMessage(
         error,
-        'Could not generate the next exercise. Please try again.'
+        'Could not generate the next exercise. Please try again.',
       );
       setUiError(message);
       toast.error(message);
@@ -776,7 +824,10 @@ export function PracticeSessionRunner({
     }
   }
 
-  function handleSelectAnswer(pvId: string, selectedValue: number | string): void {
+  function handleSelectAnswer(
+    pvId: string,
+    selectedValue: number | string,
+  ): void {
     setUiError(null);
 
     setSession((previous) => {
@@ -801,7 +852,7 @@ export function PracticeSessionRunner({
     }
 
     const unanswered = session.currentExercise.items.some(
-      (item) => session.answersByPvId[item.pvId] === undefined
+      (item) => session.answersByPvId[item.pvId] === undefined,
     );
 
     if (unanswered) {
@@ -835,7 +886,9 @@ export function PracticeSessionRunner({
       });
     } else if (isMarkSentencesCorrectExercise(session.currentExercise)) {
       session.currentExercise.items.forEach((item) => {
-        const selectedSentenceIndex = session.answersByPvId[item.pvId] as number;
+        const selectedSentenceIndex = session.answersByPvId[
+          item.pvId
+        ] as number;
         if (selectedSentenceIndex === item.correctSentenceIndex) {
           correctCount += 1;
           return;
@@ -882,7 +935,8 @@ export function PracticeSessionRunner({
     setSession({
       ...session,
       isValidated: true,
-      totalQuestions: session.totalQuestions + session.currentExercise.items.length,
+      totalQuestions:
+        session.totalQuestions + session.currentExercise.items.length,
       totalCorrect: session.totalCorrect + correctCount,
       incorrectByPvId: nextIncorrectByPvId,
       updatedAtIso: new Date().toISOString(),
@@ -922,7 +976,7 @@ export function PracticeSessionRunner({
     } catch (error) {
       const message = getErrorMessage(
         error,
-        'Could not start a new session. Please try again.'
+        'Could not start a new session. Please try again.',
       );
       console.error('Failed to restart practice session', error);
       setUiError(message);
@@ -944,7 +998,8 @@ export function PracticeSessionRunner({
 
     try {
       const retrySession =
-        session.currentExercise || session.currentExerciseIndex >= session.exerciseOrder.length
+        session.currentExercise ||
+        session.currentExerciseIndex >= session.exerciseOrder.length
           ? session
           : {
               ...session,
@@ -959,7 +1014,7 @@ export function PracticeSessionRunner({
     } catch (error) {
       const message = getErrorMessage(
         error,
-        'Could not generate the exercise. Please try again.'
+        'Could not generate the exercise. Please try again.',
       );
       setUiError(message);
       toast.error(message);
@@ -988,10 +1043,10 @@ export function PracticeSessionRunner({
     () =>
       session
         ? Object.values(session.incorrectByPvId).sort(
-            (a, b) => b.wrongCount - a.wrongCount
+            (a, b) => b.wrongCount - a.wrongCount,
           )
         : [],
-    [session]
+    [session],
   );
 
   const fillExercise =
@@ -1004,8 +1059,8 @@ export function PracticeSessionRunner({
       return {} as Record<string, string>;
     }
 
-    const entries = Object.entries(session.answersByPvId).filter(([, value]) =>
-      typeof value === 'string'
+    const entries = Object.entries(session.answersByPvId).filter(
+      ([, value]) => typeof value === 'string',
     );
 
     return Object.fromEntries(entries) as Record<string, string>;
@@ -1022,38 +1077,46 @@ export function PracticeSessionRunner({
       .map((word) => ({ id: word, text: word }));
   }, [assignedWordsByPvId, fillExercise]);
 
-  const assignWordToBlank = useCallback((word: string, targetPvId: string): void => {
-    setSession((previous) => {
-      if (!previous || previous.isValidated || !previous.currentExercise) {
-        return previous;
-      }
-
-      if (!isFillInGapsDragDropExercise(previous.currentExercise)) {
-        return previous;
-      }
-
-      const answers = { ...previous.answersByPvId } as Record<string, string | number>;
-      const sourceEntry = Object.entries(answers).find(([, value]) => value === word);
-      const sourcePvId = sourceEntry?.[0];
-      const targetCurrent = answers[targetPvId];
-
-      answers[targetPvId] = word;
-
-      if (sourcePvId && sourcePvId !== targetPvId) {
-        if (typeof targetCurrent === 'string') {
-          answers[sourcePvId] = targetCurrent;
-        } else {
-          delete answers[sourcePvId];
+  const assignWordToBlank = useCallback(
+    (word: string, targetPvId: string): void => {
+      setSession((previous) => {
+        if (!previous || previous.isValidated || !previous.currentExercise) {
+          return previous;
         }
-      }
 
-      return {
-        ...previous,
-        answersByPvId: answers,
-        updatedAtIso: new Date().toISOString(),
-      };
-    });
-  }, []);
+        if (!isFillInGapsDragDropExercise(previous.currentExercise)) {
+          return previous;
+        }
+
+        const answers = { ...previous.answersByPvId } as Record<
+          string,
+          string | number
+        >;
+        const sourceEntry = Object.entries(answers).find(
+          ([, value]) => value === word,
+        );
+        const sourcePvId = sourceEntry?.[0];
+        const targetCurrent = answers[targetPvId];
+
+        answers[targetPvId] = word;
+
+        if (sourcePvId && sourcePvId !== targetPvId) {
+          if (typeof targetCurrent === 'string') {
+            answers[sourcePvId] = targetCurrent;
+          } else {
+            delete answers[sourcePvId];
+          }
+        }
+
+        return {
+          ...previous,
+          answersByPvId: answers,
+          updatedAtIso: new Date().toISOString(),
+        };
+      });
+    },
+    [],
+  );
 
   const removeAssignedWord = useCallback((word: string): void => {
     setSession((previous) => {
@@ -1065,8 +1128,13 @@ export function PracticeSessionRunner({
         return previous;
       }
 
-      const answers = { ...previous.answersByPvId } as Record<string, string | number>;
-      const sourceEntry = Object.entries(answers).find(([, value]) => value === word);
+      const answers = { ...previous.answersByPvId } as Record<
+        string,
+        string | number
+      >;
+      const sourceEntry = Object.entries(answers).find(
+        ([, value]) => value === word,
+      );
 
       if (!sourceEntry) {
         return previous;
@@ -1150,7 +1218,9 @@ export function PracticeSessionRunner({
   if (categories.length === 0) {
     return (
       <div className='rounded-[10px] border-2 border-border bg-card p-6 shadow-[6px_6px_0_0_var(--color-border)]'>
-        <p className='font-bold'>No categories were provided for this practice session.</p>
+        <p className='font-bold'>
+          No categories were provided for this practice session.
+        </p>
       </div>
     );
   }
@@ -1216,48 +1286,73 @@ export function PracticeSessionRunner({
       <section className='rounded-[10px] border-2 border-border bg-card p-3 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
         <div className='mb-6 flex flex-wrap items-start justify-between gap-4'>
           <div>
-            <h2 className='text-base sm:text-2xl font-black text-foreground'>Session completed</h2>
+            <h2 className='text-base sm:text-2xl font-black text-foreground'>
+              Session completed
+            </h2>
             <p className='font-medium text-muted-foreground'>
               Categories: <strong>{categories.join(', ')}</strong>
             </p>
           </div>
-          <Button variant='outline' onClick={handleRestartSession} disabled={isGeneratingExercise}>
+          <Button
+            variant='outline'
+            onClick={handleRestartSession}
+            disabled={isGeneratingExercise}
+          >
             <RotateCcw className='h-4 w-4' />
             Start new session
           </Button>
         </div>
 
         <div className='mb-6 grid gap-3 md:grid-cols-3'>
-          <div className='rounded-[8px] border-2 border-border bg-muted p-4'>
-            <p className='text-xs font-black uppercase text-muted-foreground'>Questions</p>
+          <div className='rounded-xl border-2 border-border bg-muted p-4'>
+            <p className='text-xs font-black uppercase text-muted-foreground'>
+              Questions
+            </p>
             <p className='text-3xl font-black'>{session.totalQuestions}</p>
           </div>
-          <div className='rounded-[8px] border-2 border-border bg-emerald-100 p-4'>
-            <p className='text-xs font-black uppercase text-emerald-900'>Correct</p>
-            <p className='text-3xl font-black text-emerald-900'>{session.totalCorrect}</p>
+          <div className='rounded-xl border-2 border-border bg-emerald-100 p-4'>
+            <p className='text-xs font-black uppercase text-emerald-900'>
+              Correct
+            </p>
+            <p className='text-3xl font-black text-emerald-900'>
+              {session.totalCorrect}
+            </p>
           </div>
-          <div className='rounded-[8px] border-2 border-border bg-secondary p-4'>
-            <p className='text-xs font-black uppercase text-secondary-foreground'>Accuracy</p>
-            <p className='text-3xl font-black text-secondary-foreground'>{totalAccuracy}%</p>
+          <div className='rounded-xl border-2 border-border bg-secondary p-4'>
+            <p className='text-xs font-black uppercase text-secondary-foreground'>
+              Accuracy
+            </p>
+            <p className='text-3xl font-black text-secondary-foreground'>
+              {totalAccuracy}%
+            </p>
           </div>
         </div>
 
-        <div className='rounded-[8px] border-2 border-border bg-muted p-4'>
-          <h3 className='mb-3 text-lg font-black'>Phrasal verbs with mistakes</h3>
+        <div className='rounded-xl border-2 border-border bg-muted p-4'>
+          <h3 className='mb-3 text-lg font-black'>
+            Phrasal verbs with mistakes
+          </h3>
           {incorrectPhrasalVerbs.length === 0 ? (
-            <p className='font-medium text-emerald-800'>Great job! You had no mistakes.</p>
+            <p className='font-medium text-emerald-800'>
+              Great job! You had no mistakes.
+            </p>
           ) : (
             <ul className='space-y-3'>
               {incorrectPhrasalVerbs.map((entry) => (
-                <li key={entry.pvId} className='rounded-[6px] border-2 border-border bg-card p-3'>
-                  <p className='font-black text-foreground'>{entry.phrasalVerb}</p>
-                  <p className='text-sm font-medium text-muted-foreground'>
+                <li
+                  key={entry.pvId}
+                  className='rounded-[6px] border-2 border-border bg-card p-3'
+                >
+                  <p className='font-black text-foreground  text-lg sm:text-xl'>
+                    {entry.phrasalVerb}
+                  </p>
+                  <p className='text-sm sm:text-base font-medium text-muted-foreground'>
                     Mistakes: <strong>{entry.wrongCount}</strong>
                   </p>
-                  <p className='mt-1 text-sm font-medium text-muted-foreground'>
+                  <p className='mt-1 text-sm sm:text-base font-medium text-muted-foreground'>
                     Last sentence: {entry.lastSentence}
                   </p>
-                  <p className='text-sm font-semibold text-foreground'>
+                  <p className='text-sm sm:text-base font-semibold text-foreground'>
                     Correct answer: {entry.correctAnswer}
                   </p>
                 </li>
@@ -1281,8 +1376,12 @@ export function PracticeSessionRunner({
             Phrasal verbs in pool: {sourcePhrasalVerbs.length}
           </p>
           <p className='text-sm font-semibold text-muted-foreground'>
-            Exercise: {Math.min((session.currentExerciseIndex ?? 0) + 1, sessionOrder.length)}/
-            {sessionOrder.length}
+            Exercise:{' '}
+            {Math.min(
+              (session.currentExerciseIndex ?? 0) + 1,
+              sessionOrder.length,
+            )}
+            /{sessionOrder.length}
           </p>
         </div>
 
@@ -1297,14 +1396,8 @@ export function PracticeSessionRunner({
         </Button>
       </div>
 
-      {uiError && (
-        <div className='mb-4 rounded-[8px] border-2 border-border bg-destructive/10 p-3'>
-          <p className='font-bold text-destructive'>{uiError}</p>
-        </div>
-      )}
-
       {!currentExercise ? (
-        <div className='flex items-center justify-center rounded-[8px] border-2 border-border bg-muted p-10'>
+        <div className='flex items-center justify-center rounded-xl border-2 border-border bg-muted p-10'>
           {isGeneratingExercise ? (
             <>
               <Spinner className='mr-2 h-5 w-5' />
@@ -1312,7 +1405,9 @@ export function PracticeSessionRunner({
             </>
           ) : (
             <div className='text-center'>
-              <p className='mb-3 font-semibold'>Exercise could not be generated yet.</p>
+              <p className='mb-3 font-semibold'>
+                Exercise could not be generated yet.
+              </p>
               <Button onClick={() => void handleRetryGenerateExercise()}>
                 Retry generating exercise
               </Button>
@@ -1330,10 +1425,13 @@ export function PracticeSessionRunner({
                 <span
                   key={`${exerciseType}-${index}`}
                   className={cn(
-                    'rounded-full border-2 px-3 py-1 text-xs font-black uppercase',
+                    'rounded-full border-2 px-3 py-1 text-sm font-black uppercase',
                     isCurrent && 'border-primary bg-primary/15 text-primary',
-                    isCompleted && 'border-emerald-700 bg-emerald-100 text-emerald-900',
-                    !isCurrent && !isCompleted && 'border-border bg-card text-muted-foreground'
+                    isCompleted &&
+                      'border-emerald-700 bg-emerald-100 text-emerald-900',
+                    !isCurrent &&
+                      !isCompleted &&
+                      'border-border bg-card text-muted-foreground',
                   )}
                 >
                   {index + 1}. {getExerciseTypeLabel(exerciseType)}
@@ -1342,34 +1440,40 @@ export function PracticeSessionRunner({
             })}
           </div>
 
-          <div className='mb-5 rounded-[8px] border-2 border-border bg-muted p-4'>
-            <p className='text-xs font-black uppercase text-muted-foreground'>
+          <div className='mb-5 rounded-xl border-2 border-border bg-muted p-4'>
+            <p className='text-xs sm:text-sm font-black uppercase text-muted-foreground'>
               {currentExercise.exerciseType.replaceAll('_', ' ')}
             </p>
-            <h3 className='text-base sm:text-lg font-black text-foreground'>{currentExercise.title}</h3>
-            <p className='text-sm sm:text-base font-medium text-muted-foreground'>{currentExercise.instructions}</p>
+            <h3 className='text-base sm:text-lg font-black text-foreground'>
+              {currentExercise.title}
+            </h3>
+            <p className='text-sm sm:text-base font-medium text-muted-foreground'>
+              {currentExercise.instructions}
+            </p>
           </div>
 
           {isReadAndMarkMeaningExercise(currentExercise) ? (
             <ul className='space-y-4'>
               {currentExercise.items.map((item, itemIndex) => {
-                const selectedIndex = session.answersByPvId[item.pvId] as number | undefined;
+                const selectedIndex = session.answersByPvId[item.pvId] as
+                  | number
+                  | undefined;
                 const isCorrect = selectedIndex === item.correctMeaningIndex;
 
                 return (
                   <li
                     key={`${item.pvId}-${itemIndex}`}
-                    className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
+                    className='rounded-xl border-2 border-border bg-[#f3ede0] p-4'
                   >
                     <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
-                      Pair {itemIndex + 1}
+                      Group {itemIndex + 1}
                     </p>
-                    <div className='mb-3 text-base font-semibold text-foreground'>
+                    <div className='mb-3 text-base sm:text-lg font-semibold text-foreground italic'>
                       <ReactMarkdown
                         components={{
                           p: ({ children }) => <p>{children}</p>,
                           strong: ({ children }) => (
-                            <strong className='rounded-[4px] bg-primary/15 px-1 text-primary'>
+                            <strong className='rounded-lg bg-primary/15 px-1 text-primary'>
                               {children}
                             </strong>
                           ),
@@ -1380,29 +1484,35 @@ export function PracticeSessionRunner({
                     </div>
 
                     <div className='space-y-2'>
-                      {item.meanings.map((meaning: string, meaningIndex: number) => {
-                        const optionStateClass = getOptionStateClass(
-                          session.isValidated,
-                          selectedIndex,
-                          meaningIndex,
-                          item.correctMeaningIndex
-                        );
+                      {item.meanings.map(
+                        (meaning: string, meaningIndex: number) => {
+                          const optionStateClass = getOptionStateClass(
+                            session.isValidated,
+                            selectedIndex,
+                            meaningIndex,
+                            item.correctMeaningIndex,
+                          );
 
-                        return (
-                          <button
-                            key={`${item.pvId}-${meaningIndex}`}
-                            type='button'
-                            onClick={() => handleSelectAnswer(item.pvId, meaningIndex)}
-                            disabled={session.isValidated || isGeneratingExercise}
-                            className={cn(
-                              'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm font-semibold transition-colors',
-                              optionStateClass
-                            )}
-                          >
-                            {meaning}
-                          </button>
-                        );
-                      })}
+                          return (
+                            <button
+                              key={`${item.pvId}-${meaningIndex}`}
+                              type='button'
+                              onClick={() =>
+                                handleSelectAnswer(item.pvId, meaningIndex)
+                              }
+                              disabled={
+                                session.isValidated || isGeneratingExercise
+                              }
+                              className={cn(
+                                'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm sm:text-base font-semibold transition-colors',
+                                optionStateClass,
+                              )}
+                            >
+                              {meaning}
+                            </button>
+                          );
+                        },
+                      )}
                     </div>
 
                     {session.isValidated && (
@@ -1419,7 +1529,8 @@ export function PracticeSessionRunner({
                               Incorrect
                             </p>
                             <p className='text-sm font-medium text-foreground'>
-                              Correct answer: {item.meanings[item.correctMeaningIndex]}
+                              Correct answer:{' '}
+                              {item.meanings[item.correctMeaningIndex]}
                             </p>
                           </div>
                         )}
@@ -1432,54 +1543,65 @@ export function PracticeSessionRunner({
           ) : isMarkSentencesCorrectExercise(currentExercise) ? (
             <ul className='space-y-4'>
               {currentExercise.items.map((item, itemIndex) => {
-                const selectedIndex = session.answersByPvId[item.pvId] as number | undefined;
+                const selectedIndex = session.answersByPvId[item.pvId] as
+                  | number
+                  | undefined;
                 const isCorrect = selectedIndex === item.correctSentenceIndex;
-                const sentenceOptions = [item.firstSentenceMarkdown, item.secondSentenceMarkdown];
+                const sentenceOptions = [
+                  item.firstSentenceMarkdown,
+                  item.secondSentenceMarkdown,
+                ];
 
                 return (
                   <li
                     key={`${item.pvId}-${itemIndex}`}
-                    className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
+                    className='rounded-xl border-2 border-border bg-[#f3ede0] p-4'
                   >
                     <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
-                      Pair {itemIndex + 1}
+                      Group {itemIndex + 1}
                     </p>
 
                     <div className='space-y-2'>
-                      {sentenceOptions.map((sentenceMarkdown, sentenceIndex) => {
-                        const optionStateClass = getOptionStateClass(
-                          session.isValidated,
-                          selectedIndex,
-                          sentenceIndex,
-                          item.correctSentenceIndex
-                        );
+                      {sentenceOptions.map(
+                        (sentenceMarkdown, sentenceIndex) => {
+                          const optionStateClass = getOptionStateClass(
+                            session.isValidated,
+                            selectedIndex,
+                            sentenceIndex,
+                            item.correctSentenceIndex,
+                          );
 
-                        return (
-                          <button
-                            key={`${item.pvId}-sentence-${sentenceIndex}`}
-                            type='button'
-                            onClick={() => handleSelectAnswer(item.pvId, sentenceIndex)}
-                            disabled={session.isValidated || isGeneratingExercise}
-                            className={cn(
-                              'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm font-semibold transition-colors',
-                              optionStateClass
-                            )}
-                          >
-                            <ReactMarkdown
-                              components={{
-                                p: ({ children }) => <p>{children}</p>,
-                                strong: ({ children }) => (
-                                  <strong className='rounded-[4px] bg-primary/15 px-1 text-primary'>
-                                    {children}
-                                  </strong>
-                                ),
-                              }}
+                          return (
+                            <button
+                              key={`${item.pvId}-sentence-${sentenceIndex}`}
+                              type='button'
+                              onClick={() =>
+                                handleSelectAnswer(item.pvId, sentenceIndex)
+                              }
+                              disabled={
+                                session.isValidated || isGeneratingExercise
+                              }
+                              className={cn(
+                                'w-full rounded-[6px] border-2 px-3 py-2 text-left text-sm sm:text-base italic font-medium transition-colors',
+                                optionStateClass,
+                              )}
                             >
-                              {sentenceMarkdown}
-                            </ReactMarkdown>
-                          </button>
-                        );
-                      })}
+                              <ReactMarkdown
+                                components={{
+                                  p: ({ children }) => <p>{children}</p>,
+                                  strong: ({ children }) => (
+                                    <strong className='rounded-lg bg-primary/15 px-1 text-primary'>
+                                      {children}
+                                    </strong>
+                                  ),
+                                }}
+                              >
+                                {sentenceMarkdown}
+                              </ReactMarkdown>
+                            </button>
+                          );
+                        },
+                      )}
                     </div>
 
                     {session.isValidated && (
@@ -1498,8 +1620,12 @@ export function PracticeSessionRunner({
                             <p className='text-sm font-medium text-foreground'>
                               Correct answer:{' '}
                               {item.correctSentenceIndex === 0
-                                ? markdownToPlainText(item.firstSentenceMarkdown)
-                                : markdownToPlainText(item.secondSentenceMarkdown)}
+                                ? markdownToPlainText(
+                                    item.firstSentenceMarkdown,
+                                  )
+                                : markdownToPlainText(
+                                    item.secondSentenceMarkdown,
+                                  )}
                             </p>
                           </div>
                         )}
@@ -1511,28 +1637,59 @@ export function PracticeSessionRunner({
             </ul>
           ) : (
             <DndContext onDragEnd={handleFillDragEnd}>
+              <div className='mt-4 rounded-xl border-2 border-border bg-muted p-3'>
+                <p className='mb-2 text-xs font-black uppercase text-muted-foreground'>
+                  Words panel
+                </p>
+                <p className='mb-3 text-sm font-medium text-muted-foreground'>
+                  Tap a word, then tap an empty gap to place it.
+                </p>
+                <DroppableWordSlot
+                  id='word-bank'
+                  className='flex flex-wrap gap-2'
+                >
+                  {availableFillWords.length === 0 ? (
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      All words are placed.
+                    </p>
+                  ) : (
+                    availableFillWords.map((token) => (
+                      <DraggableWordToken
+                        key={token.id}
+                        id={`word:${token.id}`}
+                        text={token.text}
+                        disabled={session.isValidated}
+                        isSelected={selectedWordForTap === token.text}
+                        onTap={() => handleWordChipTap(token.text)}
+                      />
+                    ))
+                  )}
+                </DroppableWordSlot>
+              </div>
+              <div className='h-2.5'></div>
               <ul className='space-y-4'>
                 {currentExercise.items.map((item, itemIndex) => {
                   const assignedWord = assignedWordsByPvId[item.pvId] ?? null;
                   const isCorrect =
                     session.isValidated &&
                     assignedWord !== null &&
-                    normalizeWord(assignedWord) === normalizeWord(item.correctWord);
+                    normalizeWord(assignedWord) ===
+                      normalizeWord(item.correctWord);
 
                   const blankStateClass = getOptionStateClass(
                     session.isValidated,
                     assignedWord ? 1 : undefined,
                     assignedWord ? 1 : 0,
-                    isCorrect ? 1 : 0
+                    isCorrect ? 1 : 0,
                   );
 
                   return (
                     <li
                       key={`${item.pvId}-${itemIndex}`}
-                      className='rounded-[8px] border-2 border-border bg-[#f3ede0] p-4'
+                      className='rounded-xl border-2 border-border bg-[#f3ede0] p-4'
                     >
                       <p className='mb-1 text-xs font-black uppercase text-muted-foreground'>
-                        Gap {itemIndex + 1}
+                        Sentence {itemIndex + 1}
                       </p>
 
                       <div
@@ -1558,7 +1715,10 @@ export function PracticeSessionRunner({
                       >
                         <DroppableWordSlot
                           id={`blank:${item.pvId}`}
-                          className={cn('mb-2 rounded-[6px] border-2 px-3 py-2', blankStateClass)}
+                          className={cn(
+                            'mb-2 rounded-[6px] border-2 px-3 py-2',
+                            blankStateClass,
+                          )}
                         >
                           <span>{item.sentencePrefix} </span>
                           {assignedWord ? (
@@ -1585,50 +1745,41 @@ export function PracticeSessionRunner({
                   );
                 })}
               </ul>
-
-              <div className='mt-4 rounded-[8px] border-2 border-border bg-muted p-3'>
-                <p className='mb-2 text-xs font-black uppercase text-muted-foreground'>
-                  Words panel
-                </p>
-                <p className='mb-3 text-sm font-medium text-muted-foreground'>
-                  Tap a word, then tap an empty gap to place it.
-                </p>
-                <DroppableWordSlot id='word-bank' className='flex flex-wrap gap-2'>
-                  {availableFillWords.length === 0 ? (
-                    <p className='text-sm font-medium text-muted-foreground'>
-                      All words are placed.
-                    </p>
-                  ) : (
-                    availableFillWords.map((token) => (
-                      <DraggableWordToken
-                        key={token.id}
-                        id={`word:${token.id}`}
-                        text={token.text}
-                        disabled={session.isValidated}
-                        isSelected={selectedWordForTap === token.text}
-                        onTap={() => handleWordChipTap(token.text)}
-                      />
-                    ))
-                  )}
-                </DroppableWordSlot>
-              </div>
             </DndContext>
           )}
 
-          <div className='mt-6 flex flex-wrap items-center justify-between gap-3'>
+          {uiError && (
+            <div className='mb-4 rounded-xl border-2 border-border bg-destructive/10 p-3 my-4'>
+              <p className='font-bold text-destructive'>{uiError}</p>
+            </div>
+          )}
+
+          <div className='flex flex-wrap items-center justify-between gap-3 mt-4'>
             <div className='text-sm font-semibold text-muted-foreground'>
-              Score: {session.totalCorrect}/{session.totalQuestions} ({totalAccuracy}%)
+              Score: {session.totalCorrect}/{session.totalQuestions} (
+              {totalAccuracy}%)
             </div>
 
             {!session.isValidated ? (
               <Button onClick={handleValidate} disabled={isGeneratingExercise}>
-                Validate
+                Validate my answers
               </Button>
             ) : (
-              <Button onClick={() => void handleContinue()} disabled={isGeneratingExercise}>
-                {session.currentExerciseIndex >= session.exerciseOrder.length - 1
-                  ? 'Finish session'
-                  : 'Continue'}
+              <Button
+                onClick={() => void handleContinue()}
+                disabled={isGeneratingExercise}
+              >
+                {isGeneratingExercise ? (
+                  <span className='inline-flex items-center gap-2'>
+                    <Spinner className='h-4 w-4' />
+                    Generating exercise
+                  </span>
+                ) : session.currentExerciseIndex >=
+                  session.exerciseOrder.length - 1 ? (
+                  'Finish session'
+                ) : (
+                  "Let's continue!"
+                )}
               </Button>
             )}
           </div>

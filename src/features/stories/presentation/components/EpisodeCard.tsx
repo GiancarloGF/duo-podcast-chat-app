@@ -21,7 +21,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
   return (
     <Card
       key={episode.id}
-      className='transition-all bg-card pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-[10px] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_var(--color-border)]'
+      className='transition-all bg-card pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-[10px] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--color-border)]'
     >
       {episode.imageUrl && (
         <div className='relative w-full h-48 bg-muted border-b-2 border-border'>
@@ -52,7 +52,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-4 grow flex flex-col'>
-        <p className='text-sm text-muted-foreground leading-relaxed font-medium'>
+        <p className='text-base text-muted-foreground'>
           {episode.summaryText}
         </p>
 
@@ -64,7 +64,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
                 {progressPercent}%
               </span>
             </div>
-            <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
+            <div className='w-full bg-muted rounded-lg h-3 border-2 border-border'>
               <div
                 className='bg-primary h-full transition-all'
                 style={{ width: `${progressPercent}%` }}

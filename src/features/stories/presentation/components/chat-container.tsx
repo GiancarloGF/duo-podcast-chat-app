@@ -3,7 +3,10 @@
 import { ErrorAlert } from './error-alert';
 import { TranslationInput } from './translation-input';
 import { Button } from '@/shared/presentation/components/ui/button';
-import { submitTranslation, updateProgress } from '@/features/stories/presentation/actions';
+import {
+  submitTranslation,
+  updateProgress,
+} from '@/features/stories/presentation/actions';
 import type { ChatMessage } from '@/features/stories/domain/types';
 import type { Episode } from '@/features/stories/domain/entities/Episode';
 import type { Interaction } from '@/features/stories/domain/entities/Interaction';
@@ -37,7 +40,7 @@ export function ChatContainer({
   const [selectedFeedback, setSelectedFeedback] =
     useState<TranslationFeedback | null>(null);
   const [validatingMessageId, setValidatingMessageId] = useState<string | null>(
-    null
+    null,
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -56,13 +59,13 @@ export function ChatContainer({
 
     if (userProgress.interactions) {
       userProgress.interactions.forEach((i) =>
-        interactionsMap.set(i.messageId, i)
+        interactionsMap.set(i.messageId, i),
       );
     }
 
     const limit = Math.min(
       currentMessageIndex + 1,
-      initialEpisode.messages.length
+      initialEpisode.messages.length,
     );
 
     for (let i = 0; i < limit; i++) {
@@ -77,13 +80,17 @@ export function ChatContainer({
         content: episodeMessage.content,
         isUserMessage: false,
         translationFeedback: interaction?.translationFeedback,
-        isValidating:
-          validatingMessageId === episodeMessage.id && !interaction,
+        isValidating: validatingMessageId === episodeMessage.id && !interaction,
         timestamp: Date.now(),
       });
     }
     return messages;
-  }, [initialEpisode.messages, userProgress, currentMessageIndex, validatingMessageId]);
+  }, [
+    initialEpisode.messages,
+    userProgress,
+    currentMessageIndex,
+    validatingMessageId,
+  ]);
 
   const currentEpisodeMessage = useMemo(() => {
     if (currentMessageIndex >= initialEpisode.messages.length) return null;
@@ -94,7 +101,7 @@ export function ChatContainer({
 
   const needsTranslation = useMemo(
     () => !episodeComplete && currentEpisodeMessage?.language === 'es',
-    [episodeComplete, currentEpisodeMessage]
+    [episodeComplete, currentEpisodeMessage],
   );
 
   const canInteract = !isProcessing && !episodeComplete;
@@ -111,7 +118,7 @@ export function ChatContainer({
         const result = await submitTranslation(
           translation,
           currentEpisodeMessage.officialTranslation || '',
-          currentEpisodeMessage.content
+          currentEpisodeMessage.content,
         );
 
         if (!result.success || !result.feedback) {
@@ -143,7 +150,7 @@ export function ChatContainer({
           initialEpisode.id,
           nextIndex,
           nextStatus,
-          newInteraction
+          newInteraction,
         );
       } catch (error) {
         console.error('Error submitting translation:', error);
@@ -159,7 +166,7 @@ export function ChatContainer({
       initialEpisode.id,
       initialEpisode.messages.length,
       userProgress.currentMessageIndex,
-    ]
+    ],
   );
 
   const handleNext = useCallback(async () => {
@@ -202,7 +209,7 @@ export function ChatContainer({
         }
         return acc;
       },
-      { completed: 0, skipped: 0, totalScore: 0, scoredCount: 0 }
+      { completed: 0, skipped: 0, totalScore: 0, scoredCount: 0 },
     ) || { completed: 0, skipped: 0, totalScore: 0, scoredCount: 0 };
 
     const averageScore =
@@ -284,43 +291,45 @@ export function ChatContainer({
   return (
     <div className='min-h-screen flex flex-col'>
       <header className='bg-card border-b-2 border-border p-4 sticky top-0 z-40'>
-        <div className='max-w-4xl mx-auto space-y-3'>
-          <div className='flex items-start gap-2 sm:gap-4 min-w-0'>
-            <Link href='/stories'>
-              <Button variant='outline' size='sm' className='gap-2 shrink-0'>
-                <ChevronLeft className='w-4 h-4' aria-hidden='true' />
-                <span className='hidden sm:inline'>Atrás</span>
-              </Button>
-            </Link>
-            <h1 className='font-black text-foreground leading-tight line-clamp-2 min-w-0 flex-1'>
+        <div className='max-w-4xl mx-auto space-y-3 flex gap-4 sm:gap-6 items-start'>
+          <Link href='/stories'>
+            <Button variant='outline' size='sm' className='gap-2 shrink-0'>
+              <ChevronLeft className='w-4 h-4' aria-hidden='true' />
+              <span className='hidden sm:inline'>Atrás</span>
+            </Button>
+          </Link>
+
+          <div className='flex flex-col gap-2 w-full'>
+            <h1 className='sm:text-lg font-black text-foreground leading-tight line-clamp-2 min-w-0 flex-1'>
               {initialEpisode.title || 'Episodio'}
             </h1>
-          </div>
-
-          <div className='flex items-center justify-between gap-3'>
-            <p className='text-xs text-muted-foreground font-semibold uppercase shrink-0'>
-              Mensaje {currentMessageIndex + 1} de {initialEpisode.messages.length}
-            </p>
-            <div className='flex items-center gap-3 min-w-0'>
-              <span className='text-xs font-bold text-foreground min-w-[2.5rem] text-right'>
-                {Math.round(
-                  ((currentMessageIndex + 1) / initialEpisode.messages.length) *
-                    100
-                )}
-                %
-              </span>
-              <div className='w-24 sm:w-32'>
-                <div className='w-full bg-muted rounded-[4px] h-3 border-2 border-border'>
-                  <div
-                    className='bg-primary h-full transition-all'
-                    style={{
-                      width: `${
-                        ((currentMessageIndex + 1) /
-                          initialEpisode.messages.length) *
-                        100
-                      }%`,
-                    }}
-                  />
+            <div className='flex items-center justify-between gap-3'>
+              <p className='text-xs text-muted-foreground font-semibold uppercase shrink-0'>
+                Mensaje {currentMessageIndex + 1} de{' '}
+                {initialEpisode.messages.length}
+              </p>
+              <div className='flex items-center gap-3 min-w-0'>
+                <span className='text-xs font-bold text-foreground min-w-10 text-right'>
+                  {Math.round(
+                    ((currentMessageIndex + 1) /
+                      initialEpisode.messages.length) *
+                      100,
+                  )}
+                  %
+                </span>
+                <div className='w-24 sm:w-32'>
+                  <div className='w-full bg-muted rounded-lg h-3 border-2 border-border'>
+                    <div
+                      className='bg-primary h-full transition-all'
+                      style={{
+                        width: `${
+                          ((currentMessageIndex + 1) /
+                            initialEpisode.messages.length) *
+                          100
+                        }%`,
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -374,7 +383,7 @@ export function ChatContainer({
             <Button
               onClick={handleNext}
               disabled={isProcessing || !canInteract}
-              className='min-w-36'
+              className='min-w-36 sm:text-lg'
             >
               Continuar
             </Button>
