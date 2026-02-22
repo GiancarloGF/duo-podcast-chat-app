@@ -49,6 +49,14 @@ const EXERCISE_ROTATION: PracticeExerciseType[] = [
   'fill_in_gaps_drag_drop',
 ];
 
+const EXERCISE_DIFFICULTY_RANK: Partial<Record<PracticeExerciseType, number>> = {
+  read_and_mark_meaning: 1,
+  mark_sentences_correct: 2,
+  fill_in_gaps_drag_drop: 3,
+};
+
+const warnedExerciseTypesWithoutDifficulty = new Set<string>();
+
 interface WordToken {
   id: string;
   text: string;
@@ -105,7 +113,7 @@ function createEmptySession(
     filters,
     usedPvIds: [],
     recentPvIds: [],
-    exerciseOrder: getRandomExerciseOrder(),
+    exerciseOrder: getDifficultyOrderedExerciseTypes(),
     currentExerciseIndex: 0,
     currentExercise: null,
     answersByPvId: {},
@@ -183,8 +191,42 @@ function pickPhrasalVerbsForExercise(
   return picked;
 }
 
-function getRandomExerciseOrder(): PracticeExerciseType[] {
-  return shuffleArray(EXERCISE_ROTATION);
+function getExerciseDifficultyRank(exerciseType: PracticeExerciseType): number {
+  const rank = EXERCISE_DIFFICULTY_RANK[exerciseType];
+  if (typeof rank === 'number') {
+    return rank;
+  }
+
+  if (!warnedExerciseTypesWithoutDifficulty.has(exerciseType)) {
+    warnedExerciseTypesWithoutDifficulty.add(exerciseType);
+    console.warn(
+      '[PracticeSessionRunner] Missing difficulty rank for exercise type. Falling back to end of order.',
+      {
+        exerciseType,
+      },
+    );
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+}
+
+function getDifficultyOrderedExerciseTypes(): PracticeExerciseType[] {
+  const originalIndexByType = new Map<PracticeExerciseType, number>(
+    EXERCISE_ROTATION.map((exerciseType, index) => [exerciseType, index]),
+  );
+
+  return [...EXERCISE_ROTATION].sort((left, right) => {
+    const byDifficulty =
+      getExerciseDifficultyRank(left) - getExerciseDifficultyRank(right);
+    if (byDifficulty !== 0) {
+      return byDifficulty;
+    }
+
+    return (
+      (originalIndexByType.get(left) ?? Number.MAX_SAFE_INTEGER) -
+      (originalIndexByType.get(right) ?? Number.MAX_SAFE_INTEGER)
+    );
+  });
 }
 
 function sanitizeExercise(
@@ -1028,7 +1070,7 @@ export function PracticeSessionRunner({
   const sessionOrder =
     session && session.exerciseOrder.length === EXERCISE_ROTATION.length
       ? session.exerciseOrder
-      : EXERCISE_ROTATION;
+      : getDifficultyOrderedExerciseTypes();
 
   useEffect(() => {
     setSelectedWordForTap(null);
