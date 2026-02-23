@@ -20,7 +20,7 @@ function getAdminCredentials() {
   };
 }
 
-function getAdminApp() {
+export function getAdminApp() {
   // Reuse singleton app to avoid duplicate initialization in server runtime.
   if (getApps().length > 0) {
     return getApp();

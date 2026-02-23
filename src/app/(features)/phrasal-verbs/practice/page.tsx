@@ -1,4 +1,4 @@
-import { PracticeCategorySelector } from '@/features/phrasal-verbs/presentation/components/PracticeCategorySelector';
+import { SrsPracticeOrchestrator } from '@/features/phrasal-verbs/presentation/components/session/SrsPracticeOrchestrator';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,17 +27,16 @@ export default async function PhrasalVerbsPracticePage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <section className='mb-8 rounded-[10px] border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+      <section className='mb-6 rounded-[10px] border-2 border-border bg-card p-4 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
         <h1 className='mb-2 text-xl sm:text-4xl font-black text-foreground'>
           Practice session
         </h1>
         <p className='text-sm sm:text-lg font-medium text-muted-foreground'>
-          Select a supergroup, group and category to start your practice
-          session.
+          Practice the phrasal verbs you've just seen in the theory phase.
         </p>
       </section>
 
-      <PracticeCategorySelector />
+      <SrsPracticeOrchestrator />
     </div>
   );
 }

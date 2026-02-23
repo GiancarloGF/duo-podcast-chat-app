@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/presentation/components/ui/card';
+import Image from 'next/image';
 import Link from 'next/link';
 import { InitializeChatButton } from './InitializeChatButton';
 
@@ -25,11 +26,12 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
     >
       {episode.imageUrl && (
         <div className='relative w-full h-48 bg-muted border-b-2 border-border'>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={episode.imageUrl}
             alt={episodeTitle}
-            className='w-full h-full object-cover transition-transform hover:scale-105 duration-500'
+            fill
+            sizes='(max-width: 1024px) 100vw, 33vw'
+            className='object-cover transition-transform hover:scale-105 duration-500'
           />
           {isStarted && (
             <div className='absolute top-2 right-2'>

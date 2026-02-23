@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import {
   getSuperGroupColorsByTitle,
@@ -230,29 +231,7 @@ export function PhrasalVerbsExplorer() {
   }
 
   function startPracticeSession() {
-    if (!selectedSuperGroup || !selectedGroupTitle) {
-      return;
-    }
-
-    const categoriesForPractice =
-      selectedCategoryLabels.length > 0
-        ? selectedCategoryLabels
-        : categoryOptions.map((category) => category.label);
-
-    if (categoriesForPractice.length === 0) {
-      return;
-    }
-
-    const params = new URLSearchParams({
-      superGroup: selectedSuperGroup.title,
-      group: selectedGroupTitle,
-    });
-
-    categoriesForPractice.forEach((category) => {
-      params.append('category', category);
-    });
-
-    router.push(`/phrasal-verbs/practice/session?${params.toString()}`);
+    router.push('/phrasal-verbs/practice');
   }
 
   function resetFilters() {
@@ -411,7 +390,7 @@ export function PhrasalVerbsExplorer() {
             {currentLevel === 'super-group' && (
               <div>
                 <p className='mb-3 text-xs font-bold uppercase text-muted-foreground'>
-                  Selecciona un supergrupo
+                  Select a super group
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   {PHRASAL_VERB_GROUPS.map((superGroup) => (
@@ -429,11 +408,11 @@ export function PhrasalVerbsExplorer() {
             {currentLevel === 'group' && (
               <div>
                 <p className='mb-3 text-xs font-bold uppercase text-muted-foreground'>
-                  Selecciona un grupo
+                  Select a group
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   <SelectionTag
-                    label='Todos'
+                    label='All'
                     isActive={selectedGroupKey === 'all'}
                     onClick={() => handleSelectGroup('all')}
                   />
@@ -452,11 +431,11 @@ export function PhrasalVerbsExplorer() {
             {currentLevel === 'category' && (
               <div>
                 <p className='mb-3 text-xs font-bold uppercase text-muted-foreground'>
-                  Selecciona una categoria
+                  Select categories
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   <SelectionTag
-                    label='Todas'
+                    label='All'
                     isActive={selectedCategoryKeys.length === 0}
                     onClick={handleSelectAllCategories}
                   />
@@ -492,7 +471,7 @@ export function PhrasalVerbsExplorer() {
           )}
           {currentLevel === 'category' &&
             selectedCategoryLabels.length === 0 && (
-              <Badge>Todas las categorías</Badge>
+              <Badge>All categories</Badge>
             )}
           {selectedCategoryLabels.map((categoryLabel) => (
             <Badge key={categoryLabel}>{categoryLabel}</Badge>
@@ -588,10 +567,12 @@ export function PhrasalVerbsExplorer() {
 
                     <div className='relative aspect-21/10 w-full bg-transparent'>
                       {phrasalVerb.imageUrl ? (
-                        <img
+                        <Image
                           src={phrasalVerb.imageUrl}
                           alt={phrasalVerb.phrasalVerb}
-                          className='h-full w-full object-contain p-1'
+                          fill
+                          sizes='(max-width: 1024px) 100vw, 50vw'
+                          className='object-contain p-1'
                         />
                       ) : (
                         <div className='flex h-full items-center justify-center text-xs font-black uppercase text-muted-foreground'>

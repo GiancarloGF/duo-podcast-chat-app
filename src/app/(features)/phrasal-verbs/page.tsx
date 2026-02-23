@@ -32,11 +32,11 @@ export default async function PhrasalVerbsPage() {
               Phrasal Verbs
             </h1>
             <Button asChild className='shrink-0'>
-              <Link href='/phrasal-verbs/practice'>Let&apos;s practice</Link>
+              <Link href='/phrasal-verbs/practice'>Let's practice</Link>
             </Button>
           </div>
-          <p className='text-sm sm:text-base font-medium text-muted-foreground'>
-            Train your English with real phrasal verbs and native examples.
+          <p className='text-base sm:text-lg font-medium text-muted-foreground'>
+            Practice and review English phrasal verbs in a fun and effective way.
           </p>
         </div>
       </section>

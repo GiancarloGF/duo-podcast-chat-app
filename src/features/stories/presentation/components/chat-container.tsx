@@ -13,6 +13,7 @@ import type { Interaction } from '@/features/stories/domain/entities/Interaction
 import type { TranslationFeedback } from '@/features/stories/domain/entities/TranslationFeedback';
 import type { UserProgress } from '@/features/stories/domain/entities/UserProgress';
 import { ChevronLeft, Home } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -222,10 +223,12 @@ export function ChatContainer({
         <div className='max-w-md w-full'>
           <div className='bg-card rounded-[10px] border-2 border-border shadow-[8px_8px_0_0_var(--color-border)] overflow-hidden'>
             <div className='relative h-48 w-full bg-muted border-b-2 border-border'>
-              <img
+              <Image
                 src={initialEpisode.imageUrl}
                 alt={initialEpisode.title}
-                className='w-full h-full object-cover'
+                fill
+                sizes='(max-width: 768px) 100vw, 448px'
+                className='object-cover'
               />
               <div className='absolute inset-0 bg-[rgba(25,21,20,0.4)] flex items-end p-6'>
                 <div>

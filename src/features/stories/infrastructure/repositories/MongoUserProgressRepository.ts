@@ -7,12 +7,14 @@ import { getUserProgressModel } from '@/shared/infrastructure/database/mongo/mod
 
 function mapDocToUserProgress(doc: Record<string, unknown>): UserProgress {
   const interactions = ((doc.interactions as unknown[]) || []).map(
-    (i: Record<string, unknown>) => ({
-      messageId: i.messageId as string,
-      userInput: (i.userInput as string) || '',
-      translationFeedback: i.translationFeedback as UserProgress['interactions'][0]['translationFeedback'],
-      isCorrect: (i.isCorrect as boolean) ?? false,
-      timestamp: i.timestamp ? new Date(i.timestamp as string) : new Date(),
+    (interaction) => ({
+      messageId: ((interaction as Record<string, unknown>)?.messageId as string) ?? '',
+      userInput: ((interaction as Record<string, unknown>)?.userInput as string) || '',
+      translationFeedback: (interaction as Record<string, unknown>)?.translationFeedback as UserProgress['interactions'][0]['translationFeedback'],
+      isCorrect: ((interaction as Record<string, unknown>)?.isCorrect as boolean) ?? false,
+      timestamp: (interaction as Record<string, unknown>)?.timestamp
+        ? new Date((interaction as Record<string, unknown>).timestamp as string)
+        : new Date(),
     })
   );
   return {

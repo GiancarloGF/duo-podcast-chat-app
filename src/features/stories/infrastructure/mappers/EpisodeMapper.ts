@@ -31,8 +31,8 @@ export function mapDocToEpisodeFull(
   episode: Record<string, unknown>
 ): Episode {
   const characters = (episode.characters as { name: string; role: string }[]) || [];
-  const messages = ((doc.messages as unknown[]) || []).map((msg: Record<string, unknown>) =>
-    mapMessage(msg, characters)
+  const messages = ((doc.messages as unknown[]) || []).map((msg) =>
+    mapMessage((msg ?? {}) as Record<string, unknown>, characters)
   );
   return {
     id: (doc.id as string) || (doc._id as { toString: () => string }).toString(),
