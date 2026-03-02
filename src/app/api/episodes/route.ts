@@ -8,7 +8,7 @@ export async function GET() {
     const Episode = getEpisodeModel();
     const episodes = await Episode.find({})
       .select('id number title imageUrl summaryText themes characters messages')
-      .sort({ createdAt: -1 })
+      .sort({ number: 1, createdAt: 1 })
       .lean();
 
     const episodesWithCount = episodes.map((ep: Record<string, unknown>) => ({

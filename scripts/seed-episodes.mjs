@@ -56,8 +56,8 @@ function mapJsonToEpisode(id, json) {
 
   return {
     id: json.id || id, // Use id from JSON if available, otherwise use provided id
-    number: json.number,
-    title: json.title,
+    number: json.number ?? json.episodeNumber,
+    title: json.title ?? json.episodeTitle,
     url: json.url,
     imageUrl: json.imageUrl,
     summaryText: json.summaryText,

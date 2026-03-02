@@ -15,14 +15,36 @@ interface EpisodeCardProps {
 }
 
 export function EpisodeCard({ episode }: EpisodeCardProps) {
-  const isStarted = episode.status !== 'new';
+  const showProgress = episode.status !== 'new';
   const progressPercent = episode.percentCompleted;
   const episodeTitle = `${episode.number}. ${episode.title}`;
+  const badgeLabel =
+    episode.displaySlot === 'previous'
+      ? 'Anterior'
+      : episode.displaySlot === 'current'
+        ? 'Actual'
+        : 'Siguiente';
+  const badgeClassName =
+    episode.displaySlot === 'previous'
+      ? 'bg-accent text-accent-foreground'
+      : episode.displaySlot === 'current'
+        ? 'bg-primary text-primary-foreground'
+        : 'bg-secondary text-secondary-foreground';
+  const slotDescription =
+    episode.displaySlot === 'previous'
+      ? 'Ya completaste este episodio.'
+      : episode.displaySlot === 'current'
+        ? episode.status === 'started'
+          ? 'Retoma tu progreso y termina la historia actual.'
+          : 'Este es el episodio que debes completar ahora.'
+        : 'Se desbloquea cuando completes el episodio actual.';
 
   return (
     <Card
       key={episode.id}
-      className='transition-all bg-card pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-[10px] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--color-border)]'
+      className={`transition-all bg-card pt-0! pb-6 overflow-hidden flex flex-col h-full min-h-[520px] rounded-[10px] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--color-border)] ${
+        episode.displaySlot === 'next' ? 'opacity-80' : ''
+      }`}
     >
       {episode.imageUrl && (
         <div className='relative w-full h-48 bg-muted border-b-2 border-border'>
@@ -33,7 +55,14 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
             sizes='(max-width: 1024px) 100vw, 33vw'
             className='object-cover transition-transform hover:scale-105 duration-500'
           />
-          {isStarted && (
+          <div className='absolute top-2 left-2'>
+            <span
+              className={`px-2 py-1 rounded-[6px] text-[11px] font-bold uppercase tracking-wide border-2 border-border shadow-[2px_2px_0_0_var(--color-border)] ${badgeClassName}`}
+            >
+              {badgeLabel}
+            </span>
+          </div>
+          {/* {episode.status !== 'new' && (
             <div className='absolute top-2 right-2'>
               <span
                 className={`px-2 py-1 rounded-[6px] text-[11px] font-bold uppercase tracking-wide border-2 border-border shadow-[2px_2px_0_0_var(--color-border)] ${
@@ -45,7 +74,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
                 {episode.status === 'completed' ? 'Completado' : 'En progreso'}
               </span>
             </div>
-          )}
+          )} */}
         </div>
       )}
       <CardHeader className='pt-1 sm:pt-3'>
@@ -57,8 +86,11 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
         <p className='text-base text-muted-foreground'>
           {episode.summaryText}
         </p>
+        <p className='text-sm font-medium text-foreground'>
+          {slotDescription}
+        </p>
 
-        {isStarted && (
+        {showProgress && (
           <div className='space-y-2'>
             <div className='flex justify-between text-xs'>
               <span className='text-muted-foreground font-semibold uppercase'>Progreso</span>
@@ -76,19 +108,24 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
         )}
 
         <div className='mt-auto pt-4'>
-          {episode.status === 'started' && (
+          {episode.displaySlot === 'current' && episode.status === 'started' && (
             <Link href={`/stories/chat/${episode.progressId}`}>
               <Button className='w-full'>
                 Continuar
               </Button>
             </Link>
           )}
-          {episode.status === 'new' && (
+          {episode.displaySlot === 'current' && episode.status === 'new' && (
             <InitializeChatButton episodeId={episode.id} />
           )}
-          {episode.status === 'completed' && (
+          {episode.displaySlot === 'previous' && episode.status === 'completed' && (
             <div className='w-full text-center py-2 px-4 rounded-[6px] bg-accent text-accent-foreground font-bold uppercase tracking-wide border-2 border-border shadow-[3px_3px_0_0_var(--color-border)]'>
               ✓ Completado
+            </div>
+          )}
+          {episode.displaySlot === 'next' && (
+            <div className='w-full text-center py-2 px-4 rounded-[6px] bg-secondary text-secondary-foreground font-bold uppercase tracking-wide border-2 border-border shadow-[3px_3px_0_0_var(--color-border)]'>
+              Proximamente
             </div>
           )}
         </div>

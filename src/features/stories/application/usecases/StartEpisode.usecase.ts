@@ -9,6 +9,16 @@ export async function startEpisode(
   userId: string,
   episodeId: string
 ): Promise<StartEpisodeResult> {
+  const existingProgress = await repository.getByUserAndEpisode(userId, episodeId);
+
+  if (existingProgress?.id) {
+    if (existingProgress.status === 'completed') {
+      throw new Error('El episodio actual ya fue completado');
+    }
+
+    return { progressId: existingProgress.id };
+  }
+
   const progress = await repository.create({
     userId,
     episodeId,

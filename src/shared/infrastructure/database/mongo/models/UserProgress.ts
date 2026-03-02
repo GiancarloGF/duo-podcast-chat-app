@@ -49,6 +49,8 @@ const UserProgressSchema = new Schema(
   { timestamps: true }
 );
 
+UserProgressSchema.index({ userId: 1, episodeId: 1 }, { unique: true });
+
 export function getUserProgressModel() {
   if (mongoose.connection.readyState !== 1) {
     throw new Error('Database not connected');

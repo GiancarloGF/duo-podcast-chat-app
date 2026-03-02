@@ -53,8 +53,8 @@ function mapJsonToEpisode(id: string, json: Record<string, unknown>): Episode {
   return {
     id: (json.id as string) || id,
     slug: (json.slug as string) || id,
-    number: (json.number as number) ?? 0,
-    title: (json.title as string) ?? '',
+    number: (json.number as number) ?? (json.episodeNumber as number) ?? 0,
+    title: (json.title as string) ?? (json.episodeTitle as string) ?? '',
     url: json.url as string | undefined,
     imageUrl: (json.imageUrl as string) ?? '',
     summaryText: (json.summaryText as string) ?? '',

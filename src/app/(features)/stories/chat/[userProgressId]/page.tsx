@@ -1,6 +1,10 @@
 import { ChatContainer } from '@/features/stories/presentation/components/chat-container';
-import { getEpisodeByIdAction, getUserProgress } from '@/features/stories/presentation/actions';
-import { notFound } from 'next/navigation';
+import {
+  getEpisodeByIdAction,
+  getStorySequenceWindowAction,
+  getUserProgress,
+} from '@/features/stories/presentation/actions';
+import { notFound, redirect } from 'next/navigation';
 
 export default async function StoriesChatPage({
   params,
@@ -21,6 +25,16 @@ export default async function StoriesChatPage({
     if (!episode) {
       console.error(`Episode not found: ${userProgress.episodeId}`);
       notFound();
+    }
+
+    const { currentEpisode } = await getStorySequenceWindowAction();
+
+    if (
+      userProgress.status === 'started' &&
+      currentEpisode &&
+      currentEpisode.id !== episode.id
+    ) {
+      redirect('/stories');
     }
 
     return (

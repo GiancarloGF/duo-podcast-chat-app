@@ -15,6 +15,7 @@ import { getUserProgress as getUserProgressUc } from '@/features/stories/applica
 import { getAllUserProgress as getAllUserProgressUc } from '@/features/stories/application/usecases/GetAllUserProgress.usecase';
 import { startEpisode as startEpisodeUc } from '@/features/stories/application/usecases/StartEpisode.usecase';
 import { getWordDefinition as getWordDefinitionUc } from '@/features/stories/application/usecases/GetWordDefinition.usecase';
+import { getStorySequenceWindow as getStorySequenceWindowUc } from '@/features/stories/application/usecases/GetStorySequenceWindow.usecase';
 import { GeminiTranslationService } from '@/features/stories/infrastructure/services/GeminiTranslationService';
 import { MongoUserProgressRepository } from '@/features/stories/infrastructure/repositories/MongoUserProgressRepository';
 import dbConnect from '@/shared/infrastructure/database/mongo/connection';
@@ -110,10 +111,30 @@ export async function getAllUserProgress() {
   return getAllUserProgressUc(progressRepo, userId);
 }
 
+export async function getStorySequenceWindowAction() {
+  const userId = await requireCurrentUserId();
+  return getStorySequenceWindowUc(episodeRepo, progressRepo, userId);
+}
+
 export async function startChatByEpisode(episodeId: string) {
   const userId = await requireCurrentUserId();
+  const { currentEpisode } = await getStorySequenceWindowUc(
+    episodeRepo,
+    progressRepo,
+    userId
+  );
+
+  if (!currentEpisode) {
+    throw new Error('No hay episodios disponibles para iniciar');
+  }
+
+  if (currentEpisode.id !== episodeId) {
+    throw new Error('Solo puedes iniciar el episodio actual');
+  }
+
   const { progressId } = await startEpisodeUc(progressRepo, userId, episodeId);
   revalidatePath('/');
+  revalidatePath('/stories');
   redirect(`/stories/chat/${progressId}`);
 }
 
