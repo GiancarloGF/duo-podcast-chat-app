@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { PracticeQueueBlock } from '@/features/phrasal-verbs/application/usecases/BuildPracticeQueue.usecase';
 import type {
   LocalSrsMetaRow,
   SessionProgressPatch,
@@ -14,15 +15,18 @@ import type {
 interface SessionStoreActions {
   reset: () => void;
   setLoading: (isLoading: boolean) => void;
+  setGeneratingExercise: (isGeneratingExercise: boolean) => void;
   setSaving: (isSaving: boolean) => void;
   setError: (message: string | null) => void;
   setPendingCount: (count: number) => void;
   bootstrapSession: (payload: {
     session: SessionContextState;
+    practicePlan: PracticeQueueBlock[];
     practiceQueue: PracticeExerciseBlock[];
     srsMeta: LocalSrsMetaRow | null;
     srsProgressMap: SessionStoreState['srsProgressMap'];
   }) => void;
+  appendPracticeBlock: (block: PracticeExerciseBlock) => void;
   startTheory: () => void;
   completeTheory: () => void;
   answerExercise: (pvId: string, answer: string | number | undefined) => void;
@@ -46,8 +50,10 @@ function createInitialState(): SessionStoreState {
   return {
     phase: 'loading',
     isLoading: false,
+    isGeneratingExercise: false,
     isSaving: false,
     session: null,
+    practicePlan: [],
     practiceQueue: [],
     currentQuestionIndex: 0,
     answers: {},
@@ -70,6 +76,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ isLoading });
   },
 
+  setGeneratingExercise: (isGeneratingExercise) => {
+    set({ isGeneratingExercise });
+  },
+
   setSaving: (isSaving) => {
     set({ isSaving });
   },
@@ -82,9 +92,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ pendingCount: count });
   },
 
-  bootstrapSession: ({ session, practiceQueue, srsMeta, srsProgressMap }) => {
+  bootstrapSession: ({ session, practicePlan, practiceQueue, srsMeta, srsProgressMap }) => {
     set({
       session,
+      practicePlan,
       practiceQueue,
       srsMeta,
       srsProgressMap,
@@ -94,7 +105,20 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       error: null,
       phase: 'theory',
       isLoading: false,
+      isGeneratingExercise: false,
       isSaving: false,
+    });
+  },
+
+  appendPracticeBlock: (block) => {
+    set((state) => {
+      if (state.practiceQueue.some((entry) => entry.blockId === block.blockId)) {
+        return state;
+      }
+
+      return {
+        practiceQueue: [...state.practiceQueue, block],
+      };
     });
   },
 

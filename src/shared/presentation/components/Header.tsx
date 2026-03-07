@@ -52,7 +52,7 @@ export function Header({ initialUser }: HeaderProps) {
               Ruway App
             </span>
             <span className='text-[11px] font-semibold uppercase text-muted-foreground sm:text-xs'>
-              Practica Tu Ingles
+              Practice your English
             </span>
           </a>
         </div>

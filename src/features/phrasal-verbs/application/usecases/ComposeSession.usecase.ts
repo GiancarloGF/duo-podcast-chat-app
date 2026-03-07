@@ -21,6 +21,7 @@ export interface ComposedSession {
 export interface ComposeSessionInput {
   allPhrasalVerbs: PhrasalVerb[];
   progressRows: LocalPhrasalVerbProgressRow[];
+  totalSessions?: number;
   nowMs?: number;
 }
 
@@ -63,8 +64,11 @@ export function composeSession(input: ComposeSessionInput): ComposedSession {
   const allPhrasalVerbs = input.allPhrasalVerbs;
   const progressByPvId = new Map(input.progressRows.map((row) => [row.pvId, row]));
   const pvsById = new Map(allPhrasalVerbs.map((pv) => [pv.id, pv]));
-  const isFirstSession =
-    input.progressRows.length === 0 || input.progressRows.every((row) => row.timesViewed === 0);
+  const hasCompletedAnySession =
+    typeof input.totalSessions === 'number'
+      ? input.totalSessions > 0
+      : input.progressRows.some((row) => row.timesViewed > 0);
+  const isFirstSession = !hasCompletedAnySession;
 
   const failedPvs: PhrasalVerb[] = [];
   const reviewPvs: PhrasalVerb[] = [];
@@ -73,7 +77,7 @@ export function composeSession(input: ComposeSessionInput): ComposedSession {
   for (const pv of allPhrasalVerbs) {
     const progress = progressByPvId.get(pv.id);
 
-    if (!progress || progress.timesViewed === 0) {
+    if (!progress) {
       newPvs.push(pv);
       continue;
     }
@@ -90,6 +94,11 @@ export function composeSession(input: ComposeSessionInput): ComposedSession {
 
     if (isDueReview) {
       reviewPvs.push(pv);
+      continue;
+    }
+
+    if (progress.timesViewed === 0) {
+      newPvs.push(pv);
     }
   }
 

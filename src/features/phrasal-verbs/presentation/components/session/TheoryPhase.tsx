@@ -11,9 +11,10 @@ import { Badge } from '@/shared/presentation/components/ui/badge';
 interface TheoryPhaseProps {
   phrasalVerbs: PhrasalVerb[];
   onComplete: () => void;
+  isCompleting?: boolean;
 }
 
-export function TheoryPhase({ phrasalVerbs, onComplete }: TheoryPhaseProps) {
+export function TheoryPhase({ phrasalVerbs, onComplete, isCompleting = false }: TheoryPhaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
   const [imageStatus, setImageStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
@@ -44,6 +45,10 @@ export function TheoryPhase({ phrasalVerbs, onComplete }: TheoryPhaseProps) {
 
   function handleNext(): void {
     if (isLastCard) {
+      if (isCompleting) {
+        return;
+      }
+
       onComplete();
       return;
     }
@@ -222,7 +227,9 @@ export function TheoryPhase({ phrasalVerbs, onComplete }: TheoryPhaseProps) {
         <Button variant='outline' onClick={handlePrevious} disabled={currentIndex === 0}>
           Previous
         </Button>
-        <Button onClick={handleNext}>{isLastCard ? 'Start practice' : 'Next'}</Button>
+        <Button onClick={handleNext} disabled={isCompleting}>
+          {isLastCard ? (isCompleting ? 'Preparing practice...' : 'Start practice') : 'Next'}
+        </Button>
       </div>
 
       <p className='mt-3 text-center text-xs font-medium text-muted-foreground'>

@@ -22,11 +22,17 @@ import { cn } from '@/shared/presentation/utils';
 
 interface PracticePhaseProps {
   exercises: PracticeExerciseBlock[];
+  totalExercises: number;
+  isGeneratingNextExercise: boolean;
   isSaving: boolean;
   onBuildResults: (
     exercise: PracticeExerciseBlock,
     answersByPvId: Record<string, string | number | undefined>,
   ) => ExerciseResult[];
+  onContinueToNextExercise: (
+    nextResults: ExerciseResult[],
+    nextIndex: number,
+  ) => Promise<void> | void;
   onComplete: (results: ExerciseResult[]) => Promise<void> | void;
 }
 
@@ -198,8 +204,11 @@ function isFillInGapsDragDropBlock(
 
 export function PracticePhase({
   exercises,
+  totalExercises,
+  isGeneratingNextExercise,
   isSaving,
   onBuildResults,
+  onContinueToNextExercise,
   onComplete,
 }: PracticePhaseProps) {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -217,15 +226,15 @@ export function PracticePhase({
   );
 
   const currentExercise = exercises[currentExerciseIndex] ?? null;
-  const isLastExercise = currentExerciseIndex >= exercises.length - 1;
+  const isLastExercise = currentExerciseIndex >= totalExercises - 1;
 
   const progressPercent = useMemo(() => {
-    if (exercises.length === 0) {
+    if (totalExercises === 0) {
       return 0;
     }
 
-    return ((currentExerciseIndex + 1) / exercises.length) * 100;
-  }, [currentExerciseIndex, exercises.length]);
+    return ((currentExerciseIndex + 1) / totalExercises) * 100;
+  }, [currentExerciseIndex, totalExercises]);
 
   const fillExercise =
     currentExercise && isFillInGapsDragDropBlock(currentExercise)
@@ -412,13 +421,24 @@ export function PracticePhase({
       return;
     }
 
-    setAllResults(nextResults);
-    setCurrentExerciseIndex((previous) => previous + 1);
-    setAnswersByPvId({});
-    setValidatedResults([]);
-    setIsValidated(false);
-    setLocalError(null);
-    setSelectedWordForTap(null);
+    const nextIndex = currentExerciseIndex + 1;
+
+    try {
+      await onContinueToNextExercise(nextResults, nextIndex);
+      setAllResults(nextResults);
+      setCurrentExerciseIndex(nextIndex);
+      setAnswersByPvId({});
+      setValidatedResults([]);
+      setIsValidated(false);
+      setLocalError(null);
+      setSelectedWordForTap(null);
+    } catch (error) {
+      setLocalError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Failed to generate the next exercise.',
+      );
+    }
   }
 
   function getResultByPvId(pvId: string): ExerciseResult | null {
@@ -437,7 +457,7 @@ export function PracticePhase({
         <div className='mb-1 flex items-center justify-between text-sm sm:text-base font-black uppercase text-muted-foreground'>
           <span>Phase 2: Practice</span>
           <span>
-            Exercise {currentExerciseIndex + 1} / {exercises.length}
+            Exercise {currentExerciseIndex + 1} / {totalExercises}
           </span>
         </div>
         <div className='h-3 overflow-hidden rounded-[6px] border-2 border-border bg-muted'>
@@ -713,6 +733,12 @@ export function PracticePhase({
         </p>
       ) : null}
 
+      {isGeneratingNextExercise ? (
+        <div className='mt-3 rounded-[6px] border-2 border-border bg-muted px-3 py-2 text-base sm:text-lg font-semibold text-foreground'>
+          Generating the next exercise...
+        </div>
+      ) : null}
+
       <div className='mt-4 flex items-center justify-between gap-3'>
         <p className='text-base sm:text-lg font-semibold text-muted-foreground'>
           Corrects: {correctSoFar}/{allResults.length}
@@ -723,13 +749,15 @@ export function PracticePhase({
         ) : (
           <Button
             onClick={() => void continueToNextExercise()}
-            disabled={isSaving}
+            disabled={isSaving || isGeneratingNextExercise}
           >
             {isLastExercise
               ? isSaving
-                ? 'Guardando...'
-                : 'Finalizar sesión'
-              : 'Siguiente ejercicio'}
+                ? 'Saving...'
+                : 'Finalize session'
+              : isGeneratingNextExercise
+                ? 'Generating...'
+                : 'Next exercise'}
           </Button>
         )}
       </div>

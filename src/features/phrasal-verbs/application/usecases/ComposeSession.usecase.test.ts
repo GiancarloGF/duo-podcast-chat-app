@@ -213,4 +213,39 @@ describe('composeSession', () => {
     expect(result.totalPVs).toBe(5);
     expect(new Set(result.pvs.map((pv) => pv.id)).size).toBe(result.pvs.length);
   });
+
+  it('treats users with prior sessions as non-first even if current rows have zero views', () => {
+    const allPvs = Array.from({ length: 12 }, (_, index) => buildPv(`pv-${index + 1}`));
+    const nowMs = 10_000;
+
+    const progressRows: LocalPhrasalVerbProgressRow[] = [
+      buildProgress('pv-1', {
+        status: 'learning',
+        timesIncorrect: 1,
+        timesViewed: 0,
+      }),
+      buildProgress('pv-2', {
+        status: 'review',
+        nextReview: nowMs - 1,
+        timesViewed: 0,
+      }),
+      buildProgress('pv-3', {
+        status: 'review',
+        nextReview: nowMs - 2,
+        timesViewed: 0,
+      }),
+    ];
+
+    const result = composeSession({
+      allPhrasalVerbs: allPvs,
+      progressRows,
+      totalSessions: 4,
+      nowMs,
+    });
+
+    expect(result.composition.new).toBe(5);
+    expect(result.composition.failed).toBe(1);
+    expect(result.composition.review).toBe(2);
+    expect(result.totalPVs).toBe(8);
+  });
 });

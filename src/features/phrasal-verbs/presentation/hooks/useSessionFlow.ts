@@ -1,15 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { buildPracticeQueue } from '@/features/phrasal-verbs/application/usecases/BuildPracticeQueue.usecase';
+import type { PracticeQueueBlock } from '@/features/phrasal-verbs/application/usecases/BuildPracticeQueue.usecase';
 import { composeSession } from '@/features/phrasal-verbs/application/usecases/ComposeSession.usecase';
 import {
   flushPendingSessions,
   type FlushPendingSessionsResult,
 } from '@/features/phrasal-verbs/application/usecases/FlushPendingSessions.usecase';
 import { syncSrsLocalFromSnapshot } from '@/features/phrasal-verbs/application/usecases/SyncSrsLocalFromSnapshot.usecase';
-import type { PracticeExercise } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
-import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import type {
   ExerciseResult,
   LocalSrsMetaRow,
@@ -25,12 +23,12 @@ import {
   type CompleteSessionResult,
 } from '@/features/phrasal-verbs/presentation/actions';
 import { usePhrasalVerbCatalog } from '@/features/phrasal-verbs/presentation/hooks/usePhrasalVerbCatalog';
-import type {
-  FillInGapsDragDropBlock,
-  MarkSentencesCorrectBlock,
-  PracticeExerciseBlock,
-  ReadAndMarkMeaningBlock,
-} from '@/features/phrasal-verbs/presentation/session.types';
+import {
+  bootstrapPlannedPracticeSession,
+  generatePracticeBlockForIndex,
+  normalizeWord,
+} from '@/features/phrasal-verbs/presentation/practiceSessionGeneration';
+import type { PracticeExerciseBlock } from '@/features/phrasal-verbs/presentation/session.types';
 import { useSessionStore } from '@/features/phrasal-verbs/presentation/stores/sessionStore';
 import { phrasalVerbSrsDb } from '@/features/phrasal-verbs/infrastructure/storage/phrasalVerbSrsDb';
 
@@ -120,144 +118,39 @@ function createPendingRow(params: {
   };
 }
 
-function reorderBySelectedIds<T extends { pvId: string }>(
-  items: T[],
-  selectedPvIds: string[],
-): T[] {
-  const itemByPvId = new Map(items.map((item) => [item.pvId, item]));
-
-  const ordered = selectedPvIds.map((pvId) => itemByPvId.get(pvId)).filter(Boolean) as T[];
-
-  if (ordered.length !== selectedPvIds.length) {
-    throw new Error('El ejercicio generado no contiene todos los PVs requeridos.');
-  }
-
-  return ordered;
-}
-
-function normalizeWord(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-function toPracticeExerciseBlock(params: {
-  blockId: string;
-  selectedPvIds: string[];
-  exercise: PracticeExercise;
-}): PracticeExerciseBlock {
-  const allowedPvIdSet = new Set(params.selectedPvIds);
-  const expectedCount = params.selectedPvIds.length;
-
-  if (params.exercise.exerciseType === 'read_and_mark_meaning') {
-    const filtered = params.exercise.items.filter((item) => allowedPvIdSet.has(item.pvId));
-    const ordered = reorderBySelectedIds(filtered, params.selectedPvIds);
-
-    if (ordered.length !== expectedCount) {
-      throw new Error('El bloque read_and_mark_meaning quedó incompleto.');
-    }
-
-    const block: ReadAndMarkMeaningBlock = {
-      blockId: params.blockId,
-      exerciseType: 'read_and_mark_meaning',
-      title: params.exercise.title,
-      instructions: params.exercise.instructions,
-      items: ordered,
-    };
-
-    return block;
-  }
-
-  if (params.exercise.exerciseType === 'mark_sentences_correct') {
-    const filtered = params.exercise.items.filter((item) => allowedPvIdSet.has(item.pvId));
-    const ordered = reorderBySelectedIds(filtered, params.selectedPvIds);
-
-    if (ordered.length !== expectedCount) {
-      throw new Error('El bloque mark_sentences_correct quedó incompleto.');
-    }
-
-    const block: MarkSentencesCorrectBlock = {
-      blockId: params.blockId,
-      exerciseType: 'mark_sentences_correct',
-      title: params.exercise.title,
-      instructions: params.exercise.instructions,
-      items: ordered,
-    };
-
-    return block;
-  }
-
-  const filtered = params.exercise.items.filter((item) => allowedPvIdSet.has(item.pvId));
-  const ordered = reorderBySelectedIds(filtered, params.selectedPvIds);
-
-  if (ordered.length !== expectedCount) {
-    throw new Error('El bloque fill_in_gaps_drag_drop quedó incompleto.');
-  }
-
-  if (params.exercise.wordBank.length !== ordered.length) {
-    throw new Error('El banco de palabras no coincide con los items del bloque fill gaps.');
-  }
-
-  const answersSet = new Set(ordered.map((item) => normalizeWord(item.correctWord)));
-  const wordBankSet = new Set(params.exercise.wordBank.map((word) => normalizeWord(word)));
-
-  if (answersSet.size !== ordered.length || wordBankSet.size !== ordered.length) {
-    throw new Error('El banco de palabras contiene duplicados o respuestas repetidas.');
-  }
-
-  for (const word of wordBankSet) {
-    if (!answersSet.has(word)) {
-      throw new Error('El banco de palabras contiene opciones fuera de las respuestas correctas.');
-    }
-  }
-
-  const block: FillInGapsDragDropBlock = {
-    blockId: params.blockId,
-    exerciseType: 'fill_in_gaps_drag_drop',
-    title: params.exercise.title,
-    instructions: params.exercise.instructions,
-    items: ordered,
-    wordBank: params.exercise.wordBank,
-  };
-
-  return block;
-}
-
-async function generateBlockExercise(params: {
-  blockId: string;
-  selectedPvIds: string[];
-  exerciseType: PracticeExercise['exerciseType'];
-  phrasalVerbs: {
-    id: string;
-    phrasalVerb: string;
-    meaning: string;
-    definition: string;
-    example: string;
-  }[];
+async function requestGeneratedExerciseBlock(params: {
+  practicePlan: PracticeQueueBlock[];
+  practiceQueue: PracticeExerciseBlock[];
+  index: number;
 }): Promise<PracticeExerciseBlock> {
   let lastError: unknown = null;
 
   for (let attempt = 1; attempt <= GENERATION_ATTEMPTS_PER_BLOCK; attempt += 1) {
     try {
-      const response = await generatePracticeExerciseAction(
-        params.exerciseType,
-        params.phrasalVerbs,
-      );
+      return await generatePracticeBlockForIndex({
+        practicePlan: params.practicePlan,
+        practiceQueue: params.practiceQueue,
+        index: params.index,
+        generateExercise: async ({ exerciseType, phrasalVerbs, recentUsage }) => {
+          const response = await generatePracticeExerciseAction(
+            exerciseType,
+            phrasalVerbs,
+            recentUsage,
+          );
 
-      if (!response.success || !response.exercise) {
-        throw new Error(
-          response.details ?? response.error ?? 'No se pudo generar un ejercicio.',
-        );
-      }
+          if (!response.success || !response.exercise) {
+            throw new Error(
+              response.details ?? response.error ?? 'No se pudo generar un ejercicio.',
+            );
+          }
 
-      return toPracticeExerciseBlock({
-        blockId: params.blockId,
-        selectedPvIds: params.selectedPvIds,
-        exercise: response.exercise,
+          return response.exercise;
+        },
       });
     } catch (error) {
       lastError = error;
       console.warn('[useSessionFlow] Failed generating exercise block', {
-        blockId: params.blockId,
-        exerciseType: params.exerciseType,
+        index: params.index,
         attempt,
         error,
       });
@@ -269,45 +162,14 @@ async function generateBlockExercise(params: {
   );
 }
 
-async function generatePracticeExercises(
-  sessionPvs: PhrasalVerb[],
-): Promise<PracticeExerciseBlock[]> {
-  const practiceQueue = buildPracticeQueue(sessionPvs);
-
-  if (practiceQueue.blocks.length === 0) {
-    return [];
-  }
-
-  const blocks: PracticeExerciseBlock[] = [];
-
-  for (const block of practiceQueue.blocks) {
-    const selectedPvs = block.items.map((item) => item.pv);
-
-    const generatedBlock = await generateBlockExercise({
-      blockId: block.blockId,
-      selectedPvIds: selectedPvs.map((pv) => pv.id),
-      exerciseType: block.exerciseType,
-      phrasalVerbs: selectedPvs.map((pv) => ({
-        id: pv.id,
-        phrasalVerb: pv.phrasalVerb,
-        meaning: pv.meaning,
-        definition: pv.definition,
-        example: pv.example,
-      })),
-    });
-
-    blocks.push(generatedBlock);
-  }
-
-  return blocks;
-}
-
 export function useSessionFlow() {
   const {
     phase,
     isLoading,
+    isGeneratingExercise,
     isSaving,
     session,
+    practicePlan,
     practiceQueue,
     currentQuestionIndex,
     results,
@@ -315,10 +177,12 @@ export function useSessionFlow() {
     pendingCount,
     error,
     setLoading,
+    setGeneratingExercise,
     setSaving,
     setError,
     setPendingCount,
     bootstrapSession,
+    appendPracticeBlock,
     completeTheory,
     completePractice,
     persistSession,
@@ -424,15 +288,22 @@ export function useSessionFlow() {
       const composed = composeSession({
         allPhrasalVerbs: catalog.items,
         progressRows,
+        totalSessions: localMeta?.analytics.totalSessions,
       });
 
       if (composed.pvs.length === 0) {
         throw new Error('No hay phrasal verbs disponibles para iniciar una sesión.');
       }
 
-      const exercises = await generatePracticeExercises(composed.pvs);
-      if (exercises.length !== 3) {
-        throw new Error('No se pudo construir los 3 ejercicios de práctica.');
+      const plannedPractice = await bootstrapPlannedPracticeSession({
+        sessionPvs: composed.pvs,
+        generateExercise: async () => {
+          throw new Error('No debe generarse contenido durante el bootstrap.');
+        },
+      });
+
+      if (plannedPractice.practicePlan.length !== 3) {
+        throw new Error('No se pudo construir el plan de 3 ejercicios de práctica.');
       }
 
       const startedAt = Date.now();
@@ -454,7 +325,8 @@ export function useSessionFlow() {
           },
           sessionPVs: composed.pvs,
         },
-        practiceQueue: exercises,
+        practicePlan: plannedPractice.practicePlan,
+        practiceQueue: plannedPractice.practiceQueue,
         srsMeta: localMeta ?? null,
         srsProgressMap: new Map(progressRows.map((row) => [row.pvId, row])),
       });
@@ -508,6 +380,42 @@ export function useSessionFlow() {
     setError,
     setLoading,
   ]);
+
+  const ensurePracticeExercise = useCallback(
+    async (index: number) => {
+      if (index < 0 || index >= practicePlan.length) {
+        throw new Error('There is no next exercise planned.');
+      }
+
+      if (practiceQueue[index]) {
+        return;
+      }
+
+      setGeneratingExercise(true);
+
+      try {
+        const generatedBlock = await requestGeneratedExerciseBlock({
+          practicePlan,
+          practiceQueue,
+          index,
+        });
+
+        appendPracticeBlock(generatedBlock);
+      } finally {
+        setGeneratingExercise(false);
+      }
+    },
+    [appendPracticeBlock, practicePlan, practiceQueue, setGeneratingExercise],
+  );
+
+  const startPracticeSession = useCallback(async () => {
+    if (practicePlan.length === 0) {
+      throw new Error('No existe un plan de práctica disponible.');
+    }
+
+    await ensurePracticeExercise(0);
+    completeTheory();
+  }, [completeTheory, ensurePracticeExercise, practicePlan.length]);
 
   const startNewSession = useCallback(async () => {
     reset();
@@ -669,10 +577,12 @@ export function useSessionFlow() {
   return {
     phase,
     isLoading,
+    isGeneratingExercise,
     isSaving,
     error,
     catalogHydration: catalog.hydration,
     session,
+    practicePlan,
     practiceQueue,
     currentExercise,
     currentQuestionIndex,
@@ -680,7 +590,10 @@ export function useSessionFlow() {
     summary,
     srsMeta,
     pendingCount,
+    totalExercises: practicePlan.length,
     completeTheory,
+    startPracticeSession,
+    ensurePracticeExercise,
     buildExerciseResults,
     finishPractice,
     startNewSession,

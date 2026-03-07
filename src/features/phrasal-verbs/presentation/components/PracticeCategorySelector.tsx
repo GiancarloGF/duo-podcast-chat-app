@@ -287,7 +287,7 @@ export function PracticeCategorySelector() {
             </div>
 
             <Button onClick={startPractice} disabled={selectedCategory.length === 0}>
-              Practicar
+              Practice
             </Button>
           </div>
         )}

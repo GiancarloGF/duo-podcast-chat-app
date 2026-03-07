@@ -40,7 +40,7 @@ interface PracticeSessionRunnerProps {
 
 type ExerciseSourcePhrasalVerb = Pick<
   PhrasalVerb,
-  'id' | 'phrasalVerb' | 'meaning' | 'definition' | 'example'
+  'id' | 'phrasalVerb' | 'verb' | 'particles' | 'meaning' | 'definition' | 'example'
 >;
 
 const EXERCISE_ROTATION: PracticeExerciseType[] = [
@@ -79,6 +79,8 @@ function toExerciseInput(
   return phrasalVerbs.map((pv) => ({
     id: pv.id,
     phrasalVerb: pv.phrasalVerb,
+    verb: pv.verb,
+    particles: pv.particles,
     meaning: pv.meaning,
     definition: pv.definition,
     example: pv.example,
@@ -616,6 +618,8 @@ export function PracticeSessionRunner({
       categoryPhrasalVerbs.map((pv) => ({
         id: pv.id,
         phrasalVerb: pv.phrasalVerb,
+        verb: pv.verb,
+        particles: pv.particles,
         meaning: pv.meaning,
         definition: pv.definition,
         example: pv.example,

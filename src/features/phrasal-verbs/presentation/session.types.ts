@@ -1,3 +1,4 @@
+import type { PracticeQueueBlock } from '@/features/phrasal-verbs/application/usecases/BuildPracticeQueue.usecase';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import type {
   ExerciseResult,
@@ -74,8 +75,10 @@ export type PracticeAnswersMap = Record<string, string | number | undefined>;
 export interface SessionStoreState {
   phase: SessionPhase;
   isLoading: boolean;
+  isGeneratingExercise: boolean;
   isSaving: boolean;
   session: SessionContextState | null;
+  practicePlan: PracticeQueueBlock[];
   practiceQueue: PracticeExerciseBlock[];
   currentQuestionIndex: number;
   answers: PracticeAnswersMap;

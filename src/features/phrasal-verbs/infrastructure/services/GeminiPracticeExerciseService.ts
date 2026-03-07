@@ -5,11 +5,12 @@ import {
   markSentencesCorrectExerciseSchema,
   readAndMarkMeaningExerciseSchema,
   type FillInGapsDragDropExercise,
-  type PracticeExercise,
-  type PracticeExerciseType,
-  type PracticeExercisePhrasalVerbInput,
-  type ReadAndMarkMeaningExercise,
   type MarkSentencesCorrectExercise,
+  type PracticeExercise,
+  type PracticeExercisePhrasalVerbInput,
+  type PracticeExerciseRecentUsage,
+  type PracticeExerciseType,
+  type ReadAndMarkMeaningExercise,
 } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
 
 export class GeminiPracticeExerciseService {
@@ -19,7 +20,8 @@ export class GeminiPracticeExerciseService {
 
   async generateExercise(
     exerciseType: PracticeExerciseType,
-    phrasalVerbs: PracticeExercisePhrasalVerbInput[]
+    phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+    recentUsage: PracticeExerciseRecentUsage[] = [],
   ): Promise<PracticeExercise> {
     const maxAttempts = 3;
 
@@ -27,12 +29,13 @@ export class GeminiPracticeExerciseService {
       exerciseType,
       pvCount: phrasalVerbs.length,
       pvIds: phrasalVerbs.map((pv) => pv.id),
+      recentUsageCount: recentUsage.length,
       maxAttempts,
     });
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        const prompt = this.buildPrompt(exerciseType, phrasalVerbs);
+        const prompt = this.buildPrompt(exerciseType, phrasalVerbs, recentUsage);
         const responseSchema = this.getResponseSchema(exerciseType);
 
         const response = await this.client.models.generateContent({
@@ -94,22 +97,23 @@ export class GeminiPracticeExerciseService {
 
   private buildPrompt(
     exerciseType: PracticeExerciseType,
-    phrasalVerbs: PracticeExercisePhrasalVerbInput[]
+    phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+    recentUsage: PracticeExerciseRecentUsage[],
   ): string {
     if (exerciseType === 'read_and_mark_meaning') {
-      return this.buildReadAndMarkMeaningPrompt(phrasalVerbs);
+      return this.buildReadAndMarkMeaningPrompt(phrasalVerbs, recentUsage);
     }
 
     if (exerciseType === 'mark_sentences_correct') {
-      return this.buildMarkSentencesCorrectPrompt(phrasalVerbs);
+      return this.buildMarkSentencesCorrectPrompt(phrasalVerbs, recentUsage);
     }
 
-    return this.buildFillInGapsDragDropPrompt(phrasalVerbs);
+    return this.buildFillInGapsDragDropPrompt(phrasalVerbs, recentUsage);
   }
 
   private normalizeExercise(
     exerciseType: PracticeExerciseType,
-    parsedJson: unknown
+    parsedJson: unknown,
   ): PracticeExercise {
     if (exerciseType === 'read_and_mark_meaning') {
       const parsed = readAndMarkMeaningExerciseSchema.parse(parsedJson);
@@ -132,7 +136,7 @@ export class GeminiPracticeExerciseService {
   }
 
   private shuffleMeanings(
-    item: ReadAndMarkMeaningExercise['items'][number]
+    item: ReadAndMarkMeaningExercise['items'][number],
   ): ReadAndMarkMeaningExercise['items'][number] {
     const options = item.meanings.map((meaning, index) => ({
       meaning,
@@ -159,7 +163,7 @@ export class GeminiPracticeExerciseService {
   }
 
   private shuffleSentencePair(
-    item: MarkSentencesCorrectExercise['items'][number]
+    item: MarkSentencesCorrectExercise['items'][number],
   ): MarkSentencesCorrectExercise['items'][number] {
     const options = [
       {
@@ -189,10 +193,10 @@ export class GeminiPracticeExerciseService {
   }
 
   private normalizeFillInGapsExercise(
-    exercise: FillInGapsDragDropExercise
+    exercise: FillInGapsDragDropExercise,
   ): FillInGapsDragDropExercise {
     const normalizedCorrectWords = exercise.items.map((item) =>
-      item.correctWord.trim().toLowerCase()
+      item.correctWord.trim().toLowerCase(),
     );
     const uniqueCorrectWords = new Set(normalizedCorrectWords);
 
@@ -201,7 +205,7 @@ export class GeminiPracticeExerciseService {
     }
 
     const normalizedWordBank = exercise.wordBank.map((word) =>
-      word.trim().toLowerCase()
+      word.trim().toLowerCase(),
     );
     const uniqueWordBank = new Set(normalizedWordBank);
 
@@ -216,6 +220,17 @@ export class GeminiPracticeExerciseService {
     if (normalizedWordBank.some((word) => !uniqueCorrectWords.has(word))) {
       throw new Error('Fill-in-gaps word bank includes words outside correct answers.');
     }
+
+    exercise.items.forEach((item) => {
+      const normalizedPhrasalVerbParts = item.phrasalVerb
+        .split(/\s+/)
+        .map((part) => part.trim().toLowerCase())
+        .filter(Boolean);
+
+      if (!normalizedPhrasalVerbParts.includes(item.correctWord.trim().toLowerCase())) {
+        throw new Error('Fill-in-gaps correctWord must be one part of the phrasal verb.');
+      }
+    });
 
     return {
       ...exercise,
@@ -234,8 +249,25 @@ export class GeminiPracticeExerciseService {
     return next;
   }
 
+  private buildRecentUsageSection(recentUsage: PracticeExerciseRecentUsage[]): string {
+    if (recentUsage.length === 0) {
+      return '';
+    }
+
+    return `
+RECENT USAGE TO AVOID REPEATING:
+- Some phrasal verbs were already used in earlier exercises.
+- If a pvId appears below, create a clearly different situation and sentence for it.
+- Do NOT reuse the same sentence, wording, or situation.
+
+RECENT USAGE (JSON):
+${JSON.stringify(recentUsage, null, 2)}
+`;
+  }
+
   private buildReadAndMarkMeaningPrompt(
-    phrasalVerbs: PracticeExercisePhrasalVerbInput[]
+    phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+    recentUsage: PracticeExerciseRecentUsage[],
   ): string {
     return `You are an expert English teacher creating a multiple-choice exercise.
 
@@ -248,7 +280,7 @@ OUTPUT LANGUAGE:
 STRICT REQUIREMENTS:
 1. Return valid JSON that strictly matches the provided schema.
 2. Keep "exerciseType" as "read_and_mark_meaning".
-3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb).
+3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb), preserving the input order.
 4. For each item:
    - Use the same "pvId" that was provided.
    - Keep "phrasalVerb" matching the provided phrasal verb text.
@@ -256,22 +288,27 @@ STRICT REQUIREMENTS:
    - Return this sentence in "sentenceMarkdown".
    - In "sentenceMarkdown", highlight only the phrasal verb using markdown bold (example: **look up to**).
    - The sentence MUST be new and MUST NOT copy the provided "example".
+   - If this pvId appears in RECENT USAGE, the sentence must describe a clearly different situation.
    - Provide exactly 3 meaning options in "meanings".
-   - Only one option is correct.
+   - Only one option is correct and it must match the provided "meaning" and "definition".
    - The correct option should not always appear in the same position.
    - "correctMeaningIndex" must be 0, 1, or 2 and point to the correct option.
    - Distractors must be plausible but clearly incorrect.
-5. Avoid ambiguous or overlapping options.
-6. Keep level around intermediate (B1-B2).
+   - Distractors must not be synonyms or near-synonyms of the correct meaning.
+5. Do not invent, skip, or duplicate pvIds.
+6. Avoid ambiguous or overlapping options.
+7. Keep level around intermediate (B1-B2).
 
+${this.buildRecentUsageSection(recentUsage)}
 PROVIDED PHRASAL VERBS (JSON):
 ${JSON.stringify(phrasalVerbs, null, 2)}
 
-Do not include markdown. Return JSON only.`;
+Do not include markdown outside JSON string values. Return JSON only.`;
   }
 
   private buildMarkSentencesCorrectPrompt(
-    phrasalVerbs: PracticeExercisePhrasalVerbInput[]
+    phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+    recentUsage: PracticeExerciseRecentUsage[],
   ): string {
     return `You are an expert English teacher creating an exercise about phrasal verb accuracy.
 
@@ -284,22 +321,26 @@ OUTPUT LANGUAGE:
 STRICT REQUIREMENTS:
 1. Return valid JSON that strictly matches the provided schema.
 2. Keep "exerciseType" as "mark_sentences_correct".
-3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb).
+3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb), preserving the input order.
 4. For each item:
    - Use the same "pvId" that was provided.
    - Keep "phrasalVerb" matching the provided phrasal verb text.
    - Create two almost identical everyday-context sentences:
      - "firstSentenceMarkdown"
      - "secondSentenceMarkdown"
-   - Exactly one sentence must be correct and logical with the right verb + preposition combination.
-   - The other sentence must be incorrect due to the wrong preposition or phrasal verb particle.
-   - In BOTH sentences, highlight only the target verb + preposition chunk in markdown bold.
+   - Keep the same subject, tense, and surrounding wording in both sentences whenever possible.
+   - Exactly one sentence must be correct and logical with the right phrasal verb.
+   - The other sentence must be incorrect ONLY because of the wrong phrasal verb particle or preposition.
+   - In BOTH sentences, highlight only the target verb + particle chunk in markdown bold.
    - Sentences must be new and MUST NOT copy the provided "example".
+   - If this pvId appears in RECENT USAGE, use a clearly different situation from the recent one.
    - "correctSentenceIndex" must be 0 or 1 and indicate the correct sentence.
-5. Keep distractors realistic, but clearly wrong to an attentive learner.
-6. Avoid offensive, unsafe, or highly niche contexts.
-7. Keep level around intermediate (B1-B2).
+5. Do not invent, skip, or duplicate pvIds.
+6. Keep distractors realistic, but clearly wrong to an attentive learner.
+7. Avoid offensive, unsafe, or highly niche contexts.
+8. Keep level around intermediate (B1-B2).
 
+${this.buildRecentUsageSection(recentUsage)}
 PROVIDED PHRASAL VERBS (JSON):
 ${JSON.stringify(phrasalVerbs, null, 2)}
 
@@ -307,7 +348,8 @@ Do not include markdown outside the JSON string values. Return JSON only.`;
   }
 
   private buildFillInGapsDragDropPrompt(
-    phrasalVerbs: PracticeExercisePhrasalVerbInput[]
+    phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+    recentUsage: PracticeExerciseRecentUsage[],
   ): string {
     return `You are an expert English teacher creating a drag-and-drop gap-fill exercise.
 
@@ -320,29 +362,37 @@ OUTPUT LANGUAGE:
 STRICT REQUIREMENTS:
 1. Return valid JSON that strictly matches the provided schema.
 2. Keep "exerciseType" as "fill_in_gaps_drag_drop".
-3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb).
+3. Generate exactly ${phrasalVerbs.length} items (one item per provided phrasal verb), preserving the input order.
 4. For each item:
    - Use the same "pvId" that was provided.
    - Keep "phrasalVerb" exactly as provided.
+   - The provided "verb" and "particles" describe the valid parts of the phrasal verb.
    - Create one NEW natural sentence in an everyday context split into:
      - "sentencePrefix"
      - "sentenceSuffix"
-   - The missing word between prefix and suffix is "correctWord".
+   - The missing text between prefix and suffix is "correctWord".
+   - "correctWord" MUST be exactly ONE part of the phrasal verb: either the base verb or one particle from the provided "particles".
+   - The visible sentence must still include the other part or parts of the phrasal verb outside the blank.
+   - Valid examples:
+     - phrasalVerb = "butter up" -> "She always tries to ______ up her grandmother..."
+     - phrasalVerb = "butter up" -> "She always tries to butter ______ her grandmother..."
    - The completed sentence (prefix + correctWord + suffix) must be grammatically correct and coherent.
    - Use exactly one blank per item.
    - The sentence MUST be new and MUST NOT copy the provided "example".
+   - If this pvId appears in RECENT USAGE, use a clearly different situation from the recent one.
 5. All "correctWord" values MUST be unique across all items (no repeated correct words).
 6. Build "wordBank" with NO distractors:
    - Include exactly the set of correct words, one each.
    - Do not include extra words.
    - Do not repeat words.
-7. Keep words in "wordBank" short and draggable-friendly (typically one lowercase word).
-8. Keep difficulty around B1-B2.
+7. Every entry in "wordBank" must exactly match one item's "correctWord".
+8. Do not invent, skip, or duplicate pvIds.
+9. Keep difficulty around B1-B2.
 
+${this.buildRecentUsageSection(recentUsage)}
 PROVIDED PHRASAL VERBS (JSON):
 ${JSON.stringify(phrasalVerbs, null, 2)}
 
 Return JSON only.`;
   }
-
 }

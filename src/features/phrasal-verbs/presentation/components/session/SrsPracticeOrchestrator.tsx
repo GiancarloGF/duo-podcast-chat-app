@@ -14,15 +14,18 @@ export function SrsPracticeOrchestrator() {
   const {
     phase,
     isLoading,
+    isGeneratingExercise,
     isSaving,
     error,
     catalogHydration,
     session,
+    practicePlan,
     practiceQueue,
     results,
     srsMeta,
     pendingCount,
-    completeTheory,
+    startPracticeSession,
+    ensurePracticeExercise,
     buildExerciseResults,
     finishPractice,
     startNewSession,
@@ -83,14 +86,21 @@ export function SrsPracticeOrchestrator() {
   return (
     <SessionErrorBoundary>
       {phase === 'theory' ? (
-        <TheoryPhase phrasalVerbs={session.sessionPVs} onComplete={completeTheory} />
+        <TheoryPhase
+          phrasalVerbs={session.sessionPVs}
+          onComplete={startPracticeSession}
+          isCompleting={isGeneratingExercise}
+        />
       ) : null}
 
       {phase === 'practice' ? (
         <PracticePhase
           exercises={practiceQueue}
+          totalExercises={practicePlan.length}
+          isGeneratingNextExercise={isGeneratingExercise}
           isSaving={isSaving}
           onBuildResults={buildExerciseResults}
+          onContinueToNextExercise={(_, nextIndex) => ensurePracticeExercise(nextIndex)}
           onComplete={finishPractice}
         />
       ) : null}

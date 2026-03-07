@@ -12,6 +12,7 @@ import {
   practiceExerciseRequestSchema,
   type PracticeExercise,
   type PracticeExercisePhrasalVerbInput,
+  type PracticeExerciseRecentUsage,
   type PracticeExerciseType,
 } from '@/features/phrasal-verbs/infrastructure/services/practice-exercise-schema';
 import type {
@@ -32,6 +33,7 @@ const SRS_SCHEMA_VERSION = 1;
 const generatePracticeExerciseInputSchema = z.object({
   exerciseType: practiceExerciseTypeSchema,
   phrasalVerbs: practiceExerciseRequestSchema.shape.phrasalVerbs,
+  recentUsage: practiceExerciseRequestSchema.shape.recentUsage,
 });
 
 const exerciseResultSchema = z.object({
@@ -469,12 +471,14 @@ async function applySessionCompletion(params: {
 export async function generatePracticeExerciseAction(
   exerciseType: PracticeExerciseType,
   phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+  recentUsage: PracticeExerciseRecentUsage[] = [],
 ): Promise<GeneratePracticeExerciseResult> {
   try {
     console.info('[generatePracticeExerciseAction] start', {
       exerciseType,
       pvCount: phrasalVerbs.length,
       pvIds: phrasalVerbs.map((pv) => pv.id),
+      recentUsageCount: recentUsage.length,
     });
 
     if (!process.env.GEMINI_API_KEY) {
@@ -488,12 +492,14 @@ export async function generatePracticeExerciseAction(
     const parsedInput = generatePracticeExerciseInputSchema.parse({
       exerciseType,
       phrasalVerbs,
+      recentUsage,
     });
 
     const exercise = await Promise.race([
       generateExerciseService.generateExercise(
         parsedInput.exerciseType,
         parsedInput.phrasalVerbs,
+        parsedInput.recentUsage,
       ),
       new Promise<never>((_, reject) => {
         setTimeout(() => {
@@ -516,6 +522,7 @@ export async function generatePracticeExerciseAction(
     console.error('[generatePracticeExerciseAction] Failed to generate exercise', {
       exerciseType,
       pvCount: phrasalVerbs.length,
+      recentUsageCount: recentUsage.length,
       error,
     });
 

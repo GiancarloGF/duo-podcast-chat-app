@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const practiceExercisePhrasalVerbInputSchema = z.object({
   id: z.string().min(1),
   phrasalVerb: z.string().min(1),
+  verb: z.string().min(1),
+  particles: z.array(z.string().min(1)).min(1),
   meaning: z.string().min(1),
   definition: z.string().min(1),
   example: z.string().min(1),
@@ -13,6 +15,13 @@ export const practiceExerciseTypeSchema = z.enum([
   'mark_sentences_correct',
   'fill_in_gaps_drag_drop',
 ]);
+
+export const practiceExerciseRecentUsageSchema = z.object({
+  pvId: z.string().min(1),
+  phrasalVerb: z.string().min(1),
+  exerciseType: practiceExerciseTypeSchema,
+  sentence: z.string().min(1),
+});
 
 export const readAndMarkMeaningItemSchema = z.object({
   pvId: z.string().min(1),
@@ -68,10 +77,14 @@ export const practiceExerciseSchema = z.discriminatedUnion('exerciseType', [
 
 export const practiceExerciseRequestSchema = z.object({
   phrasalVerbs: z.array(practiceExercisePhrasalVerbInputSchema).min(1).max(5),
+  recentUsage: z.array(practiceExerciseRecentUsageSchema).max(5).optional().default([]),
 });
 
 export type PracticeExercisePhrasalVerbInput = z.infer<
   typeof practiceExercisePhrasalVerbInputSchema
+>;
+export type PracticeExerciseRecentUsage = z.infer<
+  typeof practiceExerciseRecentUsageSchema
 >;
 export type PracticeExerciseType = z.infer<typeof practiceExerciseTypeSchema>;
 export type ReadAndMarkMeaningExercise = z.infer<

@@ -31,7 +31,7 @@ const bungee = Bungee({
 });
 
 export const metadata: Metadata = {
-  title: 'Ruway App - Practica tu Ingles',
+  title: 'Ruway App - Practice your English',
   description:
     'Aprende inglés traduciendo historias reales y fascinantes del podcast Relatos en Inglés',
   generator: 'v0.app',
