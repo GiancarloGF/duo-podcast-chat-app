@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
+import { GEMINI_MODEL } from '@/shared/infrastructure/config/gemini';
 import { feedbackSchema } from './feedback-schema';
 import type { TranslationFeedbackService } from '@/features/stories/domain/repositories/TranslationFeedbackService.interface';
 import type { FeedbackSchemaType } from './feedback-schema';
@@ -24,7 +25,7 @@ export class GeminiTranslationService implements TranslationFeedbackService {
     );
 
     const response = await this.client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -89,7 +90,7 @@ Output JSON format.`;
     });
 
     const response = await this.client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -139,7 +140,7 @@ Tasks:
 Return pure JSON matching the schema.`;
 
     const response = await this.client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',

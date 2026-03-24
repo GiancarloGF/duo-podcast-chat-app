@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { GEMINI_MODEL } from '@/shared/infrastructure/config/gemini';
 import {
   fillInGapsDragDropExerciseSchema,
   markSentencesCorrectExerciseSchema,
@@ -39,7 +40,7 @@ export class GeminiPracticeExerciseService {
         const responseSchema = this.getResponseSchema(exerciseType);
 
         const response = await this.client.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: GEMINI_MODEL,
           contents: prompt,
           config: {
             responseMimeType: 'application/json',

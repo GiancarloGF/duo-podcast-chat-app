@@ -122,7 +122,7 @@ export function TranslationInput({
         </div>
       )}
 
-      <div className='relative flex items-end gap-2 bg-card rounded-[8px] p-2 pr-2 border-2 border-border transition-colors'>
+      <div className='bg-card rounded-[8px] p-2 border-2 border-border transition-colors'>
         {/* Text Input */}
         <textarea
           ref={inputRef}
@@ -131,25 +131,25 @@ export function TranslationInput({
           onKeyDown={handleKeyDown}
           placeholder='Escribe tu traduccion...'
           disabled={isLoading || disabled}
-          className='flex-1 max-h-[120px] py-3 pl-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-foreground placeholder-muted-foreground text-base sm:text-xl leading-relaxed overflow-hidden font-medium'
+          className='w-full max-h-[120px] py-3 px-4 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-foreground placeholder-muted-foreground text-base sm:text-xl leading-relaxed overflow-hidden font-medium'
           rows={1}
         />
 
         {/* Action Buttons */}
-        <div className='flex items-center gap-1 pb-1'>
+        <div className='mt-2 flex justify-end'>
           <Button
             onClick={handleSubmit}
             disabled={!translation.trim() || isLoading || disabled}
             size='sm'
             className={cn(
-              'h-9  px-1 sm:px-3 transition-all duration-200 min-w-min sm:min-w-24',
+              'h-9 px-3 transition-all duration-200 min-w-24',
               translation.trim()
                 ? 'bg-primary hover:brightness-95 text-primary-foreground border-2 border-border shadow-[3px_3px_0_0_var(--color-border)] rounded-[6px]'
                 : 'bg-muted text-muted-foreground border-2 border-border rounded-[6px] cursor-not-allowed'
             )}
           >
             <Send className='h-4 w-4' />
-            <span className='hidden sm:inline-block ml-2'>Enviar</span>
+            <span className='ml-2'>Enviar</span>
           </Button>
         </div>
       </div>
