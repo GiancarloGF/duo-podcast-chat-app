@@ -14,16 +14,15 @@ interface MongooseCache {
   promise: Promise<typeof mongoose> | null;
 }
 
-declare global {
-  var mongoose: MongooseCache;
-}
+const globalMongoose = globalThis as typeof globalThis & {
+  mongoose?: MongooseCache;
+};
 
-let cached = global.mongoose;
+const cached: MongooseCache =
+  globalMongoose.mongoose ?? (globalMongoose.mongoose = { conn: null, promise: null });
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
+// Reuse a single connection/promise pair across hot reloads and server entry
+// points so development does not open multiple Mongo connections.
 async function dbConnect() {
   if (cached.conn) {
     return cached.conn;

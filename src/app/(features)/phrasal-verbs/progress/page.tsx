@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Activity,
@@ -11,7 +12,7 @@ import {
   Target,
   Trophy,
 } from 'lucide-react';
-import { getSrsProgressSnapshotAction } from '@/features/phrasal-verbs/presentation/actions';
+import { getSrsProgressSnapshotForCurrentUser } from '@/features/phrasal-verbs/server/getSrsProgressSnapshotForCurrentUser';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,12 +22,24 @@ import {
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
 import { Button } from '@/shared/presentation/components/ui/button';
+import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
+
+// This route depends on authenticated server reads, so we opt into dynamic
+// rendering explicitly instead of letting Next infer it through runtime errors.
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = createFeatureMetadata({
+  title: 'Progress',
+  description: 'Revisa tu progreso global, rachas y sesiones acumuladas de phrasal verbs.',
+  path: '/phrasal-verbs/progress',
+});
 
 export default async function PhrasalVerbsProgressPage() {
-  const snapshotResult = await getSrsProgressSnapshotAction();
-  const nowMs = Date.now();
+  const snapshotResult = await getSrsProgressSnapshotForCurrentUser();
+  const nowMs = snapshotResult.snapshot?.meta.lastSyncAt ?? 0;
   const analytics = snapshotResult.snapshot?.meta.analytics;
 
+  // The page derives dashboard-friendly counters from the compact SRS map to
+  // avoid storing redundant aggregates in Firestore.
   const dueReviews = snapshotResult.snapshot
     ? Object.values(snapshotResult.snapshot.progress).filter(
         (entry) => entry.nr !== null && entry.nr <= nowMs,
@@ -183,7 +196,7 @@ export default async function PhrasalVerbsProgressPage() {
           <div className='mt-6'>
             <Button asChild className='text-base font-black'>
               <Link href='/phrasal-verbs/practice'>
-               Let's practice!
+               Let&apos;s practice!
               </Link>
             </Button>
           </div>

@@ -9,7 +9,8 @@ import { Bungee, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { Toaster } from '@/shared/presentation/components/ui/sonner';
 import { ThemeProvider } from '@/shared/presentation/layouts/theme-provider';
 
-// Initialize fonts
+// Register the three display fonts at the root so every segment can consume
+// them through CSS variables instead of importing them repeatedly.
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
@@ -34,7 +35,6 @@ export const metadata: Metadata = {
   title: 'Ruway App - Practice your English',
   description:
     'Aprende inglés traduciendo historias reales y fascinantes del podcast Relatos en Inglés',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
@@ -60,9 +60,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // Keep suppressHydrationWarning at the html level because the theme class is
+    // applied client-side by next-themes before hydration settles.
     <html lang='es' suppressHydrationWarning>
       <body
-        suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${bungee.variable} font-sans antialiased`}
       >
         <ThemeProvider

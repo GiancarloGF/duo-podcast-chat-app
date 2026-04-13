@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    // Standard browser + modern JS libs for the App Router runtime.
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "target": "ES6",
     "skipLibCheck": true,
@@ -13,13 +18,34 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    // Keep imports consistent across feature layers and avoid deep relative paths.
     "paths": {
-      "@/*": ["./*"],
-      "@/features/*": ["./src/features/*"],
-      "@/shared/*": ["./src/shared/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/shared/*": [
+        "./src/shared/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    // Next writes route-aware generated types under .next. They must be part of
+    // the program so route helpers and metadata typing stay accurate.
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -2,7 +2,7 @@
 
 import type { ChatMessage } from '@/features/stories/domain/types';
 import { cn } from '@/shared/presentation/utils';
-import { useState, useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Languages, Sparkles } from 'lucide-react';
@@ -30,7 +30,8 @@ type SentenceBoundary = {
   text: string;
 };
 
-// Function to find sentence boundaries in text
+// Split the raw message into sentence slices so a clicked word can later be
+// queried with enough context for the definition lookup.
 function findSentenceBoundaries(text: string): SentenceBoundary[] {
   const boundaries: SentenceBoundary[] = [];
   // Match sentences ending with . ! ? followed by space, newline, or end of string
@@ -80,7 +81,7 @@ function findSentenceBoundaries(text: string): SentenceBoundary[] {
   return boundaries;
 }
 
-// Function to find which sentence a word belongs to
+// Map a token position back to the sentence that contains it.
 function findSentenceForWord(
   wordIndex: number,
   boundaries: SentenceBoundary[],
@@ -94,7 +95,8 @@ function findSentenceForWord(
   return boundaries[0]?.text || '';
 }
 
-// Function to tokenize text into words and non-words with sentence information
+// Preserve punctuation and spacing so the rendered text matches the original
+// message while still making each word individually clickable.
 function tokenizeText(text: string): Token[] {
   const tokens: Token[] = [];
   const wordRegex = /\p{L}+/gu; // Unicode letters (including accented characters)
@@ -167,7 +169,8 @@ function ClickableWord({
   );
 }
 
-// Clickable text renderer component
+// Render protagonist messages as clickable words to open the contextual
+// vocabulary modal without altering the original sentence formatting.
 function ClickableTextRenderer({
   text,
   onWordClick,
@@ -179,7 +182,7 @@ function ClickableTextRenderer({
 
   return (
     <>
-      {tokens.map((token, index) =>
+      {tokens.map((token: Token, index: number) =>
         token.type === 'word' ? (
           <ClickableWord
             key={index}
@@ -195,7 +198,8 @@ function ClickableTextRenderer({
   );
 }
 
-// Function to generate consistent pastel colors from a string
+// Derive stable colors from speaker names so protagonist bubbles look consistent
+// across renders without storing presentation state elsewhere.
 function stringToPastelColor(str: string) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -236,18 +240,16 @@ export function MessageBubble({
     .toUpperCase();
 
   // Consistent random-ish color for protagonist background
-  const protagonistBgColor = useMemo(() => {
-    if (isProtagonistMessage && message?.message?.sender)
-      return stringToPastelColor(message.message.sender);
-    return undefined;
-  }, [message?.message?.sender, isProtagonistMessage]);
+  const protagonistBgColor =
+    isProtagonistMessage && message?.message?.sender
+      ? stringToPastelColor(message.message.sender)
+      : undefined;
 
   // Consistent random-ish color for protagonist avatar
-  const protagonistAvatarColor = useMemo(() => {
-    if (isProtagonistMessage && message?.message?.sender)
-      return stringToDarkColor(message.message.sender);
-    return undefined;
-  }, [message?.message?.sender, isProtagonistMessage]);
+  const protagonistAvatarColor =
+    isProtagonistMessage && message?.message?.sender
+      ? stringToDarkColor(message.message.sender)
+      : undefined;
 
   // Avatar colors based on sender type
   const avatarClasses = cn(

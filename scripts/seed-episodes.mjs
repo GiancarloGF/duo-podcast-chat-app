@@ -114,7 +114,7 @@ async function seedEpisodes() {
       console.log(`Title: ${episodeData.title}`);
 
       // Upsert the episode (update if exists, insert if not)
-      const result = await Episode.findOneAndUpdate(
+      await Episode.findOneAndUpdate(
         { id: episodeId },
         episodeData,
         { upsert: true, new: true }

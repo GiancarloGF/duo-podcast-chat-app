@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,14 +40,9 @@ export function WordDefinitionModal({
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && word) {
-      fetchDefinition();
-      setIsSaved(false);
-    }
-  }, [isOpen, word]);
-
-  const fetchDefinition = async () => {
+  const fetchDefinition = useCallback(async () => {
+    // Definitions depend on both the selected word and the sentence context,
+    // so the request is rebuilt whenever either value changes.
     setLoading(true);
     setError(null);
     try {
@@ -66,17 +61,26 @@ export function WordDefinitionModal({
       } else {
         throw new Error(result.error || 'Failed to fetch definition');
       }
-    } catch (err) {
+    } catch (_error) {
       setError('No se encontro definicion para esta palabra.');
       setDefinitionData(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [sentence, word]);
+
+  useEffect(() => {
+    if (isOpen && word) {
+      void fetchDefinition();
+      setIsSaved(false);
+    }
+  }, [fetchDefinition, isOpen, word]);
 
   const handleSave = async () => {
     if (!definitionData) return;
 
+    // Saving is explicit and independent from fetching so read failures do not
+    // accidentally create partial saved-word state.
     setIsSaving(true);
     try {
       const result = await saveWord(definitionData.definedWord, sentence);

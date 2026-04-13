@@ -22,6 +22,13 @@ const phrasalVerbs: PracticeExercisePhrasalVerbInput[] = [
 describe('GeminiPracticeExerciseService', () => {
   it('includes recent usage guidance in prompts only when repeated PV context exists', () => {
     const service = new GeminiPracticeExerciseService();
+    const promptBuilder = service as unknown as {
+      buildPrompt: (
+        exerciseType: 'mark_sentences_correct',
+        phrasalVerbs: PracticeExercisePhrasalVerbInput[],
+        recentUsage: PracticeExerciseRecentUsage[],
+      ) => string;
+    };
     const recentUsage: PracticeExerciseRecentUsage[] = [
       {
         pvId: 'pv-1',
@@ -31,16 +38,16 @@ describe('GeminiPracticeExerciseService', () => {
       },
     ];
 
-    const promptWithRecentUsage = (service as any).buildPrompt(
+    const promptWithRecentUsage = promptBuilder.buildPrompt(
       'mark_sentences_correct',
       phrasalVerbs,
       recentUsage,
-    ) as string;
-    const promptWithoutRecentUsage = (service as any).buildPrompt(
+    );
+    const promptWithoutRecentUsage = promptBuilder.buildPrompt(
       'mark_sentences_correct',
       phrasalVerbs,
       [],
-    ) as string;
+    );
 
     expect(promptWithRecentUsage).toContain('RECENT USAGE TO AVOID REPEATING');
     expect(promptWithRecentUsage).toContain('I looked up the restaurant before dinner.');
@@ -49,9 +56,12 @@ describe('GeminiPracticeExerciseService', () => {
 
   it('rejects fill-in-gaps exercises when correctWord is not one part of the phrasal verb', () => {
     const service = new GeminiPracticeExerciseService();
+    const normalizer = service as unknown as {
+      normalizeExercise: (exerciseType: 'fill_in_gaps_drag_drop', parsedJson: unknown) => unknown;
+    };
 
     expect(() =>
-      (service as any).normalizeExercise('fill_in_gaps_drag_drop', {
+      normalizer.normalizeExercise('fill_in_gaps_drag_drop', {
         exerciseType: 'fill_in_gaps_drag_drop',
         title: 'Fill the gap',
         instructions: 'Drag the right option.',

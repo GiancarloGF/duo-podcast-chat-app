@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import {
   signInWithGoogle,
@@ -22,6 +23,8 @@ interface HeaderProps {
   initialUser: SerializableUser | null;
 }
 
+// The header consumes the client auth session hook so avatar and login/logout
+// controls stay synchronized with server-rendered auth changes.
 export function Header({ initialUser }: HeaderProps) {
   const user = useUserSession(initialUser);
   const userDisplayName = user?.displayName || user?.email || 'Usuario';
@@ -47,14 +50,14 @@ export function Header({ initialUser }: HeaderProps) {
     <header className='w-full border-b-2 border-border bg-card'>
       <div className='mx-auto flex min-h-18 w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8'>
         <div className='flex min-w-0 flex-1 items-center'>
-          <a className='flex flex-col leading-tight' href='/'>
+          <Link className='flex flex-col leading-tight' href='/'>
             <span className='text-lg font-black uppercase tracking-wide text-foreground sm:text-xl'>
               Ruway App
             </span>
             <span className='text-[11px] font-semibold uppercase text-muted-foreground sm:text-xs'>
               Practice your English
             </span>
-          </a>
+          </Link>
         </div>
 
         <div className='flex shrink-0 items-center'>

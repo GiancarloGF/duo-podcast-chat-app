@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChevronLeft,
@@ -91,6 +91,8 @@ function SelectionTag({
 export function PhrasalVerbsExplorer() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  // React keeps the input responsive while expensive filtering work catches up.
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const [selectedSuperGroupId, setSelectedSuperGroupId] = useState<
     string | null
@@ -179,7 +181,7 @@ export function PhrasalVerbsExplorer() {
     superGroup: selectedSuperGroup?.title ?? null,
     group: selectedGroupTitle ?? null,
     categories: selectedCategoryLabels,
-    searchTerm,
+    searchTerm: deferredSearchTerm,
     page: currentPage,
     pageSize: PAGE_SIZE,
     paginate: shouldPaginate,

@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "node -e \"require('node:fs').rmSync('.next', { recursive: true, force: true })\" && next build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "node -e \"const fs = require('node:fs'); fs.mkdirSync('.next/types', { recursive: true }); if (!fs.existsSync('.next/types/cache-life.d.ts')) fs.writeFileSync('.next/types/cache-life.d.ts', '');\" && next typegen && node -e \"const fs = require('node:fs'); fs.mkdirSync('.next/types', { recursive: true }); if (!fs.existsSync('.next/types/cache-life.d.ts')) fs.writeFileSync('.next/types/cache-life.d.ts', '');\" && tsc --noEmit"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -64,6 +66,7 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.4",
     "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
@@ -79,7 +82,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/parser": "^8.56.0",
-    "eslint": "^10.0.1",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "16.0.7",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",

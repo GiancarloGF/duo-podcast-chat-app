@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { SrsPracticeOrchestrator } from '@/features/phrasal-verbs/presentation/components/session/SrsPracticeOrchestrator';
 import {
   Breadcrumb,
@@ -7,6 +8,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
+import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
+
+export const metadata: Metadata = createFeatureMetadata({
+  title: 'Practice',
+  description: 'Completa sesiones SRS para convertir tus phrasal verbs en memoria activa.',
+  path: '/phrasal-verbs/practice',
+});
 
 export default async function PhrasalVerbsPracticePage() {
   return (
@@ -32,7 +40,7 @@ export default async function PhrasalVerbsPracticePage() {
           Practice session
         </h1>
         <p className='text-sm sm:text-lg font-medium text-muted-foreground'>
-          Practice the phrasal verbs you've just seen in the theory phase.
+          Practice the phrasal verbs you&apos;ve just seen in the theory phase.
         </p>
       </section>
 

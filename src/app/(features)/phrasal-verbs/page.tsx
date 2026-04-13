@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PhrasalVerbsExplorer } from '@/features/phrasal-verbs/presentation/components/PhrasalVerbsExplorer';
 import {
@@ -9,6 +10,13 @@ import {
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
 import { Button } from '@/shared/presentation/components/ui/button';
+import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
+
+export const metadata: Metadata = createFeatureMetadata({
+  title: 'Phrasal Verbs',
+  description: 'Explora, busca y repasa phrasal verbs con ejemplos y soporte visual.',
+  path: '/phrasal-verbs',
+});
 
 export default async function PhrasalVerbsPage() {
   return (
@@ -32,7 +40,7 @@ export default async function PhrasalVerbsPage() {
               Phrasal Verbs
             </h1>
             <Button asChild className='shrink-0'>
-              <Link href='/phrasal-verbs/practice'>Let's practice</Link>
+              <Link href='/phrasal-verbs/practice'>Let&apos;s practice</Link>
             </Button>
           </div>
           <p className='text-base sm:text-lg font-medium text-muted-foreground'>

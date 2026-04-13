@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getStorySequenceWindowAction } from '@/features/stories/presentation/actions';
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
 import type { EpisodeWithProgressDto } from '@/features/stories/application/dto/EpisodeWithProgress.dto';
@@ -9,8 +10,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
+import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
 
+// The stories window depends on the authenticated user's current progress.
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = createFeatureMetadata({
+  title: 'Stories',
+  description: 'Sigue historias en secuencia y practica tu comprensión en inglés.',
+  path: '/stories',
+});
 
 export default async function StoriesPage() {
   const {
@@ -25,6 +33,8 @@ export default async function StoriesPage() {
   const buildEpisodeDto = (
     displaySlot: 'previous' | 'current' | 'next'
   ): EpisodeWithProgressDto | null => {
+    // Convert the windowed domain objects into a view DTO that tells the card
+    // whether the episode is completed, active, or still locked.
     const episode =
       displaySlot === 'previous'
         ? previousEpisode

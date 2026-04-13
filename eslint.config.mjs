@@ -1,24 +1,43 @@
-import tsParser from '@typescript-eslint/parser';
-import nextPlugin from '@next/eslint-plugin-next';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
-export default [
+const eslintConfig = [
+  // Start from Next's recommended rules so lint acts as a real quality gate
+  // for App Router, React, and TypeScript code.
+  ...nextVitals,
+  ...nextTs,
   {
-    ignores: ['.next/**', 'node_modules/**', 'coverage/**'],
+    // Build artifacts and generated files should not participate in lint.
+    ignores: [
+      '.next/**',
+      'out/**',
+      'build/**',
+      'coverage/**',
+      'next-env.d.ts',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+    rules: {
+      // Keep TypeScript strict on hand-written source files.
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      // These React Compiler-oriented rules are temporarily disabled because
+      // the current codebase still contains patterns that would produce a lot
+      // of noise. The rest of the React/Next rules remain active.
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
-    plugins: {
-      '@next/next': nextPlugin,
-    },
-    rules: {},
-  },
-  {
-    files: ['**/*.{js,mjs,cjs}'],
-    rules: {},
   },
 ];
+
+export default eslintConfig;

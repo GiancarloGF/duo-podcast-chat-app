@@ -1,10 +1,16 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { signInWithGoogle } from '@/shared/infrastructure/firebase/auth';
 
-export function LoginScreen() {
+interface LoginScreenProps {
+  nextPath: string;
+}
+
+export function LoginScreen({ nextPath }: LoginScreenProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,9 +20,10 @@ export function LoginScreen() {
 
     try {
       await signInWithGoogle();
-      const nextPath =
-        new URLSearchParams(window.location.search).get('next') || '/';
-      window.location.assign(nextPath);
+      // Use App Router navigation so the authenticated server tree refreshes
+      // without forcing a full-page reload.
+      router.replace(nextPath);
+      router.refresh();
     } catch (authError) {
       console.error('Error en login con Google:', authError);
       setError('No se pudo iniciar sesion. Intenta nuevamente.');

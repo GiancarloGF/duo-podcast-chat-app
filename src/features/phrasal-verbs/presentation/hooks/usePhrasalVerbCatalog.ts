@@ -65,6 +65,8 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+// This hook owns the local-first catalog lifecycle: ensure local data exists,
+// expose hydration progress, and run catalog queries against the hydrated source.
 export function usePhrasalVerbCatalog(
   params: UsePhrasalVerbCatalogParams
 ): UsePhrasalVerbCatalogResult {
@@ -112,6 +114,7 @@ export function usePhrasalVerbCatalog(
   }, [hydration.completed, hydration.error, hydration.phase, hydration.total]);
 
   useEffect(() => {
+    // Debounce the raw text input before querying IndexedDB/local storage.
     const timeoutId = setTimeout(() => {
       setDebouncedSearchTerm(params.searchTerm);
     }, SEARCH_DEBOUNCE_MS);
@@ -157,6 +160,8 @@ export function usePhrasalVerbCatalog(
       });
 
       try {
+        // Hydration may fetch from the network, persist locally, or resolve
+        // immediately from local data depending on repository state.
         const hydrationResult = await ensurePhrasalVerbCatalogHydrated(
           activeRepository,
           {
@@ -262,6 +267,8 @@ export function usePhrasalVerbCatalog(
       try {
         setIsQuerying(true);
 
+        // All reads go through the repository/use case layer so the component
+        // does not need to know whether data came from local storage or a remote refresh.
         const result = await queryPhrasalVerbCatalog(activeRepository, {
           superGroup: params.superGroup,
           group: params.group,
@@ -311,6 +318,7 @@ export function usePhrasalVerbCatalog(
     categorySignature,
     debouncedSearchTerm,
     isHydrationComplete,
+    normalizedCategories,
     params.group,
     params.page,
     params.pageSize,
