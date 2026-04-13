@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, type PanInfo } from 'motion/react';
 import Image from 'next/image';
 import type { PhrasalVerb } from '@/features/phrasal-verbs/domain/entities/PhrasalVerb';
 import { getSuperGroupColorsByTitle } from '@/features/phrasal-verbs/infrastructure/data/phrasalVerbGroups';
