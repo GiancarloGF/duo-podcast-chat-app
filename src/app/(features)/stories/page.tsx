@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { getStorySequenceWindowAction } from '@/features/stories/presentation/actions';
+import { getStoriesPageData } from '@/features/stories/server/getStoriesPageData';
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
+import { StoriesWindowSkeleton } from '@/features/stories/presentation/components/StoriesWindowSkeleton';
 import type { EpisodeWithProgressDto } from '@/features/stories/application/dto/EpisodeWithProgress.dto';
 import {
   Breadcrumb,
@@ -12,8 +14,6 @@ import {
 } from '@/shared/presentation/components/ui/breadcrumb';
 import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
 
-// The stories window depends on the authenticated user's current progress.
-export const dynamic = 'force-dynamic';
 export const metadata: Metadata = createFeatureMetadata({
   title: 'Stories',
   description: 'Sigue historias en secuencia y practica tu comprensión en inglés.',
@@ -21,6 +21,37 @@ export const metadata: Metadata = createFeatureMetadata({
 });
 
 export default async function StoriesPage() {
+  return (
+    <div className='py-4 sm:py-8'>
+      <Breadcrumb className='mb-6'>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href='/'>Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Stories</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <div className='mb-12 rounded-[10px] border-2 border-border bg-card p-4 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
+        <h1 className='text-lg sm:text-4xl font-black text-foreground mb-2'>
+          Historias en secuencia
+        </h1>
+        <p className='text-sm sm:text-lg text-muted-foreground font-medium'>
+          Completa un episodio a la vez. Siempre veras tu avance, el episodio actual y lo que sigue.
+        </p>
+      </div>
+
+      <Suspense fallback={<StoriesWindowSkeleton />}>
+        <StoriesWindowSection />
+      </Suspense>
+    </div>
+  );
+}
+
+async function StoriesWindowSection() {
   const {
     previousEpisode,
     currentEpisode,
@@ -28,7 +59,7 @@ export default async function StoriesPage() {
     currentProgress,
     hasFinishedCatalog,
     hasAnyEpisodes,
-  } = await getStorySequenceWindowAction();
+  } = await getStoriesPageData();
 
   const buildEpisodeDto = (
     displaySlot: 'previous' | 'current' | 'next'
@@ -91,66 +122,43 @@ export default async function StoriesPage() {
   ].filter((episode): episode is EpisodeWithProgressDto => episode !== null);
 
   return (
-    <div className='py-4 sm:py-8'>
-      <Breadcrumb className='mb-6'>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href='/'>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Stories</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className='mb-12 rounded-[10px] border-2 border-border bg-card p-4 sm:p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
-        <h1 className='text-lg sm:text-4xl font-black text-foreground mb-2'>
-          Historias en secuencia
-        </h1>
-        <p className='text-sm sm:text-lg text-muted-foreground font-medium'>
-          Completa un episodio a la vez. Siempre veras tu avance, el episodio actual y lo que sigue.
-        </p>
-      </div>
-
-      <div className='space-y-8'>
-        {storyWindow.length > 0 && (
-          <div>
-            <div className='flex items-center gap-3 mb-6'>
-              <h2 className='text-lg sm:text-2xl font-black text-foreground'>
-                Tu recorrido
-              </h2>
-              <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-primary text-primary-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
-                {storyWindow.length} episodio{storyWindow.length === 1 ? '' : 's'}
-              </span>
-            </div>
-            <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'>
-              {storyWindow.map((episode) => (
-                <EpisodeCard episode={episode} key={`${episode.displaySlot}-${episode.id}`} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {hasFinishedCatalog && (
-          <div className='rounded-[10px] border-2 border-border bg-card p-6 shadow-[6px_6px_0_0_var(--color-border)]'>
-            <h2 className='text-xl sm:text-2xl font-black text-foreground mb-2'>
-              No hay mas episodios por ahora
+    <div className='space-y-8'>
+      {storyWindow.length > 0 && (
+        <div>
+          <div className='flex items-center gap-3 mb-6'>
+            <h2 className='text-lg sm:text-2xl font-black text-foreground'>
+              Tu recorrido
             </h2>
-            <p className='text-muted-foreground font-medium'>
-              Ya completaste todas las historias disponibles. Cuando publiquemos un nuevo episodio, aparecera aqui automaticamente.
-            </p>
+            <span className='px-3 py-1 rounded-[6px] text-xs font-bold uppercase tracking-wide bg-primary text-primary-foreground border-2 border-border shadow-[2px_2px_0_0_var(--color-border)]'>
+              {storyWindow.length} episodio{storyWindow.length === 1 ? '' : 's'}
+            </span>
           </div>
-        )}
+          <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'>
+            {storyWindow.map((episode) => (
+              <EpisodeCard episode={episode} key={`${episode.displaySlot}-${episode.id}`} />
+            ))}
+          </div>
+        </div>
+      )}
 
-        {!hasAnyEpisodes && (
-          <div className='text-center py-12 rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)]'>
-            <p className='text-lg text-muted-foreground font-semibold'>
-              No hay episodios disponibles en este momento.
-            </p>
-          </div>
-        )}
-      </div>
+      {hasFinishedCatalog && (
+        <div className='rounded-[10px] border-2 border-border bg-card p-6 shadow-[6px_6px_0_0_var(--color-border)]'>
+          <h2 className='text-xl sm:text-2xl font-black text-foreground mb-2'>
+            No hay mas episodios por ahora
+          </h2>
+          <p className='text-muted-foreground font-medium'>
+            Ya completaste todas las historias disponibles. Cuando publiquemos un nuevo episodio, aparecera aqui automaticamente.
+          </p>
+        </div>
+      )}
+
+      {!hasAnyEpisodes && (
+        <div className='text-center py-12 rounded-[10px] border-2 border-border bg-card shadow-[6px_6px_0_0_var(--color-border)]'>
+          <p className='text-lg text-muted-foreground font-semibold'>
+            No hay episodios disponibles en este momento.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

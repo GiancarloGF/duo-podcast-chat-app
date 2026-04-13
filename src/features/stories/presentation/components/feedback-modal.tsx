@@ -20,7 +20,7 @@ export function FeedbackModal({
   if (!isOpen || !feedback) return null;
 
   return (
-    <div className='fixed inset-0 bg-[rgba(25,21,20,0.75)] backdrop-blur-[1px] flex items-center justify-center z-50 p-4 animate-in fade-in duration-200'>
+    <div className='fixed inset-0 bg-[rgba(25,21,20,0.75)] backdrop-blur-[1px] flex items-center justify-center z-[70] p-4 animate-in fade-in duration-200'>
       <div className='bg-card rounded-[10px] max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border-2 border-border shadow-[10px_10px_0_0_var(--color-border)]'>
         <div className='flex items-center justify-between px-6 py-4 border-b-2 border-border bg-card sticky top-0 z-10'>
           <div>

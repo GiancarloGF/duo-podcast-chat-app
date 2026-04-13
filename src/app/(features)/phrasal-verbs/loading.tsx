@@ -1,12 +1,7 @@
-import { Spinner } from '@/shared/presentation/components/ui/spinner';
+import { ProgressDashboardSkeleton } from '@/features/phrasal-verbs/presentation/components/ProgressDashboardSkeleton';
 
 export default function PhrasalVerbsLoading() {
   return (
-    <section className='rounded-[10px] border-2 border-border bg-card p-8 shadow-[8px_8px_0_0_var(--color-border)]'>
-      <div className='flex items-center gap-3'>
-        <Spinner className='h-5 w-5' />
-        <p className='font-semibold text-foreground'>Cargando phrasal verbs...</p>
-      </div>
-    </section>
+    <ProgressDashboardSkeleton />
   );
 }

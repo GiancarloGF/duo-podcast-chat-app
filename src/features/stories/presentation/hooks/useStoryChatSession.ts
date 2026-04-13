@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import type { ChatMessage } from '@/features/stories/domain/types';
 import type { Episode } from '@/features/stories/domain/entities/Episode';
 import type { Interaction } from '@/features/stories/domain/entities/Interaction';
@@ -42,14 +42,15 @@ export function useStoryChatSession({
 }: UseStoryChatSessionParams): UseStoryChatSessionResult {
   const [userProgress, setUserProgress] =
     useState<UserProgress>(initialUserProgress);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] =
     useState<TranslationFeedback | null>(null);
   const [validatingMessageId, setValidatingMessageId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const currentMessageIndex = userProgress.currentMessageIndex;
+  const isProcessing = isPending;
 
   useEffect(() => {
     // Scroll after new content appears so the latest message or input stays visible.
@@ -111,7 +112,7 @@ export function useStoryChatSession({
   const episodeComplete = currentMessageIndex >= episode.messages.length;
   const needsTranslation =
     !episodeComplete && currentEpisodeMessage?.language === 'es';
-  const canInteract = !isProcessing && !episodeComplete;
+  const canInteract = !isPending && !episodeComplete;
 
   const handleTranslation = useCallback(
     async (translation: string): Promise<void> => {
@@ -119,32 +120,69 @@ export function useStoryChatSession({
         return;
       }
 
-      setIsProcessing(true);
       setValidatingMessageId(currentEpisodeMessage.id);
       setAiError(null);
+      startTransition(async () => {
+        try {
+          // Validation is optimistic in the UI but still persisted through the
+          // server action after local state moves forward.
+          const result = await submitTranslation(
+            translation,
+            currentEpisodeMessage.officialTranslation ?? '',
+            currentEpisodeMessage.content,
+          );
 
-      try {
-        // Validation is optimistic in the UI but still persisted through the
-        // server action after local state moves forward.
-        const result = await submitTranslation(
-          translation,
-          currentEpisodeMessage.officialTranslation ?? '',
-          currentEpisodeMessage.content,
-        );
+          if (!result.success || !result.feedback) {
+            setAiError(result.message ?? 'Error desconocido');
+            return;
+          }
 
-        if (!result.success || !result.feedback) {
-          setAiError(result.message ?? 'Error desconocido');
-          return;
+          const newInteraction: Interaction = {
+            messageId: currentEpisodeMessage.id,
+            userInput: translation,
+            translationFeedback: result.feedback,
+            isCorrect: true,
+            timestamp: new Date(),
+          };
+
+          const nextIndex = (userProgress.currentMessageIndex ?? 0) + 1;
+          const nextStatus =
+            nextIndex >= episode.messages.length ? 'completed' : 'started';
+
+          setUserProgress((previous) => ({
+            ...previous,
+            currentMessageIndex: nextIndex,
+            interactions: [...(previous.interactions ?? []), newInteraction],
+            status: nextStatus,
+            lastActiveAt: new Date(),
+          }));
+
+          await updateProgress(
+            episode.id,
+            nextIndex,
+            nextStatus,
+            newInteraction,
+          );
+        } catch (error) {
+          console.error('Error submitting translation:', error);
+          setAiError('Error de conexión. Intenta de nuevo.');
+        } finally {
+          setValidatingMessageId(null);
         }
+      });
+    },
+    [canInteract, currentEpisodeMessage, episode.id, episode.messages.length, startTransition, userProgress.currentMessageIndex],
+  );
 
-        const newInteraction: Interaction = {
-          messageId: currentEpisodeMessage.id,
-          userInput: translation,
-          translationFeedback: result.feedback,
-          isCorrect: true,
-          timestamp: new Date(),
-        };
+  const handleNext = useCallback(async (): Promise<void> => {
+    if (isPending) {
+      return;
+    }
 
+    startTransition(async () => {
+      try {
+        // Messages that do not require translation can advance immediately while
+        // still persisting the new index on the server.
         const nextIndex = (userProgress.currentMessageIndex ?? 0) + 1;
         const nextStatus =
           nextIndex >= episode.messages.length ? 'completed' : 'started';
@@ -152,52 +190,16 @@ export function useStoryChatSession({
         setUserProgress((previous) => ({
           ...previous,
           currentMessageIndex: nextIndex,
-          interactions: [...(previous.interactions ?? []), newInteraction],
           status: nextStatus,
           lastActiveAt: new Date(),
         }));
 
-        await updateProgress(
-          episode.id,
-          nextIndex,
-          nextStatus,
-          newInteraction,
-        );
+        await updateProgress(episode.id, nextIndex, nextStatus);
       } catch (error) {
-        console.error('Error submitting translation:', error);
-        setAiError('Error de conexión. Intenta de nuevo.');
-      } finally {
-        setIsProcessing(false);
-        setValidatingMessageId(null);
+        console.error('Error next:', error);
       }
-    },
-    [canInteract, currentEpisodeMessage, episode.id, episode.messages.length, userProgress.currentMessageIndex],
-  );
-
-  const handleNext = useCallback(async (): Promise<void> => {
-    if (isProcessing) {
-      return;
-    }
-
-    try {
-      // Messages that do not require translation can advance immediately while
-      // still persisting the new index on the server.
-      const nextIndex = (userProgress.currentMessageIndex ?? 0) + 1;
-      const nextStatus =
-        nextIndex >= episode.messages.length ? 'completed' : 'started';
-
-      setUserProgress((previous) => ({
-        ...previous,
-        currentMessageIndex: nextIndex,
-        status: nextStatus,
-        lastActiveAt: new Date(),
-      }));
-
-      await updateProgress(episode.id, nextIndex, nextStatus);
-    } catch (error) {
-      console.error('Error next:', error);
-    }
-  }, [episode.id, episode.messages.length, isProcessing, userProgress.currentMessageIndex]);
+    });
+  }, [episode.id, episode.messages.length, isPending, startTransition, userProgress.currentMessageIndex]);
 
   return {
     aiError,

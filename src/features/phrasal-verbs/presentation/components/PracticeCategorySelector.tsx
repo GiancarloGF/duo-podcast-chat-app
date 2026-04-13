@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 import { PHRASAL_VERB_GROUPS } from '@/features/phrasal-verbs/infrastructure/data/phrasalVerbGroups';
@@ -61,6 +61,7 @@ function SelectorCard({
 
 export function PracticeCategorySelector() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const [selectedSuperGroupId, setSelectedSuperGroupId] = useState<string | null>(null);
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
@@ -164,7 +165,9 @@ export function PracticeCategorySelector() {
       params.append('category', category.label);
     });
 
-    router.push(`/phrasal-verbs/practice/session?${params.toString()}`);
+    startTransition(() => {
+      router.push(`/phrasal-verbs/practice/session?${params.toString()}`);
+    });
   }
 
   const animatedListKey = `${currentLevel}-${selectedSuperGroupId ?? 'none'}-${selectedGroupKey ?? 'none'}`;
@@ -286,8 +289,8 @@ export function PracticeCategorySelector() {
               </div>
             </div>
 
-            <Button onClick={startPractice} disabled={selectedCategory.length === 0}>
-              Practice
+            <Button onClick={startPractice} disabled={selectedCategory.length === 0 || isPending}>
+              {isPending ? 'Loading...' : 'Practice'}
             </Button>
           </div>
         )}

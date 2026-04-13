@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -13,6 +14,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { getSrsProgressSnapshotForCurrentUser } from '@/features/phrasal-verbs/server/getSrsProgressSnapshotForCurrentUser';
+import { ProgressDashboardSkeleton } from '@/features/phrasal-verbs/presentation/components/ProgressDashboardSkeleton';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,9 +26,6 @@ import {
 import { Button } from '@/shared/presentation/components/ui/button';
 import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
 
-// This route depends on authenticated server reads, so we opt into dynamic
-// rendering explicitly instead of letting Next infer it through runtime errors.
-export const dynamic = 'force-dynamic';
 export const metadata: Metadata = createFeatureMetadata({
   title: 'Progress',
   description: 'Revisa tu progreso global, rachas y sesiones acumuladas de phrasal verbs.',
@@ -34,30 +33,6 @@ export const metadata: Metadata = createFeatureMetadata({
 });
 
 export default async function PhrasalVerbsProgressPage() {
-  const snapshotResult = await getSrsProgressSnapshotForCurrentUser();
-  const nowMs = snapshotResult.snapshot?.meta.lastSyncAt ?? 0;
-  const analytics = snapshotResult.snapshot?.meta.analytics;
-
-  // The page derives dashboard-friendly counters from the compact SRS map to
-  // avoid storing redundant aggregates in Firestore.
-  const dueReviews = snapshotResult.snapshot
-    ? Object.values(snapshotResult.snapshot.progress).filter(
-        (entry) => entry.nr !== null && entry.nr <= nowMs,
-      ).length
-    : 0;
-
-  const learningCount = snapshotResult.snapshot
-    ? Object.values(snapshotResult.snapshot.progress).filter(
-        (entry) => entry.s === 'learning',
-      ).length
-    : 0;
-
-  const reviewCount = snapshotResult.snapshot
-    ? Object.values(snapshotResult.snapshot.progress).filter(
-        (entry) => entry.s === 'review',
-      ).length
-    : 0;
-
   return (
     <div className='py-4'>
       <Breadcrumb className='mb-6'>
@@ -85,6 +60,40 @@ export default async function PhrasalVerbsProgressPage() {
         </p>
       </section>
 
+      <Suspense fallback={<ProgressDashboardSkeleton />}>
+        <ProgressDashboardSection />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ProgressDashboardSection() {
+  const snapshotResult = await getSrsProgressSnapshotForCurrentUser();
+  const nowMs = snapshotResult.snapshot?.meta.lastSyncAt ?? 0;
+  const analytics = snapshotResult.snapshot?.meta.analytics;
+
+  // The page derives dashboard-friendly counters from the compact SRS map to
+  // avoid storing redundant aggregates in Firestore.
+  const dueReviews = snapshotResult.snapshot
+    ? Object.values(snapshotResult.snapshot.progress).filter(
+        (entry) => entry.nr !== null && entry.nr <= nowMs,
+      ).length
+    : 0;
+
+  const learningCount = snapshotResult.snapshot
+    ? Object.values(snapshotResult.snapshot.progress).filter(
+        (entry) => entry.s === 'learning',
+      ).length
+    : 0;
+
+  const reviewCount = snapshotResult.snapshot
+    ? Object.values(snapshotResult.snapshot.progress).filter(
+        (entry) => entry.s === 'review',
+      ).length
+    : 0;
+
+  return (
+    <>
       {!snapshotResult.success || !snapshotResult.snapshot ? (
         <section className='rounded-[10px] border-2 border-red-700 bg-red-100 p-6 shadow-[8px_8px_0_0_var(--color-border)]'>
           <p className='font-black text-red-900'>It was not possible to load your progress.</p>
@@ -202,6 +211,6 @@ export default async function PhrasalVerbsProgressPage() {
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

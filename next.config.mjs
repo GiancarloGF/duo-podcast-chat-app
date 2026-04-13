@@ -2,6 +2,7 @@
 // and in CI instead of being deferred to runtime.
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
   typescript: {
     ignoreBuildErrors: false,
   },

@@ -1,8 +1,8 @@
-import { getHomeFeaturesAction } from '@/features/home/presentation/actions';
+import { getHomeFeaturesForPage } from '@/features/home/server/getHomeFeaturesForPage';
 import { FeatureList } from '@/features/home/presentation/components/FeatureList';
 
 export default async function Home() {
-  const features = await getHomeFeaturesAction();
+  const features = await getHomeFeaturesForPage();
 
   return (
     <div className='py-8 sm:py-12'>

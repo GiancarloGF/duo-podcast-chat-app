@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { signInWithGoogle } from '@/shared/infrastructure/firebase/auth';
 
 interface LoginScreenProps {
@@ -11,26 +11,25 @@ interface LoginScreenProps {
 
 export function LoginScreen({ nextPath }: LoginScreenProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const handleSignIn = async () => {
-    setIsLoading(true);
+  function handleSignIn(): void {
     setError(null);
 
-    try {
-      await signInWithGoogle();
-      // Use App Router navigation so the authenticated server tree refreshes
-      // without forcing a full-page reload.
-      router.replace(nextPath);
-      router.refresh();
-    } catch (authError) {
-      console.error('Error en login con Google:', authError);
-      setError('No se pudo iniciar sesion. Intenta nuevamente.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    startTransition(async () => {
+      try {
+        await signInWithGoogle();
+        // Use App Router navigation so the authenticated server tree refreshes
+        // without forcing a full-page reload.
+        router.replace(nextPath);
+        router.refresh();
+      } catch (authError) {
+        console.error('Error en login con Google:', authError);
+        setError('No se pudo iniciar sesion. Intenta nuevamente.');
+      }
+    });
+  }
 
   return (
     <main className='min-h-screen p-4 sm:p-8'>
@@ -49,7 +48,7 @@ export function LoginScreen({ nextPath }: LoginScreenProps) {
             <button
               type='button'
               onClick={handleSignIn}
-              disabled={isLoading}
+              disabled={isPending}
               className='inline-flex h-12 w-full items-center justify-center gap-3 rounded-[8px] border-2 border-border bg-primary px-6 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-[5px_5px_0_0_var(--color-border)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[4px_4px_0_0_var(--color-border)] disabled:cursor-not-allowed disabled:opacity-60 md:h-14 md:text-base'
             >
               <span className='inline-flex h-6 w-6 items-center justify-center rounded-[5px] bg-white border border-border'>
@@ -61,7 +60,7 @@ export function LoginScreen({ nextPath }: LoginScreenProps) {
                   className='h-4 w-4'
                 />
               </span>
-              {isLoading ? 'Conectando...' : 'Entrar con Google'}
+              {isPending ? 'Conectando...' : 'Entrar con Google'}
             </button>
 
             {error && (

@@ -1,5 +1,6 @@
+import { lazy, Suspense } from 'react';
 import type { Metadata } from 'next';
-import { SrsPracticeOrchestrator } from '@/features/phrasal-verbs/presentation/components/session/SrsPracticeOrchestrator';
+import { PracticeSessionSkeleton } from '@/features/phrasal-verbs/presentation/components/session/PracticeSessionSkeleton';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,6 +10,13 @@ import {
   BreadcrumbSeparator,
 } from '@/shared/presentation/components/ui/breadcrumb';
 import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
+
+const SrsPracticeOrchestrator = lazy(
+  () =>
+    import('@/features/phrasal-verbs/presentation/components/session/SrsPracticeOrchestrator').then(
+      (module) => ({ default: module.SrsPracticeOrchestrator }),
+    ),
+);
 
 export const metadata: Metadata = createFeatureMetadata({
   title: 'Practice',
@@ -44,7 +52,9 @@ export default async function PhrasalVerbsPracticePage() {
         </p>
       </section>
 
-      <SrsPracticeOrchestrator />
+      <Suspense fallback={<PracticeSessionSkeleton />}>
+        <SrsPracticeOrchestrator />
+      </Suspense>
     </div>
   );
 }
