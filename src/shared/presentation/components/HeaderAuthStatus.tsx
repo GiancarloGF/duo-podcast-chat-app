@@ -1,7 +1,10 @@
+import type { ReactElement } from 'react';
+import { connection } from 'next/server';
 import { getAuthenticatedAppForUser } from '@/shared/infrastructure/firebase/serverApp';
 import { HeaderAuthControls } from '@/shared/presentation/components/HeaderAuthControls';
 
-export async function HeaderAuthStatus() {
+export async function HeaderAuthStatus(): Promise<ReactElement> {
+  await connection();
   const { currentUser } = await getAuthenticatedAppForUser();
   const serializableUser = currentUser
     ? {
