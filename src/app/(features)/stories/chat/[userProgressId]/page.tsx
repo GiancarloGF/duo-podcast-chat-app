@@ -1,48 +1,66 @@
-import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
-import { ChatContainer } from "@/features/stories/presentation/components/chat-container";
-import { getStoryChatPageData } from "@/features/stories/server/getStoryChatPageData";
-import { createFeatureMetadata } from "@/shared/presentation/metadata/featureMetadata";
+import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { ChatContainer } from '@/features/stories/presentation/components/chat-container';
+import { getStoryChatPageData } from '@/features/stories/server/getStoryChatPageData';
+import { createFeatureMetadata } from '@/shared/presentation/metadata/featureMetadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-    return createFeatureMetadata({
-        title: "Story Chat",
-        description:
-            "Continúa tu episodio activo y recibe feedback sobre cada traducción.",
-        path: "/stories",
-    });
+  return createFeatureMetadata({
+    title: 'Story Chat',
+    description:
+      'Continúa tu episodio activo y recibe feedback sobre cada traducción.',
+    path: '/stories',
+  });
 }
 
 export default async function StoriesChatPage({
-    params,
+  params,
 }: {
-    params: Promise<{ userProgressId: string }>;
+  params: Promise<{ userProgressId: string }>;
 }) {
-    const { userProgressId } = await params;
-    const { currentEpisode, episode, userProgress } =
-        await getStoryChatPageData(userProgressId);
+  const { userProgressId } = await params;
 
-    if (!userProgress) {
-        notFound();
-    }
+  return (
+    <Suspense fallback={null}>
+      <StoriesChatPageContent userProgressId={userProgressId} />
+    </Suspense>
+  );
+}
 
-    if (!episode) {
-        notFound();
-    }
+interface StoriesChatPageContentProps {
+  userProgressId: string;
+}
 
-    if (
-        userProgress.status === "started" &&
-        currentEpisode &&
-        currentEpisode.id !== episode.id
-    ) {
-        redirect("/stories");
-    }
+async function StoriesChatPageContent({
+  userProgressId,
+}: StoriesChatPageContentProps) {
+  await connection();
+  const { currentEpisode, episode, userProgress } =
+    await getStoryChatPageData(userProgressId);
 
-    return (
-        <ChatContainer
-            key={userProgressId}
-            initialEpisode={episode}
-            initialUserProgress={userProgress}
-        />
-    );
+  if (!userProgress) {
+    notFound();
+  }
+
+  if (!episode) {
+    notFound();
+  }
+
+  if (
+    userProgress.status === 'started' &&
+    currentEpisode &&
+    currentEpisode.id !== episode.id
+  ) {
+    redirect('/stories');
+  }
+
+  return (
+    <ChatContainer
+      key={userProgressId}
+      initialEpisode={episode}
+      initialUserProgress={userProgress}
+    />
+  );
 }

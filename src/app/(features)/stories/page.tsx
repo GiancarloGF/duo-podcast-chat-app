@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import { getStoriesPageData } from '@/features/stories/server/getStoriesPageData';
 import { EpisodeCard } from '@/features/stories/presentation/components/EpisodeCard';
 import { StoriesWindowSkeleton } from '@/features/stories/presentation/components/StoriesWindowSkeleton';
@@ -52,6 +53,7 @@ export default async function StoriesPage() {
 }
 
 async function StoriesWindowSection() {
+  await connection();
   const {
     previousEpisode,
     currentEpisode,

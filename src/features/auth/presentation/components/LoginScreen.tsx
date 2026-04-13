@@ -1,18 +1,24 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { signInWithGoogle } from '@/shared/infrastructure/firebase/auth';
 
-interface LoginScreenProps {
-  nextPath: string;
+function getSafeNextPath(value: string | null): string {
+  if (typeof value === 'string' && value.startsWith('/')) {
+    return value;
+  }
+
+  return '/';
 }
 
-export function LoginScreen({ nextPath }: LoginScreenProps) {
+export function LoginScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const nextPath = getSafeNextPath(searchParams.get('next'));
 
   function handleSignIn(): void {
     setError(null);

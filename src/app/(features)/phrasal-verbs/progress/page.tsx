@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import {
   Activity,
   Award,
@@ -68,6 +69,7 @@ export default async function PhrasalVerbsProgressPage() {
 }
 
 async function ProgressDashboardSection() {
+  await connection();
   const snapshotResult = await getSrsProgressSnapshotForCurrentUser();
   const nowMs = snapshotResult.snapshot?.meta.lastSyncAt ?? 0;
   const analytics = snapshotResult.snapshot?.meta.analytics;
