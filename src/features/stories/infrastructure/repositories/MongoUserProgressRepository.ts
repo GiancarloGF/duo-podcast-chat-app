@@ -123,7 +123,7 @@ export class MongoUserProgressRepository implements UserProgressRepository {
     const doc = await Model.findOneAndUpdate(
       { userId, episodeId: episodeIdQuery },
       updateQuery,
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return null;
     return mapDocToUserProgress(doc as unknown as Record<string, unknown>);
